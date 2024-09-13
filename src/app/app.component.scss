@@ -1,0 +1,20 @@
+.app-container {
+  display: flex;
+  box-sizing: border-box;
+}
+
+.sidebar-container {
+  height: 100%;
+  width: 80px;
+}
+
+.content-container {
+  padding: 2%;
+  height: 100%;
+  width: 100%;
+}
+
+.view-container {
+  height: 100%;
+  width: 100%;
+}

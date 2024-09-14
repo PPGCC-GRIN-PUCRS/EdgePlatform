@@ -1,75 +1,75 @@
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
-import { MapAdvancedMarker, MapInfoWindow } from '@angular/google-maps';
-import { ServerComponent } from '../../components/server/server.component';
-import { GeolocalizationService } from './geolocalization.service';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import * as L from 'leaflet';
+import { ToastContainerDirective, ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'map-view',
   templateUrl: './map.component.html',
   styleUrl: './map.component.scss',
 })
-export class MapComponent {
-  @ViewChild(MapInfoWindow) infoWindow!: MapInfoWindow;
-  content: HTMLElement = new DOMParser().parseFromString(
-    `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#FF5733" stroke="#FFFFFF" viewBox="0 0 24 24">
-    <path fill-rule="evenodd" d="M11.293 3.293a1 1 0 0 1 1.414 0l6 6 2 2a1 1 0 0 1-1.414 1.414L19 12.414V19a2 2 0 0 1-2 2h-3a1 1 0 0 1-1-1v-3h-2v3a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2v-6.586l-.293.293a1 1 0 0 1-1.414-1.414l2-2 6-6Z" clip-rule="evenodd"/>
-    </svg>`,
-    'image/svg+xml'
-  ).documentElement;
+export class MapComponent implements AfterViewInit, OnInit {
+  private PUCRSLocation: { lat: number; lng: number };
+  private markerIcon: L.MarkerOptions | undefined;
+  private zoomScale: number;
+  private map: any;
 
-  options: google.maps.MapOptions;
-  servers: ServerComponent[];
-  styles;
-
-  constructor(private geolocalizationService: GeolocalizationService) {
-    this.styles = {
-      default: [],
-      hide: [
-        {
-          featureType: 'poi.business',
-          stylers: [{ visibility: 'off' }],
-        },
-        {
-          featureType: 'transit',
-          elementType: 'labels.icon',
-          stylers: [{ visibility: 'off' }],
-        },
-      ],
-    };
-    this.servers = [{ lat: -30.061138, lng: -51.173852, ip: this.content }];
-    this.options = {
-      center: { lat: -30.049629, lng: -51.1690065 },
-      mapId: '2c9caaede23550a0',
-      // styles: this.styles['hide'],
-      // disableDefaultUI: true,
-      // clickableIcons: false,
-      zoom: 18,
+  constructor(private toastrService: ToastrService) {
+    this.PUCRSLocation = { lat: -30.061108487534216, lng: -51.17391422126215 };
+    this.zoomScale = 18;
+    this.markerIcon = {
+      icon: L.divIcon({
+        html: '<i class="fa fa-map-marker fa-2x"></i>',
+        iconSize: [10, 10],
+        className: 'leaftlet-icon',
+      }),
     };
   }
 
-  onMarkerClick(marker: MapAdvancedMarker) {
-    this.infoWindow.open(marker, true, marker.advancedMarker.title);
+  ngOnInit(): void {
+    this.map = L.map('map');
   }
 
-  public onMapReady(map: google.maps.Map): void {
-    map.setOptions(this.options);
-  }
-
-  getLocation(): any {
+  ngAfterViewInit(): void {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        this.servers.push({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-          ip: this.content,
-        });
-        return {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        };
+      navigator.geolocation.getCurrentPosition((location) => {
+        if (location.coords.accuracy > 800) {
+          this.zoomScale = 17;
+          this.toastrService.warning(
+            `[${location.coords.latitude}, ${location.coords.longitude}] ~ ${location.coords.accuracy}. Back to PUC Default.`,
+            'Geolocation found, but are not accuratele'
+          );
+
+          // this.buildMap(location.coords.latitude, location.coords.longitude);
+          this.buildMap(this.PUCRSLocation.lat, this.PUCRSLocation.lng);
+        } else {
+          this.toastrService.success(
+            `[${location.coords.latitude}, ${location.coords.longitude}] ~ ${location.coords.accuracy}`,
+            'Geolocation found'
+          );
+
+          this.buildMap(location.coords.latitude, location.coords.longitude);
+        }
       });
     } else {
-      console.log('No support for geolocation');
+      this.toastrService.warning(
+        'Geolocation is not allowed by the browser.\n Using PUC default [-30.049629, -51.1690065]',
+        'No Geolocation found'
+      );
+      this.buildMap(-30.049629, -51.1690065);
     }
+  }
+
+  buildMap(latitude: number, longitude: number) {
+    this.map.setView([latitude, longitude], this.zoomScale);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution:
+        '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>contributors',
+    }).addTo(this.map);
+
+    this.map.on('click', (e: { latlng: { lat: number; lng: number } }) => {
+      console.log(e.latlng); // get the coordinates
+      L.marker([e.latlng.lat, e.latlng.lng], this.markerIcon).addTo(this.map); // add the marker onclick
+    });
   }
 }

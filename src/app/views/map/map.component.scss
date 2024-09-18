@@ -1,21 +1,17 @@
-::ng-deep .map-container {
-  display: block;
-  height: 100% !important;
-  width: 100% !important;
+.map-container {
+  height: 100%;
+  width: 100%;
+}
+
+.map-frame {
+  height: 100%;
 }
 
 #map {
-  width: 100% !important;
-  height: 100% !important;
+  height: 100%;
 }
 
-google-map {
-  &poi {
-    display: none !important;
-    visibility: off;
-  }
-  .view-link {
-    display: none !important;
-    visibility: off;
-  }
+.leaftlet-icon {
+  text-align: center;
+  line-height: 2px;
 }

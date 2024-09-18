@@ -1,0 +1,32 @@
+.gear-button {
+  background-color: transparent; // Ensure no background color affects centering
+  border: 2px solid #ccc; // Example border, adjust color and width as needed
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%; // Make the button circular
+  margin-bottom: 10%;
+  display: flex;
+  min-width: 0; // Remove default min-width
+  height: 48px; // Adjust as needed
+  width: 48px; // Adjust as needed
+  padding: 0; // Remove default padding
+
+  // Add smooth transition for rotation
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: rotate(360deg); // Rotate 360 degrees on hover
+  }
+}
+
+.mat-icon {
+  font-size: 24px; // Adjust the size as needed
+  line-height: 1; // Ensure icon's line-height is not causing misalignment
+}
+
+:host {
+  .mat-dialog-container {
+    width: 400px; // Fixed width
+    max-width: 100%; // Ensure it doesn't exceed viewport width
+  }
+}

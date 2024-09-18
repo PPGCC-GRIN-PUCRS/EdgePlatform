@@ -1,69 +1,20 @@
 <div class="sidebar">
-  <div class="menu-icon">
-    <i class="fas fa-bars"></i>
-  </div>
-
-  <div class="icon-button">
-    <i class="fas fa-plus"></i>
-  </div>
-
-  <div
-    class="menu-item"
-    (click)="setActive('Map')"
-    [class.active]="activeMenu === 'Map'"
-    [class.disabled]="disabledMenus.includes('Map')"
-  >
-    <div class="menu-item">
-      <i class="fas fa-map-marker-alt"></i>
-      <span>Map</span>
+  <div class="d-flex-container" (click)="test()">
+    <div class="icon-button">
+      <i class="fas fa-plus"></i>
     </div>
   </div>
 
-  <div
-    class="menu-item"
-    (click)="setActive('Cloud')"
-    [class.active]="activeMenu === 'Cloud'"
-    [class.disabled]="disabledMenus.includes('Cloud')"
-  >
-    <div class="menu-item">
-      <i class="fas fa-globe"></i>
-      <span>Cloud</span>
-    </div>
+  <div class="menu">
+    <ng-template ngFor let-item="$implicit" [ngForOf]="menuItens" let-i="index">
+      <button-component
+        [disabled]="item.disabled"
+        [action]="item.action"
+        [title]="item.title"
+        [icon]="item.icon"
+      ></button-component>
+    </ng-template>
   </div>
 
-  <div
-    class="menu-item"
-    (click)="setActive('Fog')"
-    [class.active]="activeMenu === 'Fog'"
-    [class.disabled]="disabledMenus.includes('Fog')"
-  >
-    <div class="menu-item">
-      <i class="fas fa-water"></i>
-      <span>Fog</span>
-    </div>
-  </div>
-
-  <div
-    class="menu-item"
-    (click)="setActive('Edge')"
-    [class.active]="activeMenu === 'Edge'"
-    [class.disabled]="disabledMenus.includes('Edge')"
-  >
-    <div class="menu-item">
-      <i class="fas fa-server"></i>
-      <span>Edge</span>
-    </div>
-  </div>
-
-  <div
-    class="menu-item"
-    (click)="setActive('Devices')"
-    [class.active]="activeMenu === 'Devices'"
-    [class.disabled]="disabledMenus.includes('Devices')"
-  >
-    <div class="menu-item">
-      <i class="fas fa-tools"></i>
-      <span>Devices</span>
-    </div>
-  </div>
+  <configuration-component></configuration-component>
 </div>

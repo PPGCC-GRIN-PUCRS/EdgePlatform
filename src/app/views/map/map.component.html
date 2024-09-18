@@ -1,14 +1,5 @@
-<div id="map">
-  <google-map (mapInitialized)="onMapReady($event)" [options]="options">
-    <ng-template ngFor let-item="$implicit" [ngForOf]="servers" let-i="index">
-      <map-advanced-marker
-        #markerElem="mapAdvancedMarker"
-        [position]="{ lat: item.lat, lng: item.lng }"
-        [content]="item.ip"
-        [title]="'Location ' + (i + 1)"
-        (mapClick)="onMarkerClick(markerElem)"
-      />
-    </ng-template>
-    <map-info-window #infoWindow></map-info-window>
-  </google-map>
+<div class="map-container">
+  <div class="map-frame">
+    <div id="map"></div>
+  </div>
 </div>

@@ -1,0 +1,24 @@
+<h2 mat-dialog-title>Configuration Settings</h2>
+<mat-dialog-content>
+  <!-- Add your settings configuration here -->
+  <form>
+    <mat-form-field appearance="fill">
+      <mat-label>Setting 1</mat-label>
+      <input matInput [(ngModel)]="settings.setting1" name="setting1" />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Setting 2</mat-label>
+      <mat-select [(ngModel)]="settings.setting2" name="setting2">
+        <mat-option value="option1">Option 1</mat-option>
+        <mat-option value="option2">Option 2</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Add more settings as needed -->
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="onClose()">Close</button>
+  <button mat-button color="primary" (click)="onSave()">Save</button>
+</mat-dialog-actions>

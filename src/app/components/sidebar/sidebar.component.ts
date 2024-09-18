@@ -1,34 +1,39 @@
-import { ConfigurationComponent } from '../configuration/configuration.component';
+import { ConfigurationComponent } from './configuration/configuration.component';
 import { ButtonComponent } from './button/button.component';
 import { MatIconModule } from '@angular/material/icon';
-import { buttonList } from './button/button.list';
+import { buttonList } from './button/button.component.list';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgFor } from '@angular/common';
+import { AddComponent } from './add/add.component';
 
 @Component({
   selector: 'sidebar-component',
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss',
   standalone: true,
-  imports: [MatIconModule, ButtonComponent, ConfigurationComponent, NgFor],
+  imports: [
+    ConfigurationComponent,
+    ButtonComponent,
+    AddComponent,
+    MatIconModule,
+    NgFor,
+  ],
 })
 export class SidebarComponent {
-  activeMenu: string;
   disabledMenus: string[] = ['Devices', 'Edge'];
 
-  menuItens: any[] = buttonList;
+  menuItens: ButtonComponent[] = buttonList;
 
   constructor(private router: Router) {
-    this.activeMenu = 'Map';
-    this.setActive(this.activeMenu);
-  }
+    const selectedMenu = this.menuItens.find((m) => m.title == 'Map');
+    if (selectedMenu) selectedMenu.selected = true;
+    this.disabledMenus.forEach((menu) => {
+      const disableMenu = this.menuItens.find((m) => m.title == menu);
+      if (disableMenu) disableMenu.disabled = true;
+    });
 
-  setActive(menu: string) {
-    if (!this.disabledMenus.includes(menu)) {
-      this.activeMenu = menu;
-      this.router.navigate([`${menu}`]);
-    }
+    if (selectedMenu?.action) selectedMenu.action(this.router);
   }
 
   test() {

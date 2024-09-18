@@ -1,0 +1,52 @@
+.extra-button {
+  // #00d5c9
+  background-color: transparent;
+  border: 1px solid #ccc;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%; // Circular button
+  display: flex;
+  color: black;
+  height: 48px; // Fixed height
+  width: 48px; // Fixed width
+  padding: 0; // Remove default padding
+  overflow: hidden; // Ensure content doesn't overflow the button
+
+  // Add smooth transition for rotation
+  transition: transform 0.3s ease;
+
+  // Icon within the button
+  .mat-icon {
+    font-size: 24px; // Default icon size
+    line-height: 1; // Ensure proper alignment
+    transition: transform 0.3s ease; // Smooth transition for scaling
+  }
+}
+
+// Host dialog container styles
+:host {
+  .mat-dialog-container {
+    width: 400px; // Fixed width for the dialog
+    max-width: 100%; // Ensure it doesn't exceed viewport width
+  }
+}
+
+.plus-button {
+  // border: 1px solid #ccc;
+
+  .mat-icon {
+    &:hover {
+      transform: scale(1.3); // Increase icon size inside the border on hover
+    }
+  }
+}
+
+.gear-button {
+  // border: 1px solid #ccc;
+
+  .mat-icon {
+    &:hover {
+      transform: rotate(100deg); // Rotate 360 degrees on hover
+    }
+  }
+}

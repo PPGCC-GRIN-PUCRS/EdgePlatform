@@ -1,17 +1,29 @@
+@import "src/styles.scss";
+
 .menu-item {
-  display: flex;
   justify-content: center;
   flex-direction: column;
   align-items: center;
+  display: flex;
   border: none;
   gap: 5px;
+  width: 60px;
   background-color: transparent; // Default background color
   padding: 10px; // Uniform padding
   border-radius: 8px; // Uniform border-radius
-  width: 60px; // Fixed width
-  height: 60px; // Fixed height
   box-sizing: border-box; // Include padding and border in element's total width and height
   transition: background-color 0.3s ease, color 0.3s ease; // Smooth transition
+
+  &:selected {
+    border-color: 2px solid red;
+  }
+
+  &:disabled i,
+  span {
+    // background-color: $disabled-color;
+    color: #b3b3b3ee;
+    fill: #b3b3b3ee;
+  }
 
   i {
     font-size: 24px;
@@ -23,8 +35,8 @@
     font-size: 14px; // Adjust font size as needed
   }
 
-  &:hover {
-    background-color: #77bac6; // Hover background color
+  &:hover:enabled {
+    background-color: #00d5c9; // Hover background color
     border-radius: 8px; // Maintain the same border-radius on hover
 
     i {
@@ -38,15 +50,12 @@
 }
 
 .icon-button {
+  transition: background-color 0.3s ease;
   background-color: #c4bdc4;
-  width: 60px; // Ensure size consistency
-  height: 60px; // Ensure size consistency
   border-radius: 30px; // Rounded corners
-  display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 2%;
-  transition: background-color 0.3s ease;
+  display: flex;
 
   i {
     font-size: 24px;

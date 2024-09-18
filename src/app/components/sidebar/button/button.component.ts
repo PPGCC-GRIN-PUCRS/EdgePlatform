@@ -1,5 +1,5 @@
-import { Component, Input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'button-component',

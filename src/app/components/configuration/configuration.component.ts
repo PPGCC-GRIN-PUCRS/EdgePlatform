@@ -1,11 +1,15 @@
-import { Component, Inject, inject } from '@angular/core';
+import { Component, Inject, NgModule } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialog,
   MatDialogModule,
 } from '@angular/material/dialog';
-
-// import {MAT_DIALOG_DATA} from '@angular/material';
+import { MatIcon } from '@angular/material/icon';
+import { FormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
 
 export interface DialogData {
   animal: 'panda' | 'unicorn' | 'lion';
@@ -13,7 +17,7 @@ export interface DialogData {
 
 @Component({
   standalone: true,
-  imports: [MatDialogModule],
+  imports: [MatDialogModule, MatIcon],
   selector: 'configuration-component',
   templateUrl: './configuration.component.html',
   styleUrl: './configuration.component.scss',
@@ -24,7 +28,7 @@ export class ConfigurationComponent {
   openDialog() {
     this.dialog.open(DialogDataExampleDialog, {
       data: {
-        animal: 'panda',
+        panda: 'true',
       },
     });
   }
@@ -32,10 +36,31 @@ export class ConfigurationComponent {
 
 @Component({
   standalone: true,
-  imports: [MatDialogModule],
+  imports: [
+    FormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatInputModule,
+    MatDialogModule,
+    MatButtonModule,
+  ],
   selector: 'dialog-data-example-dialog',
   templateUrl: 'configuration.modal.component.html',
 })
 export class DialogDataExampleDialog {
   constructor(@Inject(MAT_DIALOG_DATA) public data: DialogData) {}
+
+  settings = {
+    setting1: '',
+    setting2: 'option1',
+  };
+
+  onClose() {
+    console.log('close');
+  }
+
+  onSave() {
+    console.log('save');
+  }
 }

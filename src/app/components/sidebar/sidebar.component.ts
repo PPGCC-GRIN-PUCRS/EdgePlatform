@@ -1,8 +1,9 @@
-import { Component, HostBinding } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { Router } from '@angular/router';
-import { ButtonComponent } from './button/button.component';
 import { ConfigurationComponent } from '../configuration/configuration.component';
+import { ButtonComponent } from './button/button.component';
+import { MatIconModule } from '@angular/material/icon';
+import { buttonList } from './button/button.list';
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { NgFor } from '@angular/common';
 
 @Component({
@@ -16,43 +17,7 @@ export class SidebarComponent {
   activeMenu: string;
   disabledMenus: string[] = ['Devices', 'Edge'];
 
-  menuItens: any[] = [
-    {
-      title: 'Map',
-      icon: 'fa-map-marker-alt',
-      action: this.test,
-      disabled: false,
-      selected: false,
-    },
-    {
-      title: 'Cloud',
-      icon: 'fa-globe',
-      action: this.test,
-      disabled: false,
-      selected: false,
-    },
-    {
-      title: 'Fog',
-      icon: 'fa-water',
-      action: this.test,
-      disabled: false,
-      selected: false,
-    },
-    {
-      title: 'Edge',
-      icon: 'fa-server',
-      action: this.test,
-      disabled: false,
-      selected: false,
-    },
-    {
-      title: 'Devices',
-      icon: 'fa-tools',
-      action: this.test,
-      disabled: false,
-      selected: false,
-    },
-  ];
+  menuItens: any[] = buttonList;
 
   constructor(private router: Router) {
     this.activeMenu = 'Map';
@@ -67,6 +32,6 @@ export class SidebarComponent {
   }
 
   test() {
-    console.log('olha o clique!');
+    console.log('hup');
   }
 }

@@ -18,9 +18,17 @@ export interface DialogData {
 @Component({
   standalone: true,
   imports: [MatDialogModule, MatIcon],
-  selector: 'configuration-component',
-  templateUrl: './configuration.component.html',
-  styleUrl: './configuration.component.scss',
+  selector: 'conf-sidebar-button',
+  template: `
+    <button
+      class="extra-button gear-button"
+      mat-icon-button
+      (click)="openDialog()"
+    >
+      <mat-icon>settings</mat-icon>
+    </button>
+  `,
+  styleUrl: '../extra.button.component.scss',
 })
 export class ConfigurationComponent {
   constructor(private dialog: MatDialog) {}

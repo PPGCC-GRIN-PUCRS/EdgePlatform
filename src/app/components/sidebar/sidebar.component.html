@@ -1,10 +1,4 @@
 <div class="sidebar">
-  <div class="d-flex-container" (click)="test()">
-    <div class="icon-button">
-      <i class="fas fa-plus"></i>
-    </div>
-  </div>
-
   <div class="menu">
     <ng-template ngFor let-item="$implicit" [ngForOf]="menuItens" let-i="index">
       <button-component
@@ -16,5 +10,9 @@
     </ng-template>
   </div>
 
-  <configuration-component></configuration-component>
+  <div class="extra-menu">
+    <add-sidebar-button></add-sidebar-button>
+    <hr />
+    <conf-sidebar-button></conf-sidebar-button>
+  </div>
 </div>

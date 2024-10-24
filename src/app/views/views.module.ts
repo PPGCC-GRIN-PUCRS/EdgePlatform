@@ -5,10 +5,8 @@ import { EdgeComponent } from './edge/edge.component';
 import { MapComponent } from './map/map.component';
 import { CommonModule } from '@angular/common';
 
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { GoogleMapsModule } from '@angular/google-maps';
-import { ToastrModule } from 'ngx-toastr';
 import { ComponentsModule } from '../components/components.module';
+import { GoogleMapsModule } from '@angular/google-maps';
 
 const moduleViews: Array<Type<any> | ModuleWithProviders<{}> | any[]> = [
   MapComponent,

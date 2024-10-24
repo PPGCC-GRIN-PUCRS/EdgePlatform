@@ -80,12 +80,9 @@ jobs:
       # - name: Docker publish image
       #   run: docker push ${{ env.REGISTRY_IMAGE }}:${{ github.sha }}
 
-      - name: Publish attestation
-        uses: actions/attest-build-provenance@v1
+      - name: Attest artifact
+        uses: actions/attest-build-provenance@bdd51370e0416ac948727f861e03c2f05d32d75e # v1.3.2
         with:
-        #   predicate-type: ''
-        #   predicate-path: ''
-        #   subject-path: /tmp/${{ env.IMAGE_ARTIFACT }}.tar
           subject-name: ${{ env.REGISTRY_IMAGE }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true

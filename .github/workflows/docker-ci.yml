@@ -79,7 +79,9 @@ jobs:
           
       # - name: Docker publish image
       #   run: docker push ${{ env.REGISTRY_IMAGE }}:${{ github.sha }}
-
+      
+      # Attest reference video
+      # https://www.youtube.com/watch?v=zTIHb-9c868
       - name: Attest artifact
         uses: actions/attest-build-provenance@bdd51370e0416ac948727f861e03c2f05d32d75e # v1.3.2
         with:

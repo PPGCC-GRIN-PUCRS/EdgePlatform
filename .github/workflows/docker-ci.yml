@@ -89,10 +89,6 @@ jobs:
           
       # - name: Docker publish image
       #   run: docker push ${{ env.REGISTRY_IMAGE }}:${{ github.sha }}
-      
-      - name: Image digest
-        run: |
-          echo "${{ needs.build.outputs.digest }}" 
           
       # Attest reference video
       # https://www.youtube.com/watch?v=zTIHb-9c868
@@ -100,7 +96,7 @@ jobs:
         uses: actions/attest-build-provenance@1c608d11d69870c2092266b3f9a6f3abbf17002c # v1.3.2
         with:
           subject-name: ${{ env.REGISTRY_IMAGE }}
-          subject-digest: ${{ steps.build.outputs.digest }}
+          subject-digest: ${{ needs.build.outputs.digest }}
           push-to-registry: true
 
       - name: Verify OCI image

@@ -37,17 +37,21 @@ jobs:
       uses: docker/setup-buildx-action@v3
     
     - name: build image
+      id: build
       uses: docker/build-push-action@v6
       with:
-        if-no-files-found: error
+        push: false
+        load: true
         tags: |
           ${{ vars.IMAGE_NAME }}:latest
           ${{ env.REGISTRY_IMAGE }}:${{ github.sha }}
-        outputs: type=docker,dest=/tmp/${{ vars.IMAGE_NAME }}.${{ github.sha }}.tar
+        outputs: |
+          type=docker,dest=/tmp/${{ vars.IMAGE_NAME }}.${{ github.sha }}.tar
         
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
+        if-no-files-found: error
         name: ${{ env.IMAGE_ARTIFACT }}
         path: /tmp/${{ env.IMAGE_ARTIFACT }}.tar
 
@@ -86,7 +90,7 @@ jobs:
         uses: actions/attest-build-provenance@1c608d11d69870c2092266b3f9a6f3abbf17002c # v1.3.2
         with:
           subject-name: ${{ env.REGISTRY_IMAGE }}
-          subject-digest: ${{ steps.push.outputs.digest }}
+          subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true
 
       - name: Verify OCI image

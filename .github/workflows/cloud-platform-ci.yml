@@ -2,7 +2,7 @@ name: Cloud Platform CI
 
 on:
   workflow_run:
-    workflows: [Docker Platform CI]
+    workflows: ["Docker Platform CI"]
     types:
       - completed
 
@@ -11,5 +11,7 @@ env:
 
 jobs:
   retrieve:
-    - name: Test workflow event
-      run: echo "called"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test workflow event
+        run: echo "called"

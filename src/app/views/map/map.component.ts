@@ -1,6 +1,8 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { ServerComponent } from 'src/app/components/marker/server/server.component';
+import { ToastrService } from 'ngx-toastr';
 import * as L from 'leaflet';
-import { ToastContainerDirective, ToastrService } from 'ngx-toastr';
+import { MarkerComponent } from 'src/app/components/marker/marker.component';
 
 @Component({
   selector: 'map-view',
@@ -9,20 +11,14 @@ import { ToastContainerDirective, ToastrService } from 'ngx-toastr';
 })
 export class MapComponent implements AfterViewInit, OnInit {
   private PUCRSLocation: { lat: number; lng: number };
-  private markerIcon: L.MarkerOptions | undefined;
+  private servers: MarkerComponent[];
   private zoomScale: number;
   private map: any;
 
   constructor(private toastrService: ToastrService) {
     this.PUCRSLocation = { lat: -30.061108487534216, lng: -51.17391422126215 };
     this.zoomScale = 18;
-    this.markerIcon = {
-      icon: L.divIcon({
-        html: '<i class="fa fa-map-marker fa-2x"></i>',
-        iconSize: [10, 10],
-        className: 'leaftlet-icon',
-      }),
-    };
+    this.servers = [];
   }
 
   ngOnInit(): void {
@@ -61,15 +57,19 @@ export class MapComponent implements AfterViewInit, OnInit {
 
   buildMap(latitude: number, longitude: number) {
     this.map.setView([latitude, longitude], this.zoomScale);
-
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution:
         '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>contributors',
     }).addTo(this.map);
 
     this.map.on('click', (e: { latlng: { lat: number; lng: number } }) => {
-      console.log(e.latlng); // get the coordinates
-      L.marker([e.latlng.lat, e.latlng.lng], this.markerIcon).addTo(this.map); // add the marker onclick
+      const server = new ServerComponent(
+        this.map,
+        e.latlng as L.LatLng,
+        false,
+        '10.32.223.4'
+      );
+      this.servers.push(server);
     });
   }
 }

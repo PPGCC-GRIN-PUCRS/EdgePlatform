@@ -1,0 +1,116 @@
+name: Docker API CI
+
+on:
+  push:
+    branches: ["release"]
+    paths:
+      - "spring/**"
+      - "!spring/docs/**"
+  pull_request:
+    branches: ["release"]
+    types: ["approved"]
+    paths:
+      - "spring/**"
+      - "!spring/docs/**"
+
+env:
+  REGISTRY_IMAGE: ${{ vars.REGISTRY }}/${{ vars.API_IMAGE_NAME }}
+  IMAGE_ARTIFACT: ${{ vars.API_IMAGE_NAME }}.${{ github.sha }}
+
+jobs:
+  build:
+    permissions:
+      packages: write
+      contents: read
+      attestations: write
+      id-token: write
+    runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: |
+            ${{ env.IMAGE_ARTIFACT}}
+            ${{ env.REGISTRY_IMAGE }}
+            ${{ env.REGISTRY_IMAGE }}:${{ github.sha }}
+
+      - name: Set Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: build image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          push: false
+          load: true
+          tags: |
+            ${{ vars.API_IMAGE_NAME  }}:latest
+            ${{ env.REGISTRY_IMAGE }}:${{ github.sha }}
+          outputs: |
+            type=docker,dest=/tmp/${{ vars.API_IMAGE_NAME  }}.${{ github.sha }}.tar
+
+      - name: Image digest
+        run: |
+          echo "${{ steps.build.outputs.digest }}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          name: ${{ env.IMAGE_ARTIFACT }}
+          path: /tmp/${{ env.IMAGE_ARTIFACT }}.tar
+
+  publish:
+    permissions:
+      id-token: write
+      attestations: write
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.IMAGE_ARTIFACT }}
+          path: /tmp
+
+      - name: Load image
+        run: |
+          docker load --input /tmp/${{ env.IMAGE_ARTIFACT }}.tar
+          docker image ls -a
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Docker publish image
+        run: docker push ${{ env.REGISTRY_IMAGE }}:${{ github.sha }}
+
+  # ONLY ON BILLING PLAN
+  # attest:
+  #   permissions:
+  #     id-token: write
+  #     attestations: write
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   steps:
+  #     # Attest reference video
+  #     # https://www.youtube.com/watch?v=zTIHb-9c868
+  #   - name: Attest artifact
+  #     uses: actions/attest-build-provenance@1c608d11d69870c2092266b3f9a6f3abbf17002c # v1.3.2
+  #     with:
+  #       subject-name: ${{ env.REGISTRY_IMAGE }}
+  #       subject-digest: ${{ needs.build.outputs.digest }}
+  #       push-to-registry: true
+
+  #   - name: Verify OCI image
+  #     env:
+  #       GH_TOKEN: ${{ github.token }}
+  #     run: gh attestation verify oci://${{ env.REGISTRY_IMAGE }}:${{ github.sha }} --owner "$GITHUB_REPOSITORY_OWNER"

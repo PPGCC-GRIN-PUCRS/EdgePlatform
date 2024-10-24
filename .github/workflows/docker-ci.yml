@@ -47,7 +47,11 @@ jobs:
           ${{ env.REGISTRY_IMAGE }}:${{ github.sha }}
         outputs: |
           type=docker,dest=/tmp/${{ vars.IMAGE_NAME }}.${{ github.sha }}.tar
-        
+          
+    - name: Image digest
+      run: |
+        echo "${{ steps.build.outputs.digest }}" 
+          
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
@@ -84,6 +88,10 @@ jobs:
       # - name: Docker publish image
       #   run: docker push ${{ env.REGISTRY_IMAGE }}:${{ github.sha }}
       
+      - name: Image digest
+        run: |
+          echo "${{ steps.build.outputs.digest }}" 
+          
       # Attest reference video
       # https://www.youtube.com/watch?v=zTIHb-9c868
       - name: Attest artifact

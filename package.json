@@ -6,6 +6,7 @@
     "dev": "ng serve --host 0.0.0.0",
     "start": "ng serve",
     "build": "ng build",
+    "build:production": "ng build --aot --optimization --progress --configuration=production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },

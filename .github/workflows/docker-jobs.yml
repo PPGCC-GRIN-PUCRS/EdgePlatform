@@ -24,7 +24,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Docker publish image
-        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}:${{ github.sha }}
+        run: docker push ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME}}:${{ github.sha }}
 
 
     

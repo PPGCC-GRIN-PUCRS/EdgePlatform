@@ -42,8 +42,8 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ IMAGE_ARTIFACT }}
-        path: /tmp/${{ IMAGE_ARTIFACT }}.tar
+        name: ${{ env.IMAGE_ARTIFACT }}
+        path: /tmp/${{ env.IMAGE_ARTIFACT }}.tar
 
 
 
@@ -54,12 +54,12 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ IMAGE_ARTIFACT }}
+          name: ${{ env.IMAGE_ARTIFACT }}
           path: /tmp
       
       - name: Load image
         run: |
-          docker load --input /tmp/${{ IMAGE_ARTIFACT }}.tar
+          docker load --input /tmp/${{ env.IMAGE_ARTIFACT }}.tar
           docker image ls -a
 
       - name: Login to Docker Hub
@@ -69,4 +69,4 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           
       - name: Docker publish image
-        run: docker push ${{ REGISTRY_IMAGE }}:${{ github.sha }}
+        run: docker push ${{ env.REGISTRY_IMAGE }}:${{ github.sha }}

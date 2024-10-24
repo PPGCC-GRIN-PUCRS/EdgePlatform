@@ -20,6 +20,8 @@ jobs:
       attestations: write
       id-token: write
     runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -90,7 +92,7 @@ jobs:
       
       - name: Image digest
         run: |
-          echo "${{ needs.build.steps.build.outputs.digest }}" 
+          echo "${{ needs.build.outputs.digest }}" 
           
       # Attest reference video
       # https://www.youtube.com/watch?v=zTIHb-9c868

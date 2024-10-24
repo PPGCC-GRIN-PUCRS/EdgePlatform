@@ -6,7 +6,6 @@ import { MapComponent } from './map/map.component';
 import { CommonModule } from '@angular/common';
 
 import { ComponentsModule } from '../components/components.module';
-import { GoogleMapsModule } from '@angular/google-maps';
 
 const moduleViews: Array<Type<any> | ModuleWithProviders<{}> | any[]> = [
   MapComponent,
@@ -17,7 +16,7 @@ const moduleViews: Array<Type<any> | ModuleWithProviders<{}> | any[]> = [
 
 @NgModule({
   declarations: [moduleViews],
-  imports: [CommonModule, GoogleMapsModule, ComponentsModule],
+  imports: [CommonModule, ComponentsModule],
   exports: [moduleViews],
 })
 export class ViewsModule {}

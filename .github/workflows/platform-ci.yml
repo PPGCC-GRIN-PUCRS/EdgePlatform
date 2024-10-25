@@ -1,11 +1,15 @@
-name: Docker Platform CI
+name: Platform CI
 
 on:
   push:
     branches: ["release"]
+    paths:
+      - "!spring/**"
   pull_request:
     branches: ["release"]
     types: ["approved"]
+    paths:
+      - "!spring/**"
 
 env:
   REGISTRY_IMAGE: ${{ vars.REGISTRY }}/${{ vars.PLATFORM_IMAGE_NAME }}
@@ -98,6 +102,23 @@ jobs:
 
       - name: Docker publish image
         run: docker push ${{ env.REGISTRY_IMAGE }}:${{ github.sha }}
+        run: docker push ${{ env.REGISTRY_IMAGE }}:latest
+
+  cloud:
+    runs-on: ubuntu-latest
+    needs: publish
+    steps:
+      - name: Docker publish image
+        run: ssh
+        run: docker-compose up -d
+
+      - name: add public key to env
+        run: |
+          echo ${{ secrets.CLOUD_RSA_KEY }} > OCI.key
+          chmod 644 OCI.key
+          ssh -i "OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} sudo docker-compose up -d
+
+
 
   # ONLY ON BILLING PLAN
   # attest:

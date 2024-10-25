@@ -107,7 +107,7 @@ jobs:
     needs: publish
     steps:
       - name: add public key to env
-        run: ssh-keygen -R ${{ secrets.CLOUD_ADDESS }}
+        run: ssh-keygen -R ${{ secrets.CLOUD_ADDRESS }}
 
       - name: add public key to env
         run: |

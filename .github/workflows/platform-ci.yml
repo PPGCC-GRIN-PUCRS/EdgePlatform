@@ -97,8 +97,9 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Docker publish image
-        run: docker push ${{ env.REGISTRY_IMAGE }}:${{ github.sha }}
-        run: docker push ${{ env.REGISTRY_IMAGE }}:latest
+        run: |
+          docker push ${{ env.REGISTRY_IMAGE }}:${{ github.sha }}
+          docker push ${{ env.REGISTRY_IMAGE }}:latest
 
   cloud:
     runs-on: ubuntu-latest
@@ -109,8 +110,6 @@ jobs:
           echo ${{ secrets.CLOUD_RSA_KEY }} > OCI.key
           chmod 644 OCI.key
           ssh -i "OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} sudo docker-compose up -d
-
-
 
   # ONLY ON BILLING PLAN
   # attest:

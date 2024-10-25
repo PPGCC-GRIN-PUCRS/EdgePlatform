@@ -3,13 +3,9 @@ name: Platform CI
 on:
   push:
     branches: ["release"]
-    paths:
-      - "!spring/**"
   pull_request:
     branches: ["release"]
     types: ["approved"]
-    paths:
-      - "!spring/**"
 
 env:
   REGISTRY_IMAGE: ${{ vars.REGISTRY }}/${{ vars.PLATFORM_IMAGE_NAME }}

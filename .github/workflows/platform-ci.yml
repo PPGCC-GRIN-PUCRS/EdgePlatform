@@ -107,10 +107,13 @@ jobs:
     needs: publish
     steps:
       - name: add public key to env
+        run: ssh-keygen -R ${{ secrets.CLOUD_ADDESS }}
+
+      - name: add public key to env
         run: |
           echo "${{ secrets.CLOUD_RSA_KEY }}" > OCI.key
           chmod 644 ./OCI.key
-          ssh -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} sudo docker-compose up -d
+          ssh -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} sudo docker-compose up -d
 
   # ONLY ON BILLING PLAN
   # attest:

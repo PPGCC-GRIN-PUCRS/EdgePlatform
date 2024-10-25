@@ -108,7 +108,7 @@ jobs:
     steps:
       - name: add public key to env
         run: |
-          echo ${{ secrets.CLOUD_RSA_KEY }} > OCI.key
+          echo "${{ secrets.CLOUD_RSA_KEY }}" > OCI.key
           chmod 644 OCI.key
           ssh -i "OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} sudo docker-compose up -d
 

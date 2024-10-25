@@ -104,10 +104,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: publish
     steps:
-      - name: Docker publish image
-        run: ssh
-        run: docker-compose up -d
-
       - name: add public key to env
         run: |
           echo ${{ secrets.CLOUD_RSA_KEY }} > OCI.key

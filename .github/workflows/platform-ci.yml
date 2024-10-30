@@ -108,7 +108,7 @@ jobs:
     steps:
       - name: Add server public key
         run: |
-          echo "${{ secrets.CLOUD_RSA_KEY }}" > OCI.key
+          echo "${{ secrets.CLOUD_RSA_KEY }}" > $HOME/OCI.key
           chmod 600 ./OCI.key
 
       - name: Retrieve docker compose file
@@ -118,12 +118,12 @@ jobs:
         run: |
           ls
           ls $HOME
-          scp -o StrictHostKeyChecking=no -i $HOME/OCI.key ./docker-compose.yml ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }}:/home/${{ secrets.CLOUD_USER }}
+          # scp -o StrictHostKeyChecking=no -i "$HOME/OCI.key" ./docker-compose.yml ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }}:/home/${{ secrets.CLOUD_USER }}
         shell: bash
 
       - name: Deploy
         run: |
-          ssh -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
+          ssh -o StrictHostKeyChecking=no -i "$HOME/OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
             sudo su
             export ${{ vars.GRIN_PLATFORM }}
             docker stop ${{ vars.GRIN_PLATFORM }} > /dev/null || true

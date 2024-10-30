@@ -1,7 +1,7 @@
 services:
   grin-platform:
     image: hcley/grin-platform:latest
-    container_name: ${GRIN_PLATFORM:grin-platform}
+    container_name: "${GRIN_PLATFORM:-grin-platform}"
     ports:
       - "4200:80"
     labels:

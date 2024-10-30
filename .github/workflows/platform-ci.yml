@@ -117,7 +117,8 @@ jobs:
       - name: Inject compose file to server
         run: |
           ls
-          scp -o StrictHostKeyChecking=no -i "./OCI.key" ./docker-compose.yml ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }}:/home/${{ secrets.CLOUD_USER }}
+          ls $HOME
+          scp -o StrictHostKeyChecking=no -i $HOME/OCI.key ./docker-compose.yml ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }}:/home/${{ secrets.CLOUD_USER }}
         shell: bash
 
       - name: Deploy

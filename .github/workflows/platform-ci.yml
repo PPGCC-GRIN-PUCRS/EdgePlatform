@@ -132,9 +132,9 @@ jobs:
 
       - name: Cleanup
         run: |
-          ssh -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} sudo rm -f docker-compose.yml
-          rm -f ./OCI.key
+          ssh -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} sudo rm -f /home/${{ secrets.CLOUD_USER }}/docker-compose.yml
           rm -f ./docker-compose.yml
+          rm -f ./OCI.key
 
   # ONLY ON BILLING PLAN
   # attest:

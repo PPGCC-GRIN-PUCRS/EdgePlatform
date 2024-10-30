@@ -123,7 +123,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
             sudo -i
-            export ${{ vars.GRIN_PLATFORM }}
+            export GRIN_PLATFORM=${{ vars.GRIN_PLATFORM }}
             docker stop ${{ vars.GRIN_PLATFORM }} || true
             docker rm ${{ vars.GRIN_PLATFORM }} || true
             docker-compose up -d

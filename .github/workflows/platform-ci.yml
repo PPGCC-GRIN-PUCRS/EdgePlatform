@@ -111,8 +111,28 @@ jobs:
           echo "${{ secrets.CLOUD_RSA_KEY }}" > OCI.key
           chmod 600 ./OCI.key
 
+      - name: Retrieve docker compose file
+        uses: actions/checkout@v4
+
+      - name: Inject compose file to server
+        run: |
+          scp -o StrictHostKeyChecking=no -i "./OCI.key" ./docker-compose.yml ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }}:/home/${{ secrets.CLOUD_USER }}
+
       - name: Deploy
-        run: ssh -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} sudo docker-compose up -d
+        run: |
+          ssh -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
+            sudo su
+            export ${{ vars.GRIN_PLATFORM }}
+            docker stop ${{ vars.GRIN_PLATFORM }} > /dev/null || true
+            docker rm ${{ vars.GRIN_PLATFORM }} > /dev/null || true
+            docker-compose up -d
+          EOF
+
+      # ssh -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} sudo rm -f docker-compose.yml
+      - name: Cleanup
+        run: |
+          rm -f ./OCI.key
+          rm -f ./docker-compose.yml
 
   # ONLY ON BILLING PLAN
   # attest:

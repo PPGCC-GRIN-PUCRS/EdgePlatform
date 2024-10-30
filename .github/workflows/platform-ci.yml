@@ -123,15 +123,16 @@ jobs:
         run: |
           ssh -t -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
             sudo -i
+            cd /home/${{ secrets.CLOUD_USER }}
             export GRIN_PLATFORM=${{ vars.GRIN_PLATFORM }}
             docker stop ${{ vars.GRIN_PLATFORM }} || true
             docker rm ${{ vars.GRIN_PLATFORM }} || true
             docker-compose up -d
           EOF
 
-      # ssh -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} sudo rm -f docker-compose.yml
       - name: Cleanup
         run: |
+          ssh -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} sudo rm -f docker-compose.yml
           rm -f ./OCI.key
           rm -f ./docker-compose.yml
 

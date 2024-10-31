@@ -125,9 +125,7 @@ jobs:
             sudo -i
             cd /home/${{ secrets.CLOUD_USER }}
             export GRIN_PLATFORM=${{ vars.GRIN_PLATFORM }}
-            docker stop ${{ vars.GRIN_PLATFORM }} || true
-            docker rm ${{ vars.GRIN_PLATFORM }} || true
-            docker-compose up -d
+            docker-compose up -d --force --remove-orphans
           EOF
 
       - name: Cleanup

@@ -1,7 +1,8 @@
 services:
   grin-platform:
-    image: hcley/grin-platform:latest
     container_name: "${GRIN_PLATFORM:-grin-platform}"
+    image: hcley/grin-platform:latest
+    pull_policy: always
     ports:
       - "8801:80"
     labels:

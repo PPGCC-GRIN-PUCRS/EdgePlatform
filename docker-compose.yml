@@ -4,14 +4,15 @@ services:
     image: hcley/grin-platform:latest
     pull_policy: always
     ports:
-      - "8801:80"
+      - "4001:80"
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
-      - "traefik.http.services.grin.loadbalancer.server.port=8801"
-      - "traefik.http.services.grin.loadbalancer.server.scheme=http"
-      - "traefik.http.routers.grin.rule=Host(`grin.logiclabsoftwares.com`)"
+      - "traefik.http.services.grin.loadbalancer.server.port=80"
+      # - "traefik.http.routers.grin.entrypoints=http"
       - "traefik.http.routers.grin.entrypoints=https"
+      - "traefik.http.routers.grin.rule=Host(`grin.logiclabsoftwares.com`)"
       - "traefik.http.routers.grin.tls.certresolver=cloudflare"
-      - "traefik.http.routers.grin.middlewares=traefik-auth"
+      - "traefik.http.routers.grin-secure.tls=true"
+      - "traefik.http.routers.grin.middlewares=traefik-auth,jellyfin-https-redirect"
       - "traefik.http.routers.grin.service=grin"

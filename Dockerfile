@@ -1,16 +1,21 @@
 ### STAGE 1:BUILD ###
 # Defining node image to be used
-FROM node:18.13 AS build
+FROM node:18-alpine AS build
+# RUN npm install -g @angular/cli
+
 # Create a Virtual directory inside the docker image
 WORKDIR /app
+
 # Copy files to virtual directory
 COPY package.json package-lock.json ./
+
 # Run command in Vizrtual directory
 RUN npm cache clean --force
 
 # Copy files from local machine to virtual directory in docker image
 COPY . .
-RUN npm install --only=production && npm run build:production
+RUN npm install
+RUN npm run build:production
 
 
 ### STAGE 2:RUN ###

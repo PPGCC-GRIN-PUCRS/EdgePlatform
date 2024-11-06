@@ -119,6 +119,13 @@ jobs:
           scp -o StrictHostKeyChecking=no -i "./OCI.key" ./docker-compose.yml ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }}:/home/${{ secrets.CLOUD_USER }}
         shell: bash
 
+      - name: Remove previous service version
+        run: |
+          ssh -t -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
+            sudo -i
+            docker stop ${{ vars.GRIN_PLATFORM }} || true && docker rm ${{ vars.GRIN_PLATFORM }} || true
+          EOF
+
       - name: Deploy
         run: |
           ssh -t -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF

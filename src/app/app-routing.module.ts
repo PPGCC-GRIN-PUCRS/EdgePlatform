@@ -7,28 +7,24 @@ import { DevicesComponent } from './views/devices/devices.component';
 import { NgModule } from '@angular/core';
 
 const routes: Routes = [
-  // {
-  //   path: '',
-  //   component: MapComponent,
-  // },
   {
-    path: 'Map',
+    path: 'map',
     component: MapComponent,
   },
   {
-    path: 'Cloud',
+    path: 'cloud',
     component: CloudComponent,
   },
   {
-    path: 'Fog',
+    path: 'fog',
     component: FogComponent,
   },
   {
-    path: 'Edge',
+    path: 'edge',
     component: EdgeComponent,
   },
   {
-    path: 'Devices',
+    path: 'devices',
     component: DevicesComponent,
   },
 ];

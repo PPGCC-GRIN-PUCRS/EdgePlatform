@@ -10,14 +10,16 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
-      - "traefik.http.services.grin-platform.loadbalancer.server.port=80"
-      - "traefik.http.services.grin-platform.loadbalancer.server.scheme=http"
-      - "traefik.http.routers.grin-platform.rule=Host(`grin.logiclabsoftwares.com`)"
-      - "traefik.http.routers.grin-platform.entrypoints=https"
-      - "traefik.http.routers.grin-platform.tls.certresolver=cloudflare"
-      - "traefik.http.routers.grin-platform.middlewares=traefik-auth"
+
       - "traefik.http.middlewares.grin-platform-https-redirect.redirectscheme.scheme=https"
-      - "traefik.http.routers.logiclabsoftwares.middlewares=grin-platform-https-redirect"
+      - "traefik.http.routers.grin-platform.middlewares=grin-platform-https-redirect"
+      - "traefik.http.services.grin-platform.loadbalancer.server.scheme=http"
+      - "traefik.http.services.grin-platform.loadbalancer.server.port=80"
+
+      - "traefik.http.routers.grin-platform-secured.rule=Host(`grin.logiclabsoftwares.com`)"
+      - "traefik.http.routers.grin-platform-secured.tls.certresolver=cloudflare"
+      - "traefik.http.routers.grin-platform-secured.middlewares=traefik-auth"
+      - "traefik.http.routers.grin-platform-secured.entrypoints=https"
 
 networks:
   proxy:

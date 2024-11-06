@@ -1,18 +1,24 @@
 services:
   grin-platform:
-    container_name: "${GRIN_PLATFORM:-grin-platform}"
     image: hcley/grin-platform:latest
-    pull_policy: always
-    ports:
-      - "4001:80"
+    container_name: "${GRIN_PLATFORM:-grin-platform}"
+    networks:
+      - proxy
+    environment:
+      - NGINX_HOST=grin.logiclabsoftwares.com
+      - NGINX_PORT=80
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
-      - "traefik.http.services.grin.loadbalancer.server.port=80"
-      # - "traefik.http.routers.grin.entrypoints=http"
-      - "traefik.http.routers.grin.entrypoints=https"
-      - "traefik.http.routers.grin.rule=Host(`grin.logiclabsoftwares.com`)"
-      - "traefik.http.routers.grin.tls.certresolver=cloudflare"
-      - "traefik.http.routers.grin-secure.tls=true"
-      - "traefik.http.routers.grin.middlewares=traefik-auth,jellyfin-https-redirect"
-      - "traefik.http.routers.grin.service=grin"
+      - "traefik.http.services.grin-platform.loadbalancer.server.port=80"
+      - "traefik.http.services.grin-platform.loadbalancer.server.scheme=http"
+      - "traefik.http.routers.grin-platform.rule=Host(`grin.logiclabsoftwares.com`)"
+      - "traefik.http.routers.grin-platform.entrypoints=https"
+      - "traefik.http.routers.grin-platform.tls.certresolver=cloudflare"
+      - "traefik.http.routers.grin-platform.middlewares=traefik-auth"
+      - "traefik.http.middlewares.grin-platform-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.logiclabsoftwares.middlewares=grin-platform-https-redirect"
+
+networks:
+  proxy:
+    external: true

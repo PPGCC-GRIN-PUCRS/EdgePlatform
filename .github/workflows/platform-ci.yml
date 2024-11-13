@@ -4,7 +4,7 @@ on:
   push:
     branches: ["release"]
     paths:
-      - "!api/"
+      - "!api/**"
 
 env:
   REGISTRY_IMAGE: ${{ vars.REGISTRY }}/${{ vars.PLATFORM_IMAGE_NAME }}

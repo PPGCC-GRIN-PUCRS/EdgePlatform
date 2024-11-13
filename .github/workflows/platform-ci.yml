@@ -3,8 +3,9 @@ name: Platform CI-CD
 on:
   push:
     branches: ["release"]
-    paths-ignore:
-      - "api/**"
+    paths:
+      - "!api/**"
+      - ".github/workflows/platform-ci.yml"
 
 env:
   REGISTRY_IMAGE: ${{ vars.REGISTRY }}/${{ vars.PLATFORM_IMAGE_NAME }}

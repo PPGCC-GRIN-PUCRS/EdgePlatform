@@ -1,0 +1,46 @@
+services:
+  db:
+    container_name: ${DB_CONTAINER_NAME:-grin-database}
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-platform}
+    networks:
+      - grin-data-network
+    volumes:
+      - grin-db-volume:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5434}:5432"
+
+  api:
+    container_name: ${CONTAINER_NAME:-grin-api}
+    image: hcley/grin-api:latest
+    networks:
+      - grin-data-network
+      - proxy
+    environment:
+      - DATASOURCE_URL=${DATASOURCE:-jdbc:postgresql://db:5434/platform}
+      - DATASOURCE_USERNAME=${POSTGRES_USER:-postgres}
+      - DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-password}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+
+      - "traefik.http.middlewares.grin-api-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.grin-api.middlewares=grin-api-https-redirect"
+      - "traefik.http.services.grin-api.loadbalancer.server.scheme=http"
+      - "traefik.http.services.grin-api.loadbalancer.server.port=80"
+
+      - "traefik.http.routers.grin-api-secured.rule=Host(`grin.logiclabsoftwares.com`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.grin-api-secured.tls.certresolver=cloudflare"
+      - "traefik.http.routers.grin-api-secured.entrypoints=https"
+
+volumes:
+  grin-db-volume:
+
+networks:
+  proxy:
+    external: true
+  grin-data-network:

@@ -3,8 +3,8 @@ name: Platform CI-CD
 on:
   push:
     branches: ["release"]
-    paths:
-      - "!api/**"
+    paths-ignore:
+      - "api/**"
 
 env:
   REGISTRY_IMAGE: ${{ vars.REGISTRY }}/${{ vars.PLATFORM_IMAGE_NAME }}

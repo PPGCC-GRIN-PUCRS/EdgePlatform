@@ -1,8 +1,0 @@
-spring:
-  application:
-    name: edgeplatform
-  datasource:
-    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5050/platform}
-    username: ${DATASOURCE_USERNAME:postgres}
-    password: ${DATASOURCE_PASSWORD:password}
-    driverClassName: ${DATASOURCE_DRIVER:org.postgresql.Driver}

@@ -1,11 +1,10 @@
-name: Platform CI
+name: Platform CI-CD
 
 on:
   push:
     branches: ["release"]
-  pull_request:
-    branches: ["release"]
-    types: ["approved"]
+    paths:
+      - "!api/"
 
 env:
   REGISTRY_IMAGE: ${{ vars.REGISTRY }}/${{ vars.PLATFORM_IMAGE_NAME }}
@@ -124,7 +123,7 @@ jobs:
         run: |
           ssh -t -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
             sudo -i
-            docker stop ${{ vars.GRIN_PLATFORM }} || true && docker rm ${{ vars.GRIN_PLATFORM }} || true
+            docker stop ${{ vars.CONTAINER_NAME }} || true && docker rm ${{ vars.CONTAINER_NAME }} || true
           EOF
 
       - name: Deploy
@@ -132,13 +131,13 @@ jobs:
           ssh -t -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
             sudo -i
             cd /home/${{ secrets.CLOUD_USER }}
-            export GRIN_PLATFORM=${{ vars.GRIN_PLATFORM }}
+            export CONTAINER_NAME=${{ vars.CONTAINER_NAME }}
             docker-compose up -d --force-recreate --remove-orphans
           EOF
 
       - name: Cleanup
         run: |
-          ssh -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} sudo mv /home/${{ secrets.CLOUD_USER }}/docker-compose.yml /opt/grin/docker-compose.yml
+          ssh -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} sudo mv /home/${{ secrets.CLOUD_USER }}/docker-compose.yml ${{ vars.PROJECT_FOLDER }}/docker-compose.yml
           rm -f ./OCI.key
 
   # ONLY ON BILLING PLAN

@@ -4,8 +4,8 @@ on:
   push:
     branches: ["release"]
     paths:
+      - "!.github/workflows/api-ci.yml"
       - "!api/**"
-      - ".github/workflows/platform-ci.yml"
 
 env:
   REGISTRY_IMAGE: ${{ vars.REGISTRY }}/${{ vars.PLATFORM_IMAGE_NAME }}
@@ -60,7 +60,7 @@ jobs:
             ${{ vars.PLATFORM_IMAGE_NAME }}:latest
             ${{ env.REGISTRY_IMAGE }}:${{ github.sha }}
           outputs: |
-            type=docker,dest=/tmp/${{ vars.PLATFORM_IMAGE_NAME }}.${{ github.sha }}.tar
+            type=docker,dest=/tmp/${{ env.IMAGE_ARTIFACT }}.tar
 
       - name: Image digest
         run: |

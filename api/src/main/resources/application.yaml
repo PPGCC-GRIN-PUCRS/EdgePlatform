@@ -1,8 +1,15 @@
 spring:
+
   application:
     name: edgeplatform
+
   datasource:
     url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5434/platform}
     username: ${DATASOURCE_USERNAME:postgres}
     password: ${DATASOURCE_PASSWORD:password}
     driverClassName: ${DATASOURCE_DRIVER:org.postgresql.Driver}
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect

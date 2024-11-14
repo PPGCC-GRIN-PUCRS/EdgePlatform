@@ -29,7 +29,7 @@ on:
         description: "Password able to login into image registry account"
 
 jobs:
-  publish:
+  artifact:
     permissions:
       id-token: write
       attestations: write

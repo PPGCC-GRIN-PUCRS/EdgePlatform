@@ -13,7 +13,7 @@ on:
         description: "Will be the name of the file that will be generated for the buildx (as $IMAGE_ARTIFACT.tar)"
 
 jobs:
-  build:
+  image:
     permissions:
       packages: write
       contents: read

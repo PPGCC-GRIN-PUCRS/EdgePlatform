@@ -1,0 +1,87 @@
+name: Build docker image as artifact
+
+on:
+  workflow_call:
+    inputs:
+      key_file:
+        type: string
+        required: false
+        default: "./cloud.key"
+        description: "Key file name (including path, such as './') and file extension (file.key / file.pem)"
+      CONTAINER_NAME:
+        type: string
+        required: true
+        description: "Desired name to be set at containar that is being deployed"
+      SERVICE_NAME:
+        type: string
+        required: true
+        description: "Docker service to be stoped and removed previous new container deployment"
+
+    secrets:
+      CLOUD_RSA_KEY:
+        required: true
+        description: "Username able to login into image registry account"
+      CLOUD_USER:
+        required: true
+        description: "Password able to login into image registry account"
+      CLOUD_ADDRESS:
+        required: true
+        description: "Cloud address host (able to accept ssh) being IPv4 or DNS."
+
+  # MISSING DATABASE VALIDATION
+  # MISSING DATABASE BACKUP
+  # MISSING MANUAL TRIGGER
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Retrieve docker compose file
+        uses: actions/checkout@v4
+
+      - name: Add server public key
+        uses: ./.github/actions/cloud-keys
+        with:
+          CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
+
+      - name: Inject compose file to server
+        uses: ./.github/actions/cloud-scp
+        with:
+          local_path: ./api/docker-compose.yml
+          target_path: /home/${{ secrets.CLOUD_USER }}
+          CLOUD_USER: ${{ secrets.CLOUD_USER }}
+          CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
+
+      - name: Prepare database and inject variables
+        run: |
+          ssh -t -o StrictHostKeyChecking=no -i "${{ inputs.key_file }}" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
+            sudo -i
+
+            echo "${{ secrets.API_ENV_FILE }}" > ./.env
+            chmod 600 ./.env && set -a
+            source ./.env
+
+            if docker ps --filter "name=${{ inputs.CONTAINER_NAME }}" --format "{{.Names}}" | grep -w "${{ inputs.CONTAINER_NAME }}"; then
+              echo "Databse is running."
+            else
+              cd /home/${{ secrets.CLOUD_USER }}
+              export CONTAINER_NAME=${{ inputs.CONTAINER_NAME }}
+              docker-compose up -d ${{ inputs.SERVICE_NAME }} --force-recreate --remove-orphans
+            fi
+          EOF
+
+      - name: Remove previous service version
+        uses: ./.github/actions/docker-stop-rm
+        with:
+          CLOUD_USER: ${{ secrets.CLOUD_USER }}
+          CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
+          API_CONTAINER_NAME: ${{ inputs.CONTAINER_NAME }}
+
+      - name: Deploy
+        run: |
+          ssh -t -o StrictHostKeyChecking=no -i "${{ inputs.key_file }}" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
+            sudo -i
+            cd /home/${{ secrets.CLOUD_USER }}
+            export CONTAINER_NAME=${{ inputs.CONTAINER_NAME}}
+            docker-compose up -d ${{ inputs.SERVICE_NAME  }} --force-recreate --remove-orphans
+          EOF

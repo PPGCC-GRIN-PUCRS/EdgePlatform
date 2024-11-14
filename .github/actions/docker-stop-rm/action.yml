@@ -20,29 +20,13 @@ inputs:
 runs:
   using: "composite"
   steps:
-  - name: Verify requirements
-    shell: bash
-    run: |
-      if [ -s "${{ inputs.key_file }}" ]
-      then
-        RED='\033[0;31m'
-        CLEAR='\033[0m'
-        echo "${RED}No key found.${CLEAR}";
-        echo "${RED}The cloud-keys action is needed to perform this composite.${CLEAR}";
-        echo "${RED}please add the following step before this action:${CLEAR}";
+    - name: Add server public key
+      uses: ./.github/actions/cloud-keys-validation
 
-        echo -e "- name: Add server public key";
-        echo -e "  uses: ./.github/actions/cloud-keys";
-        echo -e "  with:";
-        echo -e "    CLOUD_RSA_KEY: \${{ secrets.<RSA Key> }}";
-
-        exit 1;
-      fi
-
-  - name: Remove previous service version
-    shell: bash
-    run: |
-      ssh -t -o StrictHostKeyChecking=no -i "${{ inputs.key_file }}" ${{ inputs.CLOUD_USER }}@${{ inputs.CLOUD_ADDRESS }} << EOF
-        sudo -i
-        docker stop ${{ inputs.CONTAINER_NAME }} || true && docker rm ${{ inputs.CONTAINER_NAME }} || true
-      EOF
+    - name: Remove previous service version
+      shell: bash
+      run: |
+        ssh -t -o StrictHostKeyChecking=no -i "${{ inputs.key_file }}" ${{ inputs.CLOUD_USER }}@${{ inputs.CLOUD_ADDRESS }} << EOF
+          sudo -i
+          docker stop ${{ inputs.CONTAINER_NAME }} || true && docker rm ${{ inputs.CONTAINER_NAME }} || true
+        EOF

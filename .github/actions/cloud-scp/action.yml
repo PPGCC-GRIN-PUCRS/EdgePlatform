@@ -21,30 +21,14 @@ inputs:
 runs:
   using: "composite"
   steps:
-  - name: Verify requirements
-    shell: bash
-    run: |
-      if [ -s "${{ inputs.key_file }}" ]
-      then
-        RED='\033[31m'
-        CLEAR='\033[0m'
-        echo -e "${RED}No key found.${CLEAR}";
-        echo -e "${RED}The cloud-keys action is needed to perform this composite.${CLEAR}";
-        echo -e "${RED}please add the following step before this action:${CLEAR}";
+    - name: Add server public key
+      uses: ./.github/actions/cloud-keys-validation
 
-        echo -e "- name: Add server public key";
-        echo -e "  uses: ./.github/actions/cloud-keys";
-        echo -e "  with:";
-        echo -e "    CLOUD_RSA_KEY: <RSA_KEY_VARIABLE>";
+    - name: Inject compose file to server
+      shell: bash
+      run: |
+        if [ -d /path/to/directory ]; then
+          directory_option=-r
+        fi
 
-        exit 1;
-      fi
-
-  - name: Inject compose file to server
-    shell: bash
-    run: |
-      if [ -d /path/to/directory ]; then
-        directory_option=-r
-      fi
-
-      scp $directory_option -o StrictHostKeyChecking=no -i "${{ inputs.key_file }}" ${{ inputs.local_path }} ${{ inputs.CLOUD_USER }}@${{ inputs.CLOUD_ADDRESS }}:${{ inputs.target_path }}
+        scp $directory_option -o StrictHostKeyChecking=no -i "${{ inputs.key_file }}" ${{ inputs.local_path }} ${{ inputs.CLOUD_USER }}@${{ inputs.CLOUD_ADDRESS }}:${{ inputs.target_path }}

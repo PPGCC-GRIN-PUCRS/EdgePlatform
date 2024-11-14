@@ -1,0 +1,28 @@
+# .github/actions/add-server-key/action.yml
+name: "Validate RSA Key required presence"
+description: "Verify cloud RSA key requirement"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Verify key requirement
+      shell: bash
+      run: |
+        if [ -s "${{ inputs.key_file }}" ]
+        then
+          RED='\033[31m'
+          CLEAR='\033[0m'
+          echo -e "${RED}No key found.${CLEAR}";
+          echo -e "${RED}The cloud-keys action is needed to perform this composite.${CLEAR}";
+          echo -e "${RED}please add the following step before this action:${CLEAR}";
+
+          echo -e "- name: Add server public key";
+          echo -e "  uses: ./.github/actions/cloud-keys";
+          echo -e "  with:";
+          echo -e "    CLOUD_RSA_KEY: <RSA_KEY_VARIABLE>";
+          echo -e ""
+
+          ls
+
+          exit 1;
+        fi

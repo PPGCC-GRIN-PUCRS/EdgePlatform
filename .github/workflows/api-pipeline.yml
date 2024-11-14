@@ -52,15 +52,17 @@ jobs:
 
   backend:
     needs: [database-availability, database-deploy]
-    if: needs.database-availability.result == 'success' || needs.database-deploy.result == 'success'
-    uses: ./.github/workflows/deploy.yml
-    with:
-      SERVICE_NAME: ${{ vars.API_SERVICE_NAME }}
-      CONTAINER_NAME: ${{ vars.API_CONTAINER_NAME }}
-    secrets:
-      CLOUD_USER: ${{ secrets.CLOUD_USER }}
-      CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
-      CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: deploy
+        if: needs.database-availability.result == 'success' || needs.database-deploy.result == 'success'
+        uses: ./.github/workflows/deploy.yml
+        with:
+          SERVICE_NAME: ${{ vars.API_SERVICE_NAME }}
+          CONTAINER_NAME: ${{ vars.API_CONTAINER_NAME }}
+          CLOUD_USER: ${{ secrets.CLOUD_USER }}
+          CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
+          CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
 
   cleanup:
     runs-on: ubuntu-latest

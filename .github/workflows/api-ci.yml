@@ -130,7 +130,7 @@ jobs:
             chmod 600 .env && set -a
             source .env
 
-            if 'docker ps --filter "name=${{ vars.DB_CONTAINER_NAME }}" --format "{{.Names}}" | grep -w "${{ vars.DB_CONTAINER_NAME }}"'; then
+            if docker ps --filter "name=${{ vars.DB_CONTAINER_NAME }}" --format "{{.Names}}" | grep -w "${{ vars.DB_CONTAINER_NAME }}"; then
               echo "Databse is running."
             else
               export CONTAINER_NAME=${{ vars.DB_CONTAINER_NAME }}

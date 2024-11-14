@@ -46,13 +46,6 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}
             ${{ env.REGISTRY_IMAGE }}:${{ github.sha }}
 
-      - name: Add server public key
-        run: |
-          echo "${{ secrets.API_ENV_FILE }}" > .env
-          chmod 600 .env
-          set -a
-          source .env
-
       - name: Set Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -128,18 +121,19 @@ jobs:
           scp -o StrictHostKeyChecking=no -i "./OCI.key" ./api/docker-compose.yml ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }}:/home/${{ secrets.CLOUD_USER }}
         shell: bash
 
-      - name: Prepare database
+      - name: Prepare database and inject variables
         run: |
           ssh -t -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
             sudo -i
-            docker ps --filter "name=${{ vars.DB_CONTAINER_NAME }}" --format "{{.Names}}" | grep -w "${{ vars.DB_CONTAINER_NAME }}"'; then
+
+            echo "${{ secrets.API_ENV_FILE }}" > .env
+            chmod 600 .env && set -a
+            source .env
+
+            if 'docker ps --filter "name=${{ vars.DB_CONTAINER_NAME }}" --format "{{.Names}}" | grep -w "${{ vars.DB_CONTAINER_NAME }}"'; then
               echo "Databse is running."
             else
-              echo "${{ secrets.API_ENV_FILE }}" > .env
-              chmod 600 .env && set -a
-              source .env
-              docker-compose up -d ${{ vars.DB_SERVICE_NAME}} --force-recreate --remove-orphans
-              rm -f .env
+              docker-compose up -d ${{ vars.DB_SERVICE_NAME }} --force-recreate --remove-orphans
             fi
           EOF
 
@@ -163,6 +157,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} sudo mv /home/${{ secrets.CLOUD_USER }}/docker-compose.yml ${{ vars.PROJECT_FOLDER }}/docker-compose.yml
           rm -f ./OCI.key
+          rm -f ./.env
 
   # ONLY ON BILLING PLAN
   # attest:

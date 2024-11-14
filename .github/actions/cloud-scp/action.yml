@@ -3,21 +3,26 @@ name: "Stop and remove docker container"
 description: "Reusable step to stop and remove a docker container"
 
 inputs:
+  local_path:
+    description: "Path to the local machine which will be sent to the target"
+  target_path:
+    description: "Target path inside the ssh client that the local content will be placed"
   key_file:
     required: false
     default: "./cloud.key"
     description: "Key file name (including path, such as './') and file extension (file.key / file.pem)"
   CLOUD_USER:
     required: true
+    description: "Cloud user with access granted to the RSA key file"
   CLOUD_ADDRESS:
     required: true
-  API_CONTAINER_NAME:
-    required: true
+    description: "Cloud address host (able to accept ssh) being IPv4 or DNS."
 
 runs:
   using: "composite"
   steps:
   - name: Verify requirements
+    shell: bash
     run: |
       if [ -s "${{ inputs.key_file }}" ]
       then
@@ -35,9 +40,11 @@ runs:
         exit 1;
       fi
 
-  - name: Remove previous service version
+  - name: Inject compose file to server
+    shell: bash
     run: |
-      ssh -t -o StrictHostKeyChecking=no -i "${{ inputs.key_file }}" ${{ inputs.CLOUD_USER }}@${{ inputs.CLOUD_ADDRESS }} << EOF
-        sudo -i
-        docker stop ${{ inputs.API_CONTAINER_NAME }} || true && docker rm ${{ inputs.API_CONTAINER_NAME }} || true
-      EOF
+      if [ -d /path/to/directory ]; then
+        directory_option=-r
+      fi
+
+      scp $directory_option -o StrictHostKeyChecking=no -i "${{ inputs.key_file }}" ${{ inputs.local_path }} ${{ inputs.CLOUD_USER }}@${{ inputs.CLOUD_ADDRESS }}:${{ inputs.target_path }}

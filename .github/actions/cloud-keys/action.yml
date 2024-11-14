@@ -8,8 +8,8 @@ inputs:
     default: "./cloud.key"
     description: "Key file name (including path, such as './') and file extension (file.key / file.pem)"
   CLOUD_RSA_KEY:
-    description: "Cloud RSA key file"
     required: true
+    description: "Cloud RSA key file"
 
 runs:
   using: "composite"

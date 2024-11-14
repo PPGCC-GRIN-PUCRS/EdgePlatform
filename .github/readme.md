@@ -1,3 +1,47 @@
+# Modular github actions pipeline
+
+# Usage
+
+## Folder structure
+
+The root folder normally is the frontend framework.  
+Inside the root folder, there is the 'api' folder, which will contains the whole backend.
+
+## Workflow
+
+< Add workflow print here after its finished >
+
+- explain steps
+
+## Required environment variables
+
+### Secrets:
+
+- API_ENV_FILE
+
+- CLOUD_USER
+- CLOUD_ADDRESS
+- CLOUD_RSA_KEY
+- DOCKER_REPOSITORY_USERNAME
+- DOCKER_REPOSITORY_PASSWORD
+- DOCKER_API_REPOSITORY_USERNAME <optional>
+- DOCKER_API_REPOSITORY_PASSWORD <optional>
+
+### Variables:
+
+- API_IMAGE_NAME
+- API_SERVICE_NAME
+- API_CONTAINER_NAME
+
+- DB_SERVICE_NAME
+- DB_CONTAINER_NAME
+
+- PLATFORM_IMAGE_NAME
+- PLATFORM_CONTAINER_NAME
+
+- REGISTRY
+- PROJECT_FOLDER
+
 # TODO
 
 - [ ] Enable frontend tests
@@ -5,25 +49,4 @@
 - [ ] Backend tests
 - [ ] e2e
 
-## ONLY ON BILLING PLAN
-
-attest:
-  permissions:
-    id-token: write
-    attestations: write
-  runs-on: ubuntu-latest
-  needs: build
-  steps:
-    # Attest reference video
-    # https://www.youtube.com/watch?v=zTIHb-9c868
-  - name: Attest artifact
-    uses: actions/attest-build-provenance@1c608d11d69870c2092266b3f9a6f3abbf17002c # v1.3.2
-    with:
-      subject-name: ${{ env.REGISTRY_IMAGE }}
-      subject-digest: ${{ needs.build.outputs.digest }}
-      push-to-registry: true
-
-  - name: Verify OCI image
-    env:
-      GH_TOKEN: ${{ github.token }}
-    run: gh attestation verify oci://${{ env.REGISTRY_IMAGE }}:${{ github.sha }} --owner "$GITHUB_REPOSITORY_OWNER"
+###### When using, reasonable fashion, credit the author(s). ;)

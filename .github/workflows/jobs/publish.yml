@@ -1,0 +1,57 @@
+name: Publish artifact image
+
+on:
+  workflow_call:
+    inputs:
+      latest:
+        type: boolean
+        default: false
+        required: false
+      TAG:
+        type: string
+        required: false
+        default: ${{ github.sha }}
+      IMAGE_ARTIFACT:
+        type: string
+        required: true
+        description: "Artifact name to be retrieved from previous job (without .tar extension)"
+      REGISTRY_IMAGE:
+        type: string
+        required: true
+        description: "Image Registry with repository without tag (e.g. hcley/grin)"
+
+    secrets:
+      DOCKER_REGISTRY_USERNAME:
+        required: true
+      DOCKER_REGISTRY_PASSWORD:
+        required: true
+
+jobs:
+  publish:
+    permissions:
+      id-token: write
+      attestations: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.IMAGE_ARTIFACT }}
+          path: /tmp
+
+      - name: Load image
+        run: |
+          docker load --input /tmp/${{ inputs.IMAGE_ARTIFACT }}.tar
+          docker image ls -a
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Docker publish image
+        run: |
+          docker push ${{ inputs.REGISTRY_IMAGE }}:${{ inputs.TAG }}
+          docker image tag ${{ inputs.REGISTRY_IMAGE }}:${{ inputs.TAG }} ${{ inputs.REGISTRY_IMAGE }}:latest
+          docker push ${{ inputs.REGISTRY_IMAGE }}:latest

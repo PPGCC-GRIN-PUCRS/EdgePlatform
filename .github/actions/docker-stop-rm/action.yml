@@ -3,21 +3,25 @@ name: "Stop and remove docker container"
 description: "Reusable step to stop and remove a docker container"
 
 inputs:
-  local_path:
-  target_path:
   key_file:
     required: false
     default: "./cloud.key"
     description: "Key file name (including path, such as './') and file extension (file.key / file.pem)"
   CLOUD_USER:
     required: true
+    description: "Cloud user with access granted to the RSA key file"
   CLOUD_ADDRESS:
     required: true
+    description: "Cloud address host (able to accept ssh) being IPv4 or DNS."
+  CONTAINER_NAME:
+    required: true
+    description: "Name of the container to be dropped. (Doesn't accept container ID)"
 
 runs:
   using: "composite"
   steps:
   - name: Verify requirements
+    shell: bash
     run: |
       if [ -s "${{ inputs.key_file }}" ]
       then
@@ -35,7 +39,10 @@ runs:
         exit 1;
       fi
 
-  - name: Inject compose file to server
-    run: |
-      scp -o StrictHostKeyChecking=no -i "${{ inputs.key_file }}" ${{ inputs.local_path }} ${{ inputs.CLOUD_USER }}@${{ inputs.CLOUD_ADDRESS }}:${{ inputs.target_path }}
+  - name: Remove previous service version
     shell: bash
+    run: |
+      ssh -t -o StrictHostKeyChecking=no -i "${{ inputs.key_file }}" ${{ inputs.CLOUD_USER }}@${{ inputs.CLOUD_ADDRESS }} << EOF
+        sudo -i
+        docker stop ${{ inputs.CONTAINER_NAME }} || true && docker rm ${{ inputs.CONTAINER_NAME }} || true
+      EOF

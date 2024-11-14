@@ -12,14 +12,14 @@ env:
 
 jobs:
   build:
-    uses: ./.github/workflows/jobs/build.yml
+    uses: ./.github/workflows/build.yml
     with:
       REGISTRY_IMAGE: ${{ vars.REGISTRY }}/${{ vars.API_IMAGE_NAME }}
       IMAGE_ARTIFACT: ${{ vars.API_IMAGE_NAME }}.${{ github.sha }}
 
   publish:
     needs: build
-    uses: ./.github/workflows/jobs/publish.yml
+    uses: ./.github/workflows/publish.yml
     with:
       TAG: ${{ github.sha }}
       IMAGE_ARTIFACT: ${{ vars.API_IMAGE_NAME }}.${{ github.sha }}

@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: solve
-        run: echo "a"
+        run: echo "ab"
 
   database-deploy:
     needs: publish

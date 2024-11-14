@@ -1,0 +1,41 @@
+# .github/actions/add-server-key/action.yml
+name: "Stop and remove docker container"
+description: "Reusable step to stop and remove a docker container"
+
+inputs:
+  local_path:
+  target_path:
+  key_file:
+    required: false
+    default: "./cloud.key"
+    description: "Key file name (including path, such as './') and file extension (file.key / file.pem)"
+  CLOUD_USER:
+    required: true
+  CLOUD_ADDRESS:
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+  - name: Verify requirements
+    run: |
+      if [ -s "${{ inputs.key_file }}" ]
+      then
+        RED='\033[0;31m'
+        CLEAR='\033[0m'
+        echo "${RED}No key found.${CLEAR}";
+        echo "${RED}The cloud-keys action is needed to perform this composite.${CLEAR}";
+        echo "${RED}please add the following step before this action:${CLEAR}";
+
+        echo -e "- name: Add server public key";
+        echo -e "  uses: ./.github/actions/cloud-keys";
+        echo -e "  with:";
+        echo -e "    CLOUD_RSA_KEY: \${{ secrets.<RSA Key> }}";
+
+        exit 1;
+      fi
+
+  - name: Inject compose file to server
+    run: |
+      scp -o StrictHostKeyChecking=no -i "${{ inputs.key_file }}" ${{ inputs.local_path }} ${{ inputs.CLOUD_USER }}@${{ inputs.CLOUD_ADDRESS }}:${{ inputs.target_path }}
+    shell: bash

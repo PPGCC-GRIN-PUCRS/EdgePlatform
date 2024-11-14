@@ -8,22 +8,11 @@ on:
       - "api/**"
 
 env:
+  key_file: ./cloud.key
   REGISTRY_IMAGE: ${{ vars.REGISTRY }}/${{ vars.API_IMAGE_NAME }}
   IMAGE_ARTIFACT: ${{ vars.API_IMAGE_NAME }}.${{ github.sha }}
 
 jobs:
-  # ONGOING #TODO
-  # test:
-  #   strategy:
-  #     matrix:
-  #       node-version: [ 20.x ]
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     coverage: ""
-  #   steps:
-  #     - name: validation
-  #       users: actions/checkout@v4
-
   build:
     permissions:
       packages: write
@@ -104,26 +93,42 @@ jobs:
           docker image tag ${{ env.REGISTRY_IMAGE }}:${{ github.sha }} ${{ env.REGISTRY_IMAGE }}:latest
           docker push ${{ env.REGISTRY_IMAGE }}:latest
 
+  database-availability:
+    runs-on: ubuntu-latest
+    steps:
+      - name: solve
+        run: echo "a"
+
+  database-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: solve
+        run: echo "a"
+
   deploy:
     runs-on: ubuntu-latest
-    needs: publish
+    needs: [publish, database-availability, database-deploy]
+    if: needs.database-availability.result == 'success' || needs.database-deploy.result == 'success'
     steps:
       - name: Retrieve docker compose file
         uses: actions/checkout@v4
 
       - name: Add server public key
-        run: |
-          echo "${{ secrets.CLOUD_RSA_KEY }}" > ./OCI.key
-          chmod 600 ./OCI.key
+        uses: ./.github/actions/cloud-keys
+        with:
+          CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
 
       - name: Inject compose file to server
-        run: |
-          scp -o StrictHostKeyChecking=no -i "./OCI.key" ./api/docker-compose.yml ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }}:/home/${{ secrets.CLOUD_USER }}
-        shell: bash
+        uses: ./.github/actions/cloud-scp
+        with:
+          local_path: ./api/docker-compose.yml
+          target_path: /home/${{ secrets.CLOUD_USER }}
+          CLOUD_USER: ${{ secrets.CLOUD_USER }}
+          CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
 
       - name: Prepare database and inject variables
         run: |
-          ssh -t -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
+          ssh -t -o StrictHostKeyChecking=no -i "${{ env.key_file }}" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
             sudo -i
 
             echo "${{ secrets.API_ENV_FILE }}" > ./.env
@@ -140,45 +145,30 @@ jobs:
           EOF
 
       - name: Remove previous service version
-        run: |
-          ssh -t -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
-            sudo -i
-            docker stop ${{ vars.API_CONTAINER_NAME }} || true && docker rm ${{ vars.API_CONTAINER_NAME }} || true
-          EOF
+        uses: ./.github/actions/docker-stop-rm
+        with:
+          CLOUD_USER: ${{ secrets.CLOUD_USER }}
+          CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
+          API_CONTAINER_NAME: ${{ vars.API_CONTAINER_NAME }}
 
       - name: Deploy
         run: |
-          ssh -t -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
+          ssh -t -o StrictHostKeyChecking=no -i "${{ env.key_file }}" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
             sudo -i
             cd /home/${{ secrets.CLOUD_USER }}
             export CONTAINER_NAME=${{ vars.API_CONTAINER_NAME}}
             docker-compose up -d ${{ vars.API_SERVICE_NAME  }} --force-recreate --remove-orphans
           EOF
 
-      - name: Cleanup
+  cleanup:
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    steps:
+      - name: Move file to project folder to keep history
         run: |
-          ssh -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} sudo mv /home/${{ secrets.CLOUD_USER }}/docker-compose.yml ${{ vars.PROJECT_FOLDER }}/docker-compose.yml
-          rm -f ./OCI.key
+          ssh -o StrictHostKeyChecking=no -i "${{ env.key_file }}" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} sudo mv /home/${{ secrets.CLOUD_USER }}/docker-compose.yml ${{ vars.PROJECT_FOLDER }}/docker-compose.yml
+
+      - name: Remove sensitive files
+        run: |
+          rm -f ${{ env.key_file }}
           rm -f ./.env
-
-  # ONLY ON BILLING PLAN
-  # attest:
-  #   permissions:
-  #     id-token: write
-  #     attestations: write
-  #   runs-on: ubuntu-latest
-  #   needs: build
-  #   steps:
-  #     # Attest reference video
-  #     # https://www.youtube.com/watch?v=zTIHb-9c868
-  #   - name: Attest artifact
-  #     uses: actions/attest-build-provenance@1c608d11d69870c2092266b3f9a6f3abbf17002c # v1.3.2
-  #     with:
-  #       subject-name: ${{ env.REGISTRY_IMAGE }}
-  #       subject-digest: ${{ needs.build.outputs.digest }}
-  #       push-to-registry: true
-
-  #   - name: Verify OCI image
-  #     env:
-  #       GH_TOKEN: ${{ github.token }}
-  #     run: gh attestation verify oci://${{ env.REGISTRY_IMAGE }}:${{ github.sha }} --owner "$GITHUB_REPOSITORY_OWNER"

@@ -124,7 +124,7 @@ jobs:
         run: |
           ssh -t -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
             sudo -i
-            docker stop ${{ vars.CONTAINER_NAME }} || true && docker rm ${{ vars.CONTAINER_NAME }} || true
+            docker stop ${{ vars.PLATFORM_CONTAINER_NAME }} || true && docker rm ${{ vars.PLATFORM_CONTAINER_NAME }} || true
           EOF
 
       - name: Deploy
@@ -132,7 +132,7 @@ jobs:
           ssh -t -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
             sudo -i
             cd /home/${{ secrets.CLOUD_USER }}
-            export CONTAINER_NAME=${{ vars.CONTAINER_NAME }}
+            export CONTAINER_NAME=${{ vars.PLATFORM_CONTAINER_NAME }}
             docker-compose up -d --force-recreate --remove-orphans
           EOF
 

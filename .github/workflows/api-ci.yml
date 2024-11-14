@@ -126,9 +126,9 @@ jobs:
           ssh -t -o StrictHostKeyChecking=no -i "./OCI.key" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
             sudo -i
 
-            echo "${{ secrets.API_ENV_FILE }}" > .env
-            chmod 600 .env && set -a
-            source .env
+            echo "${{ secrets.API_ENV_FILE }}" > ./.env
+            chmod 600 ./.env && set -a
+            source ./.env
 
             if docker ps --filter "name=${{ vars.DB_CONTAINER_NAME }}" --format "{{.Names}}" | grep -w "${{ vars.DB_CONTAINER_NAME }}"; then
               echo "Databse is running."

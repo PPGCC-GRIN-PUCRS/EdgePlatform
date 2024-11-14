@@ -26,11 +26,11 @@ runs:
     run: |
       if [ -s "${{ inputs.key_file }}" ]
       then
-        RED='\033[0;31m'
+        RED='\033[31m'
         CLEAR='\033[0m'
-        echo "${RED}No key found.${CLEAR}";
-        echo "${RED}The cloud-keys action is needed to perform this composite.${CLEAR}";
-        echo "${RED}please add the following step before this action:${CLEAR}";
+        echo -e "${RED}No key found.${CLEAR}";
+        echo -e "${RED}The cloud-keys action is needed to perform this composite.${CLEAR}";
+        echo -e "${RED}please add the following step before this action:${CLEAR}";
 
         echo -e "- name: Add server public key";
         echo -e "  uses: ./.github/actions/cloud-keys";

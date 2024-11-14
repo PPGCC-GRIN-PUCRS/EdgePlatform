@@ -133,6 +133,7 @@ jobs:
             if docker ps --filter "name=${{ vars.DB_CONTAINER_NAME }}" --format "{{.Names}}" | grep -w "${{ vars.DB_CONTAINER_NAME }}"; then
               echo "Databse is running."
             else
+              cd /home/${{ secrets.CLOUD_USER }}
               export CONTAINER_NAME=${{ vars.DB_CONTAINER_NAME }}
               docker-compose up -d ${{ vars.DB_SERVICE_NAME }} --force-recreate --remove-orphans
             fi

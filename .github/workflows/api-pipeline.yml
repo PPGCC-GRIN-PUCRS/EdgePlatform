@@ -51,11 +51,11 @@ jobs:
         run: echo "ab"
 
   backend:
+    if: needs.database-availability.result == 'success' || needs.database-deploy.result == 'success'
     needs: [database-availability, database-deploy]
     runs-on: ubuntu-latest
     steps:
       - name: deploy
-        if: needs.database-availability.result == 'success' || needs.database-deploy.result == 'success'
         uses: ./.github/workflows/deploy.yml
         with:
           SERVICE_NAME: ${{ vars.API_SERVICE_NAME }}

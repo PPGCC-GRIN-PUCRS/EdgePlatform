@@ -4,7 +4,7 @@ on:
   push:
     branches: ["release"]
     paths:
-      - "!.github/workflows/api-ci.yml"
+      - ".github/workflows/api-pipeline.yml"
       - "!api/**"
 
 env:

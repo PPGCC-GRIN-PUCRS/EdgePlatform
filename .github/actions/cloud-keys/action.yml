@@ -17,5 +17,5 @@ runs:
     - name: Add server public key
       shell: bash
       run: |
-        echo "${{ inputs.CLOUD_RSA_KEY }}" > $key_export_name
-        chmod 600 $key_export_name
+        echo "${{ inputs.CLOUD_RSA_KEY }}" > ${{ inputs.key_export_name }}
+        chmod 600 ${{ inputs.key_export_name }}

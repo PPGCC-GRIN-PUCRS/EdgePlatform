@@ -41,14 +41,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: solve
-        run: echo "ab"
+        run: echo "a"
 
   database-deploy:
     needs: publish
     runs-on: ubuntu-latest
     steps:
       - name: solve
-        run: echo "ab"
+        run: echo "a"
 
   backend:
     needs: [database-availability, database-deploy]

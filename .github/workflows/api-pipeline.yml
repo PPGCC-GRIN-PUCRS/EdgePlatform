@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: solve
-        run: echo "a"
+        run: echo "ab"
 
   backend:
     needs: [database-availability, database-deploy]

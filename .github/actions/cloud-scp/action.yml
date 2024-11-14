@@ -35,7 +35,7 @@ runs:
         echo -e "- name: Add server public key";
         echo -e "  uses: ./.github/actions/cloud-keys";
         echo -e "  with:";
-        echo -e "    CLOUD_RSA_KEY: $${{ secrets.<RSA Key> }}";
+        echo -e "    CLOUD_RSA_KEY: <RSA_KEY_VARIABLE>";
 
         exit 1;
       fi

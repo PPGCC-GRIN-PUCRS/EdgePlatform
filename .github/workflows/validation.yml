@@ -69,9 +69,10 @@ jobs:
             job_conclusion=$(echo "$job_info" | jq -r '.conclusion') # Extract the conclusion value
             job_name=$(echo "$job_info" | jq -r '.name') # Extract the job name
 
-            if [[ "$job_conclusion" != "null" ]]; then
-              break
-            fi
+            # if [[ "$job_conclusion" != "null" ]]; then
+            #   break
+            # fi
+
             sleep 10
           done
 

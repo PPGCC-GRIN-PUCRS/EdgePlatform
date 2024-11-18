@@ -3,6 +3,8 @@ name: Build docker image as artifact
 on:
   workflow_call:
     inputs:
+      DATABASE_RESULT:
+        type: string
       key_file:
         type: string
         required: false
@@ -57,3 +59,16 @@ jobs:
               exit 1;
             fi
           EOF
+
+      - name: Wait for potential database success
+        # Only wait if the 'database' job is not yet completed
+        if: ${{ inputs.DATABASE_RESULT != 'success' && inputs.DATABASE_RESULT != 'failure' }}
+        run: |
+          echo "Waiting for database job to complete..."
+          while [[ "$(gh run view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.name==\"database\").conclusion')" == "null" ]]; do
+            sleep 10
+          done
+
+      - name: Re-run health check if database succeeds
+        if: ${{ inputs.DATABASE_RESULT == 'success' }}
+        run: echo "Re-running health check after database success!"

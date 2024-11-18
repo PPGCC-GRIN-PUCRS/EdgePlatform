@@ -37,10 +37,12 @@ jobs:
       DOCKER_REGISTRY_PASSWORD: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
 
   database-health:
-    needs: publish
+    needs: [publish, database]
+    if: always()
     uses: ./.github/workflows/validation.yml
     with:
       CONTAINER_NAME: ${{ vars.DB_CONTAINER_NAME }}
+      DATABASE_RESULT: ${{ needs.database.result }}
     secrets:
       CLOUD_USER: ${{ secrets.CLOUD_USER }}
       CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}

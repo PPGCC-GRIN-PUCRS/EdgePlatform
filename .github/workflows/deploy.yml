@@ -55,6 +55,7 @@ jobs:
 
       - name: Request manual approval
         uses: ./.github/actions/manual-approval
+        timeout-minutes: 5
         if: ${{ inputs.manual }}
         with:
           APP_ID: ${{ secrets.MANUAL_APPROVE_REQUESTOR_ID }}

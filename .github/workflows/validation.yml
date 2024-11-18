@@ -65,22 +65,17 @@ jobs:
         run: |
           echo "Waiting for database job to complete..."
           while true; do
-            job_info=$(gh run view ${{ github.run_id }} --json jobs | jq '.jobs[] | select(.name=="database / deploy")')
-            job_conclusion=$(echo "$job_info" | jq -r '.conclusion') # Extract the conclusion value
-            job_name=$(echo "$job_info" | jq -r '.name') # Extract the job name
+            job=$(gh run view ${{ github.run_id }} --json jobs | jq '.jobs[] | select(.name=="database / deploy")')
+            job_status=$(job | jq '.conclusion')
+            deploy_job=$(job | jq '.steps[] | select(.name=="Deploy")')
 
-            # if [[ "$job_conclusion" != "null" ]]; then
-            #   break
-            # fi
-
-            echo '-'
-            echo "$(gh run view ${{ github.run_id }} --json jobs | jq '.jobs[]')"
-            echo '-'
-            echo "$(gh run view ${{ github.run_id }} --json jobs | jq '.jobs[] | select(.name=="database / deploy")')"
-            echo '-'
-            echo "$(gh run view ${{ github.run_id }} --json jobs | jq -r '.name')"
+            echo "$job_status"
+            echo "$deploy_job"
             echo "------"
 
+            if [[ "$job_status" != "null" ]]; then
+              break
+            fi
             sleep 10
           done
 

@@ -21,9 +21,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Add server public key
-      uses: ./.github/actions/cloud-keys-validation
-
     - name: Inject compose file to server
       shell: bash
       run: |

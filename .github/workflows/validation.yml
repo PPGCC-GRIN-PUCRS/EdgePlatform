@@ -75,7 +75,7 @@ jobs:
             echo "------"
 
             if [[ ! -z "$job_status" ]]; then
-              break
+              echo "EXIT"
             fi
             sleep 10
           done

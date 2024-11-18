@@ -83,9 +83,14 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
+      - name: Add server public key
+        uses: ./.github/actions/cloud-keys
+        with:
+          CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
+
       - name: Move file to project folder to keep history
         run: |
-          ssh -o StrictHostKeyChecking=no -i "${{ env.key_file }}" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} sudo mv /home/${{ secrets.CLOUD_USER }}/docker-compose.yml ${{ vars.PROJECT_FOLDER }}/docker-compose.yml
+          ssh -o StrictHostKeyChecking=no -i "${{ env.key_file }}" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} sudo mv /home/${{ secrets.CLOUD_USER }}/docker-compose.yml ${{ vars.PROJECT_FOLDER }}/docker-compose-api.yml
 
       - name: Remove sensitive files
         run: |
@@ -94,5 +99,5 @@ jobs:
           #   key="${line%%=*}"
           #   printf '%s\n' "$key"
           # done < .env
-          rm -f ${{ env.key_file }}
-          rm -f ./.env
+          rm -rf ${{ env.key_file }}
+          rm -rf ./.env

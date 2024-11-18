@@ -60,9 +60,6 @@ jobs:
           APP_ID: ${{ secrets.MANUAL_APPROVE_REQUESTOR_ID }}
           APP_PRIVATE_KEY: ${{ secrets.MANUAL_APPROVE_REQUESTOR_SECRET }}
 
-      - name: Retrieve docker compose file
-        uses: actions/checkout@v4
-
       - name: Add server public key
         uses: ./.github/actions/cloud-keys
         with:

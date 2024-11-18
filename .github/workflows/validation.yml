@@ -74,7 +74,8 @@ jobs:
             echo "$deploy_job"
             echo "------"
 
-            if [[ ! -z "$job_status" ]]; then
+            if [[ ! -z "${job_status}" ]]; then
+              echo "$job_status"
               echo "EXIT"
             fi
             sleep 10

@@ -68,12 +68,13 @@ jobs:
             job=$(gh run view ${{ github.run_id }} --json jobs | jq '.jobs[] | select(.name=="database / deploy")')
             job_status=$(echo "$job" | jq '.conclusion')
             deploy_job=$(echo "$job" | jq '.steps[] | select(.name=="Deploy")')
+            deploy_job_status=$(echo "$deploy_job" | jq '.conclusion')
 
             echo "$job_status"
             echo "$deploy_job"
             echo "------"
 
-            if [[ "$job_status" != "null" ]]; then
+            if [[ ! -z "$job_status" ]]; then
               break
             fi
             sleep 10

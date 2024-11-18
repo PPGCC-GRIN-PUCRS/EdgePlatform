@@ -70,6 +70,14 @@ jobs:
             sleep 10
           done
 
+          job_info=$(gh run view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.name=="database")')
+          job_conclusion=$(echo "$job_info" | jq -r '.conclusion') # Extract the conclusion value
+          job_name=$(echo "$job_info" | jq -r '.name') # Extract the job name
+
+          echo "Job: $job_info"
+          echo "Checking job: $job_name"
+          echo "Job conclusion: $job_conclusion"
+
       # - name: Re-run health check if database succeeds
       #   if: ${{ inputs.DATABASE_RESULT == 'success' }}
       #   run: echo "Re-running health check after database success!"

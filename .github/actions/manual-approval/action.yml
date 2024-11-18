@@ -5,7 +5,7 @@ description: "Rise issue requesting manual approval to continue"
 inputs:
   APPROVERS:
     required: false
-    default: GrinEdgePlatform
+    default: grinedgeplatform
     description: "Team eligible to approve the request"
   APP_ID:
     required: true

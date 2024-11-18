@@ -65,7 +65,7 @@ jobs:
         run: |
           echo "Waiting for database job to complete..."
           while true; do
-            job_info=$(gh run view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.name=="database")')
+            job_info=$(gh run view ${{ github.run_id }} --json jobs | jq '.jobs[] | select(.name=="database / deploy")')
             job_conclusion=$(echo "$job_info" | jq -r '.conclusion') # Extract the conclusion value
             job_name=$(echo "$job_info" | jq -r '.name') # Extract the job name
 
@@ -73,11 +73,12 @@ jobs:
             #   break
             # fi
 
-            echo ${{ github.run_id }}
-            echo "$(gh run view ${{ github.run_id }} --json jobs)"
-            echo "Job: $job_info"
-            echo "Checking job: $job_name"
-            echo "Job conclusion: $job_conclusion"
+            echo '-'
+            echo "$(gh run view ${{ github.run_id }} --json jobs | jq '.jobs[]')"
+            echo '-'
+            echo "$(gh run view ${{ github.run_id }} --json jobs | jq '.jobs[] | select(.name=="database / deploy")')"
+            echo '-'
+            echo "$(gh run view ${{ github.run_id }} --json jobs | jq -r '.name')"
             echo "------"
 
             sleep 10

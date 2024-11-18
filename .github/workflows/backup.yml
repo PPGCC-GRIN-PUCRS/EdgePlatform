@@ -1,0 +1,12 @@
+name: Backup docker images
+
+on:
+  workflow_call:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sample
+        run: |
+          echo "backup"

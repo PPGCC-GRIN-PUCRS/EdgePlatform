@@ -61,6 +61,11 @@ jobs:
       MANUAL_APPROVE_REQUESTOR_ID: ${{ secrets.MANUAL_APPROVE_REQUESTOR_ID }}
       MANUAL_APPROVE_REQUESTOR_SECRET: ${{ secrets.MANUAL_APPROVE_REQUESTOR_SECRET }}
 
+  database-snapshot:
+    if: success() || needs.database-health.result == 'success' || needs.database.result == 'success'
+    needs: [database-health, database]
+    uses: ./.github/workflows/backup.yml
+
   backend:
     if: success() || needs.database-health.result == 'success' || needs.database.result == 'success'
     needs: [database-health, database]
@@ -74,8 +79,9 @@ jobs:
       CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
 
   cleanup:
+    needs: [database-snapshot, backend]
+    if: always()
     runs-on: ubuntu-latest
-    needs: backend
     steps:
       - name: Move file to project folder to keep history
         run: |

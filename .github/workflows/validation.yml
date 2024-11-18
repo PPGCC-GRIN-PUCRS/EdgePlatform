@@ -63,7 +63,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "$(gh run view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.name==\"database\").conclusion')"
+          echo $(gh run view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.name=="database").conclusion')
           echo "Waiting for database job to complete..."
           while [[ "$(gh run view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.name==\"database\").conclusion')" == "null" ]]; do
             sleep 10

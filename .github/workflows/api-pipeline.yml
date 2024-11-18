@@ -1,5 +1,7 @@
 name: API CI-CD
 
+# "Trigger"
+
 on:
   push:
     branches: ["release"]
@@ -83,6 +85,9 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Add server public key
         uses: ./.github/actions/cloud-keys
         with:

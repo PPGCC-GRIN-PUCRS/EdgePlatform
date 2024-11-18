@@ -60,7 +60,8 @@ jobs:
 
       - name: Wait for potential database success
         if: always()
-        # Only wait if the 'database' job is not yet completed
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "$(gh run view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.name==\"database\").conclusion')"
           echo "Waiting for database job to complete..."

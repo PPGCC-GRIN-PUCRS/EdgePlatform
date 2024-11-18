@@ -44,16 +44,11 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: manual-aproval
-        if: ${{ inputs.manual }}
-        uses: trstringer/manual-approval@v1
+      - name: Add server public key
+        uses: ./.github/actions/manual-approval
         with:
-          secret: ${{ secrets.GITHUB_TOKEN }}
-          approvers: GRIN
-          minimum-approvals: 1
-          issue-title: "Deploying v1.3.5 to prod from staging"
-          issue-body: "Please approve or deny the deployment of version v1.3.5."
-          exclude-workflow-initiator-as-approver: false
+          APP_ID: ${{ secrets.MANUAL_APPROVE_REQUESTOR_ID }}
+          APP_PRIVATE_KEY: ${{ secrets.MANUAL_APPROVE_REQUESTOR_SECRET }}
 
       - name: Retrieve docker compose file
         uses: actions/checkout@v4

@@ -46,10 +46,6 @@ jobs:
           ssh -t -o StrictHostKeyChecking=no -i "${{ inputs.key_file }}" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
             sudo -i
 
-            GREEN='\033[32m'
-            CLEAR='\033[0m'
-            RED='\033[31m'
-
             if docker ps --filter "name=${{ inputs.CONTAINER_NAME }}" --format "{{.Names}}" | grep -w "${{ inputs.CONTAINER_NAME }}"; then
               echo "${GREEN}${{ inputs.CONTAINER_NAME }} is currently running.${CLEAR}"
               exit 0;

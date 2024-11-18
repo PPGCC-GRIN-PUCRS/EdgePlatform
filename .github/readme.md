@@ -27,6 +27,11 @@ Inside the root folder, there is the 'api' folder, which will contains the whole
 - DOCKER_API_REPOSITORY_USERNAME <optional>
 - DOCKER_API_REPOSITORY_PASSWORD <optional>
 
+- DB_ENV_FILE
+
+- MANUAL_APPROVE_REQUESTOR_ID <optional | Required if using manual approval deploy>
+- MANUAL_APPROVE_REQUESTOR_SECRET <optional | Required if using manual approval deploy>
+
 ### Variables:
 
 - API_IMAGE_NAME

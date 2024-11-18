@@ -40,7 +40,7 @@ jobs:
     needs: publish
     uses: ./.github/workflows/validation.yml
     with:
-      CONTAINER_NAME: ${{ vars.API_CONTAINER_NAME }}
+      CONTAINER_NAME: ${{ vars.DB_CONTAINER_NAME }}
     secrets:
       CLOUD_USER: ${{ secrets.CLOUD_USER }}
       CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
@@ -51,10 +51,10 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       manual: true
-      SERVICE_NAME: ${{ vars.API_SERVICE_NAME }}
-      CONTAINER_NAME: ${{ vars.API_CONTAINER_NAME }}
+      SERVICE_NAME: ${{ vars.DB_SERVICE_NAME }}
+      CONTAINER_NAME: ${{ vars.DB_CONTAINER_NAME }}
     secrets:
-      ENV_FILE: ${{ secrets.API_ENV_FILE }}
+      ENV_FILE: ${{ secrets.DB_ENV_FILE }}
       CLOUD_USER: ${{ secrets.CLOUD_USER }}
       CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
       CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}

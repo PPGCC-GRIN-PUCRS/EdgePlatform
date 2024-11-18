@@ -63,16 +63,17 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo $(gh run view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.name=="database").conclusion')
           echo "Waiting for database job to complete..."
-          while [[ "$(gh run view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.name=="database").conclusion')" == "null" ]]; do
-            echo $(gh run view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.name=="database")')
+          while true; do
+            job_info=$(gh run view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.name=="database")')
+            job_conclusion=$(echo "$job_info" | jq -r '.conclusion') # Extract the conclusion value
+            job_name=$(echo "$job_info" | jq -r '.name') # Extract the job name
+
+            if [[ "$job_conclusion" != "null" ]]; then
+              break
+            fi
             sleep 10
           done
-
-          job_info=$(gh run view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.name=="database")')
-          job_conclusion=$(echo "$job_info" | jq -r '.conclusion') # Extract the conclusion value
-          job_name=$(echo "$job_info" | jq -r '.name') # Extract the job name
 
           echo "Job: $job_info"
           echo "Checking job: $job_name"

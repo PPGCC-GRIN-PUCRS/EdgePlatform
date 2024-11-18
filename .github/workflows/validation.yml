@@ -73,12 +73,13 @@ jobs:
             #   break
             # fi
 
+            echo "Job: $job_info"
+            echo "Checking job: $job_name"
+            echo "Job conclusion: $job_conclusion"
+            echo "------"
+
             sleep 10
           done
-
-          echo "Job: $job_info"
-          echo "Checking job: $job_name"
-          echo "Job conclusion: $job_conclusion"
 
       # - name: Re-run health check if database succeeds
       #   if: ${{ inputs.DATABASE_RESULT == 'success' }}

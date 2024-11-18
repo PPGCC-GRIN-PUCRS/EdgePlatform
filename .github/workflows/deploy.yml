@@ -3,6 +3,16 @@ name: Build docker image as artifact
 on:
   workflow_call:
     inputs:
+      CONTAINER_NAME:
+        type: string
+        required: true
+        description: "Desired name to be set at containar that is being deployed"
+      SERVICE_NAME:
+        type: string
+        required: true
+        description: "Docker service to be stoped and removed previous new container deployment"
+
+      # <optional>
       manual:
         type: boolean
         default: false
@@ -13,14 +23,6 @@ on:
         required: false
         default: "./cloud.key"
         description: "Key file name (including path, such as './') and file extension (file.key / file.pem)"
-      CONTAINER_NAME:
-        type: string
-        required: true
-        description: "Desired name to be set at containar that is being deployed"
-      SERVICE_NAME:
-        type: string
-        required: true
-        description: "Docker service to be stoped and removed previous new container deployment"
 
     secrets:
       ENV_FILE:
@@ -36,7 +38,13 @@ on:
         required: true
         description: "Cloud address host (able to accept ssh) being IPv4 or DNS."
 
-  # MISSING DATABASE BACKUP
+      # <optional>
+      MANUAL_APPROVE_REQUESTOR_ID:
+        required: false
+        description: "Cloud address host (able to accept ssh) being IPv4 or DNS."
+      MANUAL_APPROVE_REQUESTOR_SECRET:
+        required: false
+        description: "Cloud address host (able to accept ssh) being IPv4 or DNS."
 
 jobs:
   deploy:
@@ -45,8 +53,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Add server public key
+      - name: Request manual approval
         uses: ./.github/actions/manual-approval
+        if: ${{ inputs.manual }}
         with:
           APP_ID: ${{ secrets.MANUAL_APPROVE_REQUESTOR_ID }}
           APP_PRIVATE_KEY: ${{ secrets.MANUAL_APPROVE_REQUESTOR_SECRET }}

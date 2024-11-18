@@ -36,33 +36,46 @@ jobs:
       DOCKER_REGISTRY_USERNAME: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
       DOCKER_REGISTRY_PASSWORD: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
 
-  database-availability:
+  database-health:
     needs: publish
-    runs-on: ubuntu-latest
-    steps:
-      - name: solve
-        run: echo "ab"
+    uses: ./.github/workflows/validation.yml
+    with:
+      CONTAINER_NAME: ${{ vars.API_CONTAINER_NAME }}
+    secrets:
+      CLOUD_USER: ${{ secrets.CLOUD_USER }}
+      CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
+      CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
 
-  database-deploy:
+  database:
     needs: publish
-    runs-on: ubuntu-latest
-    steps:
-      - name: solve
-        run: echo "ab"
+    uses: ./.github/workflows/deploy.yml
+    with:
+      manual: true
+      SERVICE_NAME: ${{ vars.API_SERVICE_NAME }}
+      CONTAINER_NAME: ${{ vars.API_CONTAINER_NAME }}
+    secrets:
+      ENV_FILE: ${{ secrets.API_ENV_FILE }}
+      CLOUD_USER: ${{ secrets.CLOUD_USER }}
+      CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
+      CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
+
+    # needs: publish
+    # runs-on: ubuntu-latest
+    # steps:
+    #   - name: solve
+    #     run: echo "ab"
 
   backend:
-    if: needs.database-availability.result == 'success' || needs.database-deploy.result == 'success'
-    needs: [database-availability, database-deploy]
-    runs-on: ubuntu-latest
-    steps:
-      - name: deploy
-        uses: ./.github/workflows/deploy.yml
-        with:
-          SERVICE_NAME: ${{ vars.API_SERVICE_NAME }}
-          CONTAINER_NAME: ${{ vars.API_CONTAINER_NAME }}
-          CLOUD_USER: ${{ secrets.CLOUD_USER }}
-          CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
-          CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
+    if: needs.database-health.result == 'success' || needs.database.result == 'success'
+    needs: [database-health, database]
+    uses: ./.github/workflows/deploy.yml
+    with:
+      SERVICE_NAME: ${{ vars.API_SERVICE_NAME }}
+      CONTAINER_NAME: ${{ vars.API_CONTAINER_NAME }}
+    secrets:
+      CLOUD_USER: ${{ secrets.CLOUD_USER }}
+      CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
+      CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
 
   cleanup:
     runs-on: ubuntu-latest
@@ -74,5 +87,10 @@ jobs:
 
       - name: Remove sensitive files
         run: |
+          # while IFS='' read -r line || [ -n "$line" ]
+          # do
+          #   key="${line%%=*}"
+          #   printf '%s\n' "$key"
+          # done < .env
           rm -f ${{ env.key_file }}
           rm -f ./.env

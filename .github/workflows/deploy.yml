@@ -3,6 +3,11 @@ name: Build docker image as artifact
 on:
   workflow_call:
     inputs:
+      manual:
+        type: boolean
+        default: false
+        required: false
+        description: "If manual input is set to true, this workflow will only continue when te owner approves the opened issue"
       key_file:
         type: string
         required: false
@@ -18,6 +23,9 @@ on:
         description: "Docker service to be stoped and removed previous new container deployment"
 
     secrets:
+      ENV_FILE:
+        required: false
+        description: "Secured application environment variables file"
       CLOUD_RSA_KEY:
         required: true
         description: "Username able to login into image registry account"
@@ -36,6 +44,17 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: manual-aproval
+        if: ${{ inputs.manual }}
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ secrets.GITHUB_TOKEN }}
+          approvers: GRIN
+          minimum-approvals: 1
+          issue-title: "Deploying v1.3.5 to prod from staging"
+          issue-body: "Please approve or deny the deployment of version v1.3.5."
+          exclude-workflow-initiator-as-approver: false
+
       - name: Retrieve docker compose file
         uses: actions/checkout@v4
 
@@ -81,7 +100,16 @@ jobs:
         run: |
           ssh -t -o StrictHostKeyChecking=no -i "${{ inputs.key_file }}" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
             sudo -i
+
+            if [[ -z "${{ secrets.ENV_FILE }}" ]]; then
+              echo "Not injecting env variables"
+            else
+              echo "${{ secrets.ENV_FILE }}" > ./.env
+              chmod 600 ./.env && set -a
+              source ./.env
+            fi
+
             cd /home/${{ secrets.CLOUD_USER }}
             export CONTAINER_NAME=${{ inputs.CONTAINER_NAME}}
-            docker-compose up -d ${{ inputs.SERVICE_NAME  }} --force-recreate --remove-orphans
+            docker-compose up -d ${{ inputs.SERVICE_NAME }} --force-recreate --remove-orphans
           EOF

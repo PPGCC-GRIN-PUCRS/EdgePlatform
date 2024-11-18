@@ -65,7 +65,8 @@ jobs:
         run: |
           echo $(gh run view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.name=="database").conclusion')
           echo "Waiting for database job to complete..."
-          while [[ "$(gh run view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.name==\"database\").conclusion')" == "null" ]]; do
+          while [[ "$(gh run view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.name=="database").conclusion')" == "null" ]]; do
+            echo $(gh run view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.name=="database")')
             sleep 10
           done
 

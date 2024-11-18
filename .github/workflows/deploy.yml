@@ -36,14 +36,15 @@ on:
         required: true
         description: "Cloud address host (able to accept ssh) being IPv4 or DNS."
 
-  # MISSING DATABASE VALIDATION
   # MISSING DATABASE BACKUP
-  # MISSING MANUAL TRIGGER
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Add server public key
         uses: ./.github/actions/manual-approval
         with:

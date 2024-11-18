@@ -1,4 +1,4 @@
-# .github/actions/add-server-key/action.yml
+# .github/actions/cloud-keys/action.yml
 name: "Add Server Public Key"
 description: "Reusable step to add server public key"
 

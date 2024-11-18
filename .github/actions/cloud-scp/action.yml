@@ -1,4 +1,4 @@
-# .github/actions/add-server-key/action.yml
+# .github/actions/cloud-scp/action.yml
 name: "Stop and remove docker container"
 description: "Reusable step to stop and remove a docker container"
 

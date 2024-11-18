@@ -1,4 +1,4 @@
-# .github/actions/add-server-key/action.yml
+# .github/actions/cloud-validation-keys/action.yml
 name: "Validate RSA Key required presence"
 description: "Verify cloud RSA key requirement"
 

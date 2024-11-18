@@ -25,9 +25,12 @@ on:
         description: "Cloud address host (able to accept ssh) being IPv4 or DNS."
 
 jobs:
-  deploy:
+  observe:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Add server public key
         uses: ./.github/actions/cloud-keys
         with:

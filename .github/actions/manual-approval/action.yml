@@ -1,3 +1,4 @@
+# .github/actions/manual-approval/action.yml
 name: "Manual approval"
 description: "Rise issue requesting manual approval to continue"
 

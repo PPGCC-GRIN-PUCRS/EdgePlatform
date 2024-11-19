@@ -55,8 +55,9 @@ jobs:
 
       - name: Request manual approval
         uses: ./.github/actions/manual-approval
-        timeout-minutes: 5
         if: ${{ inputs.manual }}
+        continue-on-error: true
+        timeout-minutes: 5
         with:
           APP_ID: ${{ secrets.MANUAL_APPROVE_REQUESTOR_ID }}
           APP_PRIVATE_KEY: ${{ secrets.MANUAL_APPROVE_REQUESTOR_SECRET }}
@@ -97,7 +98,7 @@ jobs:
         with:
           CLOUD_USER: ${{ secrets.CLOUD_USER }}
           CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
-          API_CONTAINER_NAME: ${{ inputs.CONTAINER_NAME }}
+          CONTAINER_NAME: ${{ inputs.CONTAINER_NAME }}
 
       - name: Deploy
         run: |

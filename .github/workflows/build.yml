@@ -28,10 +28,10 @@ jobs:
 
       - name: Extract metadata
         id: meta
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        uses: docker/metadata-action@v5.6.0
         with:
           images: |
-            ${{ inputs.IMAGE_ARTIFACT}}
+            ${{ inputs.IMAGE_ARTIFACT }}
             ${{ inputs.REGISTRY_IMAGE }}
             ${{ inputs.REGISTRY_IMAGE }}:${{ github.sha }}
 

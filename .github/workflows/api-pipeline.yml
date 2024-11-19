@@ -3,7 +3,6 @@ name: API CI-CD
 # Trigger
 # Trigger
 # Trigger
-# Trigger
 
 on:
   push:

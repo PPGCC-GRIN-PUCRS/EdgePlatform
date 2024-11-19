@@ -70,14 +70,17 @@ jobs:
             deploy_job=$(echo "$job" | jq '.steps[] | select(.name=="Deploy")')
             deploy_job_status=$(echo "$deploy_job" | jq '.conclusion')
 
-            echo "$job_status"
-            if [[ "${job_status}" == "cancelled" ]]; then
-              echo "EXIT"
+            echo "Job Status: $job_status"
+
+            if [[ "$job_status" == "cancelled" ]]; then
+              echo "Job was cancelled. Exiting..."
+              exit 1
+            fi
+
+            if [[ "$job_status" == "finished" ]]; then
+              echo "Job finished successfully!"
+              exit 0
             fi
 
             sleep 10
           done
-
-      # - name: Re-run health check if database succeeds
-      #   if: ${{ inputs.DATABASE_RESULT == 'success' }}
-      #   run: echo "Re-running health check after database success!"

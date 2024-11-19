@@ -71,7 +71,7 @@ jobs:
             deploy_job_status=$(echo "$deploy_job" | jq '.conclusion')
 
             echo "$job_status"
-            if [[ "$job_status" == "cancelled" || "$job_status" == "finished" ]]; then
+            if [[ "${job_status}" == "cancelled" ]]; then
               echo "EXIT"
             fi
 

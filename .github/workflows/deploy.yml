@@ -56,21 +56,18 @@ jobs:
       - name: Request manual approval
         id: request-approval
         uses: ./.github/actions/manual-approval
-        continue-on-error: true
         timeout-minutes: 5
         with:
           APP_ID: ${{ secrets.MANUAL_APPROVE_REQUESTOR_ID }}
           APP_PRIVATE_KEY: ${{ secrets.MANUAL_APPROVE_REQUESTOR_SECRET }}
 
       - name: Add server public key
-        if: ${{ inputs.manual == false || (inputs.manual && steps.request-approval.outcome != 'failure') }}
         id: add_keys
         uses: ./.github/actions/cloud-keys
         with:
           CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
 
       - name: Inject compose file to server
-        if: ${{ inputs.manual == false || (inputs.manual && steps.request-approval.outcome != 'failure') }}
         uses: ./.github/actions/cloud-scp
         with:
           local_path: ./api/docker-compose.yml
@@ -79,7 +76,6 @@ jobs:
           CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
 
       - name: Prepare database and inject variables
-        if: ${{ inputs.manual == false || (inputs.manual && steps.request-approval.outcome != 'failure') }}
         run: |
           ssh -t -o StrictHostKeyChecking=no -i "${{ inputs.key_file }}" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
             sudo -i
@@ -98,7 +94,6 @@ jobs:
           EOF
 
       - name: Remove previous service version
-        if: ${{ inputs.manual == false || (inputs.manual && steps.request-approval.outcome != 'failure') }}
         uses: ./.github/actions/docker-stop-rm
         with:
           CLOUD_USER: ${{ secrets.CLOUD_USER }}
@@ -106,7 +101,6 @@ jobs:
           CONTAINER_NAME: ${{ inputs.CONTAINER_NAME }}
 
       - name: Deploy
-        if: ${{ inputs.manual == false || (inputs.manual && steps.request-approval.outcome != 'failure') }}
         run: |
           ssh -t -o StrictHostKeyChecking=no -i "${{ inputs.key_file }}" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
             sudo -i

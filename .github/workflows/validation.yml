@@ -1,6 +1,13 @@
 name: Build docker image as artifact
 
 on:
+  workflow_dispatch:
+    inputs:
+      task:
+        required: true
+        default: "observe"
+        description: "Task to execute"
+
   workflow_call:
     inputs:
       key_file:
@@ -52,18 +59,26 @@ jobs:
 
             if docker ps --filter "name=${{ inputs.CONTAINER_NAME }}" --format "{{.Names}}" | grep -w "${{ inputs.CONTAINER_NAME }}"; then
               echo "${GREEN}${{ inputs.CONTAINER_NAME }} is currently running.${CLEAR}"
+              echo "status=healthy" >> $GITHUB_OUTPUT
               exit 0;
             else
               echo -e "${RED}${{ inputs.CONTAINER_NAME }} is not running or not healthy.${CLEAR}"
+              echo "status=unhealthy" >> $GITHUB_OUTPUT
               exit 1;
             fi
           EOF
 
+  double-check:
+    # if: ${{ github.event.inputs.task != 'observe' }}
+    runs-on: ubuntu-latest
+    steps:
       - name: Wait for potential database success
         if: always()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          echo Dispatch event: ${{ github.event.inputs.task }}
+
           echo "Waiting for database deploy job to complete..."
           while true; do
             job=$(gh run view ${{ github.run_id }} --json jobs | jq '.jobs[] | select(.name=="database / deploy")')
@@ -72,18 +87,19 @@ jobs:
             deploy_job_status=$(echo "$deploy_job" | jq -r '.conclusion')
 
             if [[ "$job_status" == "cancelled" || "$job_status" == "failure" ]]; then
-              echo "previous: ${{ toJson(steps.healthcheck.outputs) }}"
-              echo "Job: $deploy_job"
-              echo "DEPLOY STATUS: $deploy_job_status"
-              if [[ "$deploy_job_status" == "skipped" && ${{ steps.healthcheck.outputs }} == '0' ]]; then
+              if [[ "$deploy_job_status" == "skipped" && ${{ steps.healthcheck.outputs.status }} == 'healthy' ]]; then
                 exit 0
               fi
               exit 1
             fi
 
-            if [[ "$job_status" == "success" ]]; then
-              echo "Job finished successfully!"
-              exit 0
+            echo "Deplopy status: $deploy_job_status"
+            if [[ "$deploy_job_status" == "success" ]]; then
+              curl -X POST \
+                -H "Authorization: Bearer ${{ env.GH_TOKEN }}" \
+                -H "Accept: application/vnd.github+json" \
+                https://api.github.com/repos/${{ github.repository }}/actions/workflows/${{ github.run_id }}/dispatches \
+                -d '{"ref":"release", "inputs":{"task":"observe"}}'
             fi
 
             sleep 10

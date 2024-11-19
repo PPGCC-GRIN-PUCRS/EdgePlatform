@@ -72,11 +72,11 @@ jobs:
 
             echo "Job Status: $job_status"
 
-            if [[ "$job_status" == "cancelled" ]]; then
+            if [[ "$job_status" == "cancelled" || "$job_status" == "failure"]]; then
               echo "Job was cancelled. Exiting..."
               exit 1
             else
-              echo "Error?"
+              echo "Error"
             fi
 
             if [[ "$job_status" == "success" ]]; then

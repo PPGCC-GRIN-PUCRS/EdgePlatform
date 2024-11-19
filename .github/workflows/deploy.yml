@@ -54,6 +54,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Request manual approval
+        id: request-approval
         uses: ./.github/actions/manual-approval
         if: ${{ inputs.manual }}
         continue-on-error: true
@@ -63,6 +64,8 @@ jobs:
           APP_PRIVATE_KEY: ${{ secrets.MANUAL_APPROVE_REQUESTOR_SECRET }}
 
       - name: Add server public key
+        id: add_keys
+        if: ${{ inputs.manual == false || (inputs.manual && steps.request-approval.outcome != 'failure') }}
         uses: ./.github/actions/cloud-keys
         with:
           CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}

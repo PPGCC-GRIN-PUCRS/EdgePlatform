@@ -1,11 +1,8 @@
-name: API CI-CD
+name: Database CI-CD
 
 on:
-  push:
-    branches: ["release"]
-    paths:
-      - ".github/workflows/api-pipeline.yml"
-      - "api/**"
+  schedule:
+    - cron: "0 0 * * 0" # This runs every Sunday at midnight UTC
 
 env:
   key_file: ./cloud.key

@@ -45,6 +45,7 @@ jobs:
           CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
 
       - name: Validate container existance
+        id: healthcheck
         run: |
           ssh -t -o StrictHostKeyChecking=no -i "${{ inputs.key_file }}" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
             sudo -i
@@ -63,7 +64,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Waiting for database job to complete..."
+          echo "Waiting for database deploy job to complete..."
           while true; do
             job=$(gh run view ${{ github.run_id }} --json jobs | jq '.jobs[] | select(.name=="database / deploy")')
             job_status=$(echo "$job" | jq -r '.conclusion')
@@ -71,10 +72,11 @@ jobs:
             deploy_job_status=$(echo "$deploy_job" | jq -r '.conclusion')
 
             if [[ "$job_status" == "cancelled" || "$job_status" == "failure" ]]; then
+              echo "previous: ${{ steps.healthcheck.outputs }}"
               echo "Job: $deploy_job"
               echo "DEPLOY STATUS: $deploy_job_status"
-              if [[ "$deploy_job_status" == "skypped" ]]; then
-                echo "Job was cancelled. Exiting..."
+              if [[ "$deploy_job_status" == "skipped" && ${{ steps.healthcheck.outputs }} == '0' ]]; then
+                exit 0
               fi
               exit 1
             fi

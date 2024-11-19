@@ -3,9 +3,9 @@ name: Build docker image as artifact
 on:
   workflow_dispatch:
     inputs:
-      task:
+      status:
         required: true
-        default: "observe"
+        default: "deployed"
         description: "If value set to observe, the double-check stage will not be triggered again."
 
   workflow_call:
@@ -70,12 +70,12 @@ jobs:
 
       - name: Wait for potential database success
         id: double-check
-        if: always() && ${{ github.event.inputs.task != 'observe' }}
+        if: always() && ${{ github.event.inputs.status != 'deployed' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TIMEOUT: 360 # 6 MINUTES
         run: |
-          echo "Dispatch event: ${{ github.event.inputs.task }}"
+          echo "Dispatch event: ${{ github.event.inputs.status }}"
           echo "Waiting for database deploy job to complete..."
           start_time=$(date +%s)
           while true; do
@@ -93,21 +93,20 @@ jobs:
             deploy_job_status=$(echo "$deploy_job" | jq -r '.conclusion')
 
             if [[ "$job_status" == "cancelled" || "$job_status" == "failure" ]]; then
-              echo "Previous status: ${{ toJson(steps.healthcheck.outputs.status) }}"
+              echo "\033[33mPrevious status: ${{ toJson(steps.healthcheck.outputs.status) }}\033[0m"
               if [[ "$deploy_job_status" == "skipped" ]]; then
                 exit 0
               fi
               exit 1
             fi
 
-            echo "Deplopy status: $deploy_job_status"
             if [[ "$deploy_job_status" == "success" ]]; then
-              echo "Trigger dispatch"
-              # curl -X POST \
-              #   -H "Authorization: Bearer ${{ env.GH_TOKEN }}" \
-              #   -H "Accept: application/vnd.github+json" \
-              #   https://api.github.com/repos/${{ github.repository }}/actions/workflows/${{ github.run_id }}/dispatches \
-              #   -d '{"ref":"release", "inputs":{"task":"observe"}}'
+              echo -e "\033[32mTrigger dispatch\033[0m"
+              curl -X POST \
+                -H "Authorization: Bearer ${{ env.GH_TOKEN }}" \
+                -H "Accept: application/vnd.github+json" \
+                https://api.github.com/repos/${{ github.repository }}/actions/workflows/${{ github.run_id }}/dispatches \
+                -d '{"ref":"release", "inputs":{"task":"deployed"}}'
               exit 0
             fi
 

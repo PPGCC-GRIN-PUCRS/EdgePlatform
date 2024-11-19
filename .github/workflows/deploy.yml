@@ -54,6 +54,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Request manual approval
+        if: ${{ inputs.manual }}
         id: request-approval
         uses: ./.github/actions/manual-approval
         timeout-minutes: 5

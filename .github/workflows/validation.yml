@@ -73,7 +73,7 @@ jobs:
         if: always() && ${{ github.event.inputs.task != 'observe' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TIMEOUT: 300 # 5 MINUTES
+          TIMEOUT: 360 # 6 MINUTES
         run: |
           echo "Dispatch event: ${{ github.event.inputs.task }}"
           echo "Waiting for database deploy job to complete..."
@@ -93,7 +93,7 @@ jobs:
             deploy_job_status=$(echo "$deploy_job" | jq -r '.conclusion')
 
             if [[ "$job_status" == "cancelled" || "$job_status" == "failure" ]]; then
-              echo "Previous status: ${{ steps.healthcheck.outputs.status }}"
+              echo "Previous status: ${{ toJson(steps.healthcheck.outputs.status) }}"
               if [[ "$deploy_job_status" == "skipped" ]]; then
                 exit 0
               fi
@@ -102,6 +102,7 @@ jobs:
 
             echo "Deplopy status: $deploy_job_status"
             if [[ "$deploy_job_status" == "success" ]]; then
+              echo "Trigger dispatch"
               # curl -X POST \
               #   -H "Authorization: Bearer ${{ env.GH_TOKEN }}" \
               #   -H "Accept: application/vnd.github+json" \

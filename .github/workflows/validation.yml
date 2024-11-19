@@ -68,15 +68,15 @@ jobs:
             job=$(gh run view ${{ github.run_id }} --json jobs | jq '.jobs[] | select(.name=="database / deploy")')
             job_status=$(echo "$job" | jq -r '.conclusion')
             deploy_job=$(echo "$job" | jq '.steps[] | select(.name=="Deploy")')
-            deploy_job_status=$(echo "$deploy_job" | jq '.conclusion')
-
-            echo "Job Status: $job_status"
+            deploy_job_status=$(echo "$deploy_job" | jq -r '.conclusion')
 
             if [[ "$job_status" == "cancelled" || "$job_status" == "failure" ]]; then
-              echo "Job was cancelled. Exiting..."
+              echo "Job: $deploy_job"
+              echo "DEPLOY STATUS: $deploy_job_status"
+              if [[ "$deploy_job_status" == "skypped" ]]; then
+                echo "Job was cancelled. Exiting..."
+              fi
               exit 1
-            else
-              echo "Error"
             fi
 
             if [[ "$job_status" == "success" ]]; then

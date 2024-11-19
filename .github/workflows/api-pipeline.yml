@@ -117,4 +117,8 @@ jobs:
           #   printf '%s\n' "$key"
           # done < .env
           rm -rf ${{ env.key_file }}
-          rm -rf ./.env
+          rm -rf ./*.pem
+          rm -rf ./*.key
+          rm -rf ./.*env
+          echo "Env:"
+          echo "$GITHUB_OUTPUT"

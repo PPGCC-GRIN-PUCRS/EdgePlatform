@@ -21,6 +21,12 @@ on:
         description: "Desired name to be set at containar that is being deployed"
 
     secrets:
+      APP_ID:
+        required: true
+        description: "App eligible to create token to trigger dispatches"
+      APP_PRIVATE_KEY:
+        required: true
+        description: "App secret eligible to create token to trigger dispatches"
       CLOUD_RSA_KEY:
         required: true
         description: "Username able to login into image registry account"
@@ -70,9 +76,17 @@ jobs:
             fi
           EOF
 
-      - name: Wait for potential database success
+      - name: Generate agent access token
+        id: generate_token
+        uses: tibdex/github-app-token@v1
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Wait for potential database deploy
         id: double-check
         if: always() && ${{ github.event.inputs.status != 'deployed' }}
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TIMEOUT: 360 # 6 MINUTES
@@ -105,11 +119,11 @@ jobs:
             if [[ "$deploy_job_status" == "success" ]]; then
               echo -e "\033[32mTrigger dispatch\033[0m"
               api_call=$(curl -X POST \
-                          -H "Authorization: token ${{ env.GH_TOKEN }}" \
+                          -H "Authorization: Bearer ${{ steps.generate_token.outputs.token }}" \
                           -H "Accept: application/vnd.github+json" \
                           https://api.github.com/repos/${{ github.repository }}/actions/workflows/${{ github.run_id }}/dispatches \
                           -d '{"ref":"release", "inputs":{"task":"deployed"}}')
-              echo "\033[33m$api_call\033[0m"
+              echo -e "\033[33m$api_call\033[0m"
               exit 0
             fi
 

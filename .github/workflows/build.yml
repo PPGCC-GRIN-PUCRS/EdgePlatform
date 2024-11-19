@@ -1,4 +1,4 @@
-name: Build docker image as artifact
+name: Build docker workflow
 
 on:
   workflow_call:

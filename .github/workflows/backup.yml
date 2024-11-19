@@ -1,4 +1,4 @@
-name: Backup docker images
+name: Backup workflow
 
 on:
   workflow_call:

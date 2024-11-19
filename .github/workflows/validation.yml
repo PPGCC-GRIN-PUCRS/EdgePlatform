@@ -74,8 +74,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo Dispatch event: ${{ github.event.inputs.task }}
-
+          echo "Dispatch event: ${{ github.event.inputs.task }}"
           echo "Waiting for database deploy job to complete..."
           while true; do
             job=$(gh run view ${{ github.run_id }} --json jobs | jq '.jobs[] | select(.name=="database / deploy")')
@@ -84,7 +83,7 @@ jobs:
             deploy_job_status=$(echo "$deploy_job" | jq -r '.conclusion')
 
             if [[ "$job_status" == "cancelled" || "$job_status" == "failure" ]]; then
-              if [[ "$deploy_job_status" == "skipped" && ${{ steps.healthcheck.outputs.status }} == 'healthy' ]]; then
+              if [[ "$deploy_job_status" == "skipped" && ${{ steps.healthcheck.outputs.status }} == "healthy" ]]; then
                 exit 0
               fi
               exit 1
@@ -92,11 +91,11 @@ jobs:
 
             echo "Deplopy status: $deploy_job_status"
             if [[ "$deploy_job_status" == "success" ]]; then
-              curl -X POST \
-                -H "Authorization: Bearer ${{ env.GH_TOKEN }}" \
-                -H "Accept: application/vnd.github+json" \
-                https://api.github.com/repos/${{ github.repository }}/actions/workflows/${{ github.run_id }}/dispatches \
-                -d '{"ref":"release", "inputs":{"task":"observe"}}'
+              # curl -X POST \
+              #   -H "Authorization: Bearer ${{ env.GH_TOKEN }}" \
+              #   -H "Accept: application/vnd.github+json" \
+              #   https://api.github.com/repos/${{ github.repository }}/actions/workflows/${{ github.run_id }}/dispatches \
+              #   -d '{"ref":"release", "inputs":{"task":"observe"}}'
             fi
 
             sleep 10

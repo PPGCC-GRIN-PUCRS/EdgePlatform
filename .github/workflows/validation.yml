@@ -77,7 +77,7 @@ jobs:
               exit 1
             fi
 
-            if [[ "$job_status" == "finished" ]]; then
+            if [[ "$job_status" == "success" ]]; then
               echo "Job finished successfully!"
               exit 0
             fi

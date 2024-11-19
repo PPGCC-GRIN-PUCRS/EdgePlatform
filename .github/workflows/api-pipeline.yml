@@ -68,11 +68,12 @@ jobs:
     needs: [database]
     uses: ./.github/workflows/backup.yml
     with:
+      backup: restore
       SERVICE_NAME: ${{ vars.API_SERVICE_NAME }}
       CONTAINER_NAME: ${{ vars.API_CONTAINER_NAME }}
     secrets:
       ENV_FILE: ${{ secrets.DB_ENV_FILE }}
-      BUCKET_TOKEN: ${{ secrets.BUCKET_TOKEN}}
+      BUCKET_TOKEN: ${{ secrets.BUCKET_TOKEN }}
       CLOUD_USER: ${{ secrets.CLOUD_USER }}
       CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
       CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
@@ -90,7 +91,7 @@ jobs:
       CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
 
   cleanup:
-    needs: [database-snapshot, backend]
+    needs: [database-backup, backend]
     if: always()
     runs-on: ubuntu-latest
     steps:

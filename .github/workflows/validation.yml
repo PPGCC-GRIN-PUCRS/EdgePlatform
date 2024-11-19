@@ -6,7 +6,7 @@ on:
       task:
         required: true
         default: "observe"
-        description: "Task to execute"
+        description: "If value set to observe, the double-check stage will not be triggered again."
 
   workflow_call:
     inputs:
@@ -68,12 +68,9 @@ jobs:
             fi
           EOF
 
-  double-check:
-    # if: ${{ github.event.inputs.task != 'observe' }}
-    runs-on: ubuntu-latest
-    steps:
       - name: Wait for potential database success
-        if: always()
+        id: double-check
+        if: always() && ${{ github.event.inputs.task != 'observe' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

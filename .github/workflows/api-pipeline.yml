@@ -1,7 +1,5 @@
 name: API CI-CD
 
-#trigger
-
 on:
   push:
     branches: ["release"]
@@ -95,7 +93,7 @@ jobs:
 
       - name: Move file to project folder to keep history
         run: |
-          ssh -o StrictHostKeyChecking=no -i "${{ env.key_file }}" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} sudo mv /home/${{ secrets.CLOUD_USER }}/docker-compose.yml ${{ vars.PROJECT_FOLDER }}/docker-compose-api.yml
+          ssh -o StrictHostKeyChecking=no -i "${{ env.key_file }}" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} sudo mv /home/${{ secrets.CLOUD_USER }}/docker-compose.yml ${{ vars.PROJECT_FOLDER }}/docker-compose-api.yml || true
 
       - name: Remove sensitive files
         run: |

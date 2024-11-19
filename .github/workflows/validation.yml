@@ -82,8 +82,7 @@ jobs:
             current_time=$(date +%s)
             elapsed=$(( current_time - start_time ))
 
-            if [[ $elapsed -ge $timeout ]]; then
-                echo "Elapsed time: $elapsed"
+            if [[ $elapsed -ge ${{ env.TIMEOUT }} ]]; then
                 echo -e "\033[31mTimeout waiting for database deploy job to complete.\033[0m"
                 exit 1
             fi

@@ -41,10 +41,10 @@ on:
       # <optional>
       MANUAL_APPROVE_REQUESTOR_ID:
         required: false
-        description: "Cloud address host (able to accept ssh) being IPv4 or DNS."
+        description: "App eligible to create token to rise manual request issue"
       MANUAL_APPROVE_REQUESTOR_SECRET:
         required: false
-        description: "Cloud address host (able to accept ssh) being IPv4 or DNS."
+        description: "App secret eligible to create token to trigger dispatches"
 
 jobs:
   deploy:

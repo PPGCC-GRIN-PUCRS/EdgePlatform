@@ -70,8 +70,8 @@ jobs:
             deploy_job=$(echo "$job" | jq '.steps[] | select(.name=="Deploy")')
             deploy_job_status=$(echo "$deploy_job" | jq '.conclusion')
 
-            if [[ -n "${job_status:-}" ]]; then
-              echo "$job_status"
+            echo "$job_status"
+            if [[ "${job_status:-}" = "cancelled" || "${job_status:-}" = "finished" ]]; then
               echo "EXIT"
             fi
 

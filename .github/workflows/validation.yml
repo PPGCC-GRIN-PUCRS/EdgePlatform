@@ -75,6 +75,8 @@ jobs:
             if [[ "$job_status" == "cancelled" ]]; then
               echo "Job was cancelled. Exiting..."
               exit 1
+            else
+              echo "Error?"
             fi
 
             if [[ "$job_status" == "success" ]]; then

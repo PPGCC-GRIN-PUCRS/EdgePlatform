@@ -70,12 +70,11 @@ jobs:
             deploy_job=$(echo "$job" | jq '.steps[] | select(.name=="Deploy")')
             deploy_job_status=$(echo "$deploy_job" | jq '.conclusion')
 
-            echo "$job_status"
-            echo "$deploy_job"
-            echo "------"
-
-            if [[ ! -z "${job_status}" ]]; then
+            if [[ -n "${job_status}" ]]; then
               echo "$job_status"
+              echo "$deploy_job"
+              echo "$deploy_job_status"
+              echo "------"
               echo "EXIT"
             fi
             sleep 10

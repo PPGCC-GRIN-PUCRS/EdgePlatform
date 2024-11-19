@@ -1,13 +1,6 @@
 name: Build docker image as artifact
 
 on:
-  workflow_dispatch:
-    inputs:
-      status:
-        required: true
-        default: "deployed"
-        description: "If value set to observe, the double-check stage will not be triggered again."
-
   workflow_call:
     inputs:
       key_file:
@@ -86,12 +79,10 @@ jobs:
       - name: Wait for potential database deploy
         id: double-check
         if: always() && ${{ github.event.inputs.status != 'deployed' }}
-        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TIMEOUT: 360 # 6 MINUTES
         run: |
-          echo "Dispatch event: ${{ github.event.inputs.status }}"
           echo "Waiting for database deploy job to complete..."
           start_time=$(date +%s)
           while true; do
@@ -117,21 +108,7 @@ jobs:
             fi
 
             if [[ "$deploy_job_status" == "success" ]]; then
-              echo -e "\033[32mTrigger dispatch\033[0m"
-              api_call=$(curl -X POST \
-                            -H "Authorization: token ${{ steps.generate_token.outputs.token }}" \
-                            -H "Accept: application/vnd.github+json" \
-                            -d '{"ref":"release", "inputs":{"status":"deployed"}}' \
-                            https://api.github.com/repos/${{ github.repository }}/actions/workflows/${{ github.run_id }}/dispatches)
-              echo -e "\033[33m$api_call\033[0m"
-
-              api_call_status=$(echo "$api_call" | jq -r '.status')
-              if [[ "$api_call_status" = "204" ]]; then
                 exit 0
-              fi
-              echo -e "\033[33mError $api_call_status calling dispatch.\033[0m"
-              echo -e "\033[33m$api_call\033[0m"
-              exit 1
             fi
 
             sleep 10

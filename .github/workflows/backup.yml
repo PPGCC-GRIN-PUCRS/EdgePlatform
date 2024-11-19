@@ -2,11 +2,52 @@ name: Backup workflow
 
 on:
   workflow_call:
+    inputs:
+      backup:
+        type: string
+        required: true
+        description: "Defines if it will dump or restore backup."
+      bucket_api:
+        type: string
+        required: false
+        default: https://utfs.io/f/TmsfyMJVKEcgE2oH1cXbfASTxr9wyRqhIedaV5Ni2GECgXP7
+      CONTAINER_NAME:
+        type: string
+        required: true
+        description: "Desired name to be set at containar that is being deployed"
+      SERVICE_NAME:
+        type: string
+        required: true
+        description: "Docker service to be stoped and removed previous new container deployment"
 
+    secrets:
+      ENV_FILE:
+        required: false
+        description: "Secured application environment variables file"
+      BUCKET_TOKEN:
+        required: true
+        description: "File bucket storage token to upload backup"
+      CLOUD_RSA_KEY:
+        required: true
+        description: "Username able to login into image registry account"
+      CLOUD_USER:
+        required: true
+        description: "Password able to login into image registry account"
+      CLOUD_ADDRESS:
+        required: true
+        description: "Cloud address host (able to accept ssh) being IPv4 or DNS."
 jobs:
-  backup:
+  restore:
     runs-on: ubuntu-latest
+    if: ${{ inputs.backup }} == "restore"
     steps:
-      - name: Sample
+      - name: restore
         run: |
-          echo "backup"
+          echo "Restore backup from bucket"
+
+  dump:
+    runs-on: ubuntu-latest
+    if: ${{ inputs.backup }} == "dump"
+    steps:
+      - name: upload
+        run: |

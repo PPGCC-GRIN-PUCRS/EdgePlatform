@@ -34,6 +34,8 @@ on:
 jobs:
   observe:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -102,11 +104,12 @@ jobs:
 
             if [[ "$deploy_job_status" == "success" ]]; then
               echo -e "\033[32mTrigger dispatch\033[0m"
-              curl -X POST \
-                -H "Authorization: Bearer ${{ env.GH_TOKEN }}" \
-                -H "Accept: application/vnd.github+json" \
-                https://api.github.com/repos/${{ github.repository }}/actions/workflows/${{ github.run_id }}/dispatches \
-                -d '{"ref":"release", "inputs":{"task":"deployed"}}'
+              api_call=$(curl -X POST \
+                          -H "Authorization: token ${{ env.GH_TOKEN }}" \
+                          -H "Accept: application/vnd.github+json" \
+                          https://api.github.com/repos/${{ github.repository }}/actions/workflows/${{ github.run_id }}/dispatches \
+                          -d '{"ref":"release", "inputs":{"task":"deployed"}}')
+              echo "\033[33m$api_call\033[0m"
               exit 0
             fi
 

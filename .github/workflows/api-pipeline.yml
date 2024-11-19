@@ -2,8 +2,6 @@ name: API CI-CD
 
 # Trigger
 
-# Trigger
-
 on:
   push:
     branches: ["release"]

@@ -69,19 +69,12 @@ jobs:
             fi
           EOF
 
-      - name: Generate agent access token
-        id: generate_token
-        uses: tibdex/github-app-token@v1
-        with:
-          app_id: ${{ secrets.APP_ID }}
-          private_key: ${{ secrets.APP_PRIVATE_KEY }}
-
       - name: Wait for potential database deploy
         id: double-check
         if: always() && ${{ github.event.inputs.status != 'deployed' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TIMEOUT: 360 # 6 MINUTES
+          TIMEOUT: 420 # 6 MINUTES
         run: |
           echo "Waiting for database deploy job to complete..."
           start_time=$(date +%s)
@@ -98,6 +91,10 @@ jobs:
             job_status=$(echo "$job" | jq -r '.conclusion')
             deploy_job=$(echo "$job" | jq '.steps[] | select(.name=="Deploy")')
             deploy_job_status=$(echo "$deploy_job" | jq -r '.conclusion')
+
+
+            echo "$job_status"
+            echo "$deploy_job_status"
 
             if [[ "$job_status" == "cancelled" || "$job_status" == "failure" ]]; then
               echo "\033[33mPrevious status: ${{ toJson(steps.healthcheck.outputs.status) }}\033[0m"

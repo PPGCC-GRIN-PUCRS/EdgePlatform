@@ -67,9 +67,9 @@ jobs:
         if: ${{ inputs.manual && steps.request-approval.outcome == 'failure' }}
         id: bypass
         run: |
-          echo -e "\033[33m--------\033[0m""
-          echo -e "\033[33m${{ inputs.CONTAINER_NAME }} not deployed.\033[0m""
-          echo -e "\033[33m--------\033[0m""
+          echo -e "\033[33m--------\033[0m"
+          echo -e "\033[33m${{ inputs.CONTAINER_NAME }} not deployed.\033[0m"
+          echo -e "\033[33m--------\033[0m"
           exit 0
 
       - name: Add server public key

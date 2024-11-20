@@ -93,8 +93,8 @@ jobs:
             deploy_job_status=$(echo "$deploy_job" | jq -r '.conclusion')
 
 
-            echo "$job_status"
-            echo "$deploy_job_status"
+            echo "job: $job_status"
+            echo "deploy: $deploy_job_status"
 
             if [[ "$job_status" == "cancelled" || "$job_status" == "failure" ]]; then
               echo "\033[33mPrevious status: ${{ toJson(steps.healthcheck.outputs.status) }}\033[0m"

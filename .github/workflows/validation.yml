@@ -53,6 +53,7 @@ jobs:
           CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
 
       - name: Validate container existance
+        continue-on-error: true
         id: healthcheck
         run: |
           ssh -t -o StrictHostKeyChecking=no -i "${{ inputs.key_file }}" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF

@@ -85,13 +85,10 @@ jobs:
                 exit 1
             fi
 
-            job_infos=$(gh run view ${{ github.run_id }} --json jobs | jq '
-              .jobs[]
-              | select(.name=="database / deploy")
-              | {job_status: .conclusion, deploy_status: (.steps[] | select(.name=="Deploy") | .conclusion)}
-            ')
-            deploy_job_status=$(echo "$job_infos" | jq -r '.[0].steps[0].conclusion')
-            job_status=$(echo "$job_infos" | jq -r '.[0].conclusion')
+            job=$(gh run view ${{ github.run_id }} --json jobs | jq '.jobs[] | select(.name=="database / deploy")')
+            deploy_job_status=$(echo "$job" | jq '.steps[] | select(.name=="Deploy") | jq -r '.conclusion')
+            job_status=$(echo "$job" | jq -r '.conclusion')
+
 
             if [[ "$job_status" != "" ]]; then
               echo -e "\033[33m${{ inputs.CONTAINER_NAME }} status on previous step: ${{ steps.healthcheck.outcome }}\033[0m"

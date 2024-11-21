@@ -93,14 +93,14 @@ jobs:
             deploy_job_status=$(echo "$deploy_job" | jq -r '.conclusion')
 
             echo "$job_status"
-            echo -e "\033[33mPrevious status: ${{ toJson(steps.healthcheck.outputs.status) }}\033[0m"
-            echo -e "\033[33mPrevious status: ${{ steps.healthcheck.outputs.status }}\033[0m"
+            echo -e "\033[33mPrevious status: ${{ toJson(steps.healthcheck.outcome) }}\033[0m"
+            echo -e "\033[33mPrevious status: ${{ steps.healthcheck.outcome }}\033[0m"
             echo "RAW"
             echo -e "\033[33mPrevious status: $deploy_job\033[0m"
-            echo -e "$deploy_job_status"
+            echo -e "Deploy status: $deploy_job_status"
 
 
-            if [[ "$job_status" == "123" ]]; then
+            if [[ "$job_status" != "" ]]; then
               if [[ "$deploy_job_status" == "skipped" ]]; then
                 exit 0
               fi

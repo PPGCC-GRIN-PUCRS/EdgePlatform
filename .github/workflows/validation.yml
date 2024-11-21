@@ -75,41 +75,37 @@ jobs:
         if: always() && ${{ github.event.inputs.status != 'deployed' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TIMEOUT: 420 # 6 MINUTES
+          TIMEOUT: 360 # 6 MINUTES
         run: |
           echo "Waiting for database deploy job to complete..."
           start_time=$(date +%s)
           while true; do
             current_time=$(date +%s)
             elapsed=$(( current_time - start_time ))
-
             if [[ $elapsed -ge ${{ env.TIMEOUT }} ]]; then
                 echo -e "\033[31mTimeout waiting for database deploy job to complete.\033[0m"
                 exit 1
             fi
 
-            job=$(gh run view ${{ github.run_id }} --json jobs | jq '.jobs[] | select(.name=="database / deploy")')
-            job_status=$(echo "$job" | jq -r '.conclusion')
-            deploy_job=$(echo "$job" | jq '.steps[] | select(.name=="Deploy")')
-            deploy_job_status=$(echo "$deploy_job" | jq -r '.conclusion')
-
-            echo "$job_status"
-            echo -e "\033[33mPrevious status: ${{ toJson(steps.healthcheck.outcome) }}\033[0m"
-            echo -e "\033[33mPrevious status: ${{ steps.healthcheck }}\033[0m"
-            echo "RAW"
-            echo -e "\033[33mPrevious status: $deploy_job\033[0m"
-            echo -e "Deploy status: $deploy_job_status"
-
+            job_infos=$(gh run view ${{ github.run_id }} --json jobs | jq '
+              .jobs[]
+              | select(.name=="database / deploy")
+              | {job_status: .conclusion, deploy_status: (.steps[] | select(.name=="Deploy") | .conclusion)}
+            ')
+            deploy_job_status=$(echo "$job_infos" | jq -r '.[0].steps[0].conclusion')
+            job_status=$(echo "$job_infos" | jq -r '.[0].conclusion')
 
             if [[ "$job_status" != "" ]]; then
-              if [[ "$deploy_job_status" == "skipped" ]]; then
+              echo -e "\033[33m${{ inputs.CONTAINER_NAME }} status on previous step: ${{ steps.healthcheck.outcome }}\033[0m"
+              if [[ "$deploy_job_status" == "skipped" && "$steps.healthcheck.outcome" == "success" ]]; then
                 exit 0
               fi
               exit 1
             fi
 
             if [[ "$deploy_job_status" == "success" ]]; then
-                exit 0
+              echo -e "\033[32mThe deploy job finished successfully.\033[0m"
+              exit 0
             fi
 
             sleep 10

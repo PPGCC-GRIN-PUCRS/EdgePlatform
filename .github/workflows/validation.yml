@@ -90,6 +90,10 @@ jobs:
             deploy_job=$(echo "$job" | jq '.steps[] | select(.name=="Deploy")')
             deploy_job_status=$(echo "$deploy_job" | jq -r '.conclusion')
 
+            if [[ "$deploy_job_status" == "success" ]]; then
+              echo -e "\033[32mThe deploy job finished successfully.\033[0m"
+              exit 0
+            fi
 
             if [[ "$job_status" != "" ]]; then
               if [[ "$deploy_job_status" == "skipped" && "$steps.healthcheck.outcome" == "success" ]]; then
@@ -100,11 +104,6 @@ jobs:
               echo -e "\033[33m${{ inputs.CONTAINER_NAME }} status on previous step: \033[31m${{ steps.healthcheck.outcome }}\033[0m"
               echo -e "\033[33mDeploy status: \033[31m$deploy_job_status\033[0m"
               exit 1
-            fi
-
-            if [[ "$deploy_job_status" == "success" ]]; then
-              echo -e "\033[32mThe deploy job finished successfully.\033[0m"
-              exit 0
             fi
 
             sleep 10

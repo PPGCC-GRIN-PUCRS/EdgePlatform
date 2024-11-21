@@ -92,6 +92,7 @@ jobs:
             deploy_job=$(echo "$job" | jq '.steps[] | select(.name=="Deploy")')
             deploy_job_status=$(echo "$deploy_job" | jq -r '.conclusion')
 
+            echo "$job_status"
             if [[ "$job_status" == "cancelled" || "$job_status" == "failure" || "$job_status" == "skipped" ]]; then
               echo -e "\033[33mPrevious status: ${{ toJson(steps.healthcheck.outputs.status) }}\033[0m"
               if [[ "$deploy_job_status" == "skipped" ]]; then

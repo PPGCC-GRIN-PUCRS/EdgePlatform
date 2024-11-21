@@ -94,7 +94,7 @@ jobs:
 
             echo "$job_status"
             echo -e "\033[33mPrevious status: ${{ toJson(steps.healthcheck.outcome) }}\033[0m"
-            echo -e "\033[33mPrevious status: ${{ steps.healthcheck.outcome }}\033[0m"
+            echo -e "\033[33mPrevious status: ${{ steps.healthcheck }}\033[0m"
             echo "RAW"
             echo -e "\033[33mPrevious status: $deploy_job\033[0m"
             echo -e "Deploy status: $deploy_job_status"

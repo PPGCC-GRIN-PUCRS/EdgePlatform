@@ -3,9 +3,6 @@ name: Platform CI-CD
 on:
   push:
     branches: ["release"]
-    paths:
-      - "!.github/workflows/api-pipeline.yml"
-      - "!api/**"
 
 env:
   key_file: ./cloud.key

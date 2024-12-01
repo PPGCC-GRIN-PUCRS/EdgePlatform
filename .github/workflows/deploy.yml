@@ -3,6 +3,10 @@ name: Deploy docker workflow
 on:
   workflow_call:
     inputs:
+      COMPOSE_PATH:
+        type: string
+        required: true
+        description: "Path to docker-compose.yml file"
       CONTAINER_NAME:
         type: string
         required: true
@@ -84,7 +88,7 @@ jobs:
         if: ${{ inputs.manual == false || (inputs.manual && steps.request-approval.outcome != 'failure') }}
         uses: ./.github/actions/cloud-scp
         with:
-          local_path: ./api/docker-compose.yml
+          local_path: ${{ inputs.COMPOSE_PATH }}
           target_path: /home/${{ secrets.CLOUD_USER }}
           CLOUD_USER: ${{ secrets.CLOUD_USER }}
           CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}

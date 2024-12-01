@@ -84,6 +84,7 @@ jobs:
     needs: [database-health, database]
     uses: ./.github/workflows/deploy.yml
     with:
+      COMPOSE_PATH: ./api/docker-compose.yml
       SERVICE_NAME: ${{ vars.API_SERVICE_NAME }}
       CONTAINER_NAME: ${{ vars.API_CONTAINER_NAME }}
     secrets:

@@ -105,6 +105,7 @@ jobs:
     needs: publish
     uses: ./.github/workflows/deploy.yml
     with:
+      COMPOSE_PATH: ./docker-compose.yml
       SERVICE_NAME: ${{ vars.PLATFORM_IMAGE_NAME }}
       CONTAINER_NAME: ${{ vars.PLATFORM_CONTAINER_NAME }}
     secrets:

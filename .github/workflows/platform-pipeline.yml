@@ -102,40 +102,15 @@ jobs:
           docker push ${{ env.REGISTRY_IMAGE }}:latest
 
   deploy:
-    runs-on: ubuntu-latest
     needs: publish
-    steps:
-      - name: Retrieve docker compose file
-        uses: actions/checkout@v4
-
-      - name: Add server public key
-        uses: ./.github/actions/cloud-keys
-        with:
-          CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
-
-      - name: Inject compose file to server
-        uses: ./.github/actions/cloud-scp
-        with:
-          local_path: ./api/docker-compose.yml
-          target_path: /home/${{ secrets.CLOUD_USER }}
-          CLOUD_USER: ${{ secrets.CLOUD_USER }}
-          CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
-
-      - name: Remove previous service version
-        uses: ./.github/actions/docker-stop-rm
-        with:
-          CLOUD_USER: ${{ secrets.CLOUD_USER }}
-          CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
-          API_CONTAINER_NAME: ${{ vars.API_CONTAINER_NAME }}
-
-      - name: Deploy
-        run: |
-          ssh -t -o StrictHostKeyChecking=no -i "${{ env.key_file }}" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
-            sudo -i
-            cd /home/${{ secrets.CLOUD_USER }}
-            export CONTAINER_NAME=${{ vars.PLATFORM_CONTAINER_NAME }}
-            docker-compose up -d --force-recreate --remove-orphans
-          EOF
+    uses: ./.github/workflows/deploy.yml
+    with:
+      SERVICE_NAME: ${{ vars.PLATFORM_IMAGE_NAME }}
+      CONTAINER_NAME: ${{ vars.PLATFORM_CONTAINER_NAME }}
+    secrets:
+      CLOUD_USER: ${{ secrets.CLOUD_USER }}
+      CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
+      CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
 
   cleanup:
     runs-on: ubuntu-latest

@@ -54,6 +54,7 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       manual: true
+      COMPOSE_PATH: ./api/docker-compose.yml
       SERVICE_NAME: ${{ vars.DB_SERVICE_NAME }}
       CONTAINER_NAME: ${{ vars.DB_CONTAINER_NAME }}
     secrets:

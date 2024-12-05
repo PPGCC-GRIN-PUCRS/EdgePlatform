@@ -96,7 +96,7 @@ jobs:
             fi
 
             if [[ "$job_status" != "" ]]; then
-              if [[ "$deploy_job_status" == "skipped" && "$steps.healthcheck.outcome" == "success" ]]; then
+              if [[ $deploy_job_status == "skipped" && $steps.healthcheck.outcome == "success" ]]; then
                 echo -e "\033[33m${{ inputs.CONTAINER_NAME }} status on previous step: \033[32m${{ steps.healthcheck.outcome }}\033[0m"
                 echo -e "\033[33mDeploy status: \033[32m$deploy_job_status\033[0m"
                 exit 0

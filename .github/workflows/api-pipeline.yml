@@ -87,6 +87,7 @@ jobs:
       SERVICE_NAME: ${{ vars.API_SERVICE_NAME }}
       CONTAINER_NAME: ${{ vars.API_CONTAINER_NAME }}
     secrets:
+      ENV_FILE: ${{ secrets.API_ENV_FILE }}
       CLOUD_USER: ${{ secrets.CLOUD_USER }}
       CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
       CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}

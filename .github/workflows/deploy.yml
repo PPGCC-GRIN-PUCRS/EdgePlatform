@@ -3,6 +3,10 @@ name: Deploy docker workflow
 on:
   workflow_call:
     inputs:
+      COMPOSE_PATH:
+        type: string
+        required: true
+        description: "Path to docker-compose.yml file"
       CONTAINER_NAME:
         type: string
         required: true
@@ -84,29 +88,10 @@ jobs:
         if: ${{ inputs.manual == false || (inputs.manual && steps.request-approval.outcome != 'failure') }}
         uses: ./.github/actions/cloud-scp
         with:
-          local_path: ./api/docker-compose.yml
+          local_path: ${{ inputs.COMPOSE_PATH }}
           target_path: /home/${{ secrets.CLOUD_USER }}
           CLOUD_USER: ${{ secrets.CLOUD_USER }}
           CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
-
-      - name: Prepare database and inject variables
-        if: ${{ inputs.manual == false || (inputs.manual && steps.request-approval.outcome != 'failure') }}
-        run: |
-          ssh -t -o StrictHostKeyChecking=no -i "${{ inputs.key_file }}" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
-            sudo -i
-
-            echo "${{ secrets.API_ENV_FILE }}" > ./.env
-            chmod 600 ./.env && set -a
-            source ./.env
-
-            if docker ps --filter "name=${{ inputs.CONTAINER_NAME }}" --format "{{.Names}}" | grep -w "${{ inputs.CONTAINER_NAME }}"; then
-              echo "Databse is running."
-            else
-              cd /home/${{ secrets.CLOUD_USER }}
-              export CONTAINER_NAME=${{ inputs.CONTAINER_NAME }}
-              docker-compose up -d ${{ inputs.SERVICE_NAME }} --force-recreate --remove-orphans
-            fi
-          EOF
 
       - name: Remove previous service version
         if: ${{ inputs.manual == false || (inputs.manual && steps.request-approval.outcome != 'failure') }}

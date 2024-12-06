@@ -60,7 +60,7 @@ jobs:
             sudo -i
 
             if docker ps --filter "name=${{ inputs.CONTAINER_NAME }}" --format "{{.Names}}" | grep -w "${{ inputs.CONTAINER_NAME }}"; then
-              echo "\033[32m${{ inputs.CONTAINER_NAME }} is currently running.\033[0m"
+              echo -e "\033[32m${{ inputs.CONTAINER_NAME }} is currently running.\033[0m"
               exit 0;
             else
               echo -e "\033[31m${{ inputs.CONTAINER_NAME }} is not running or not healthy.\033[0m"
@@ -97,7 +97,6 @@ jobs:
 
             if [[ "$job_status" != "" ]]; then
               if [[ "$deploy_job_status" == "skipped" && "${{steps.healthcheck.outcome}}" == "success" ]]; then
-                echo "Inside if"
                 echo -e "\033[33m${{ inputs.CONTAINER_NAME }} status on previous step: \033[32m${{ steps.healthcheck.outcome }}\033[0m"
                 echo -e "\033[33mDeploy status: \033[32m$deploy_job_status\033[0m"
                 exit 0

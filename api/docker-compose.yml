@@ -42,10 +42,10 @@ services:
       - grin-data-network
       - proxy
     environment:
-      - SPRING_PROFILES_ACTIVE="${SPRING_PROFILE:-development}"
-      - DATASOURCE_URL=${DATASOURCE:-jdbc:postgresql://db:5434/platform}
-      - DATASOURCE_USERNAME=${POSTGRES_USER:-postgres}
-      - DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-password}
+      SPRING_PROFILES_ACTIVE: "${SPRING_PROFILE:-development}"
+      DATASOURCE_URL: "${DATASOURCE:-jdbc:postgresql://db:5434/platform}"
+      DATASOURCE_USERNAME: "${POSTGRES_USER:-postgres}"
+      DATASOURCE_PASSWORD: "${POSTGRES_PASSWORD:-password}"
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"

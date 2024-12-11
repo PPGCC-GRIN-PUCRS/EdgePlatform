@@ -1,30 +1,30 @@
-import { RouterModule, Routes } from '@angular/router';
-import { MapComponent } from './views/map/map.component';
-import { CloudComponent } from './views/cloud/cloud.component';
-import { FogComponent } from './views/fog/fog.component';
-import { EdgeComponent } from './views/edge/edge.component';
 import { DevicesComponent } from './views/devices/devices.component';
+import { CloudComponent } from './views/cloud/cloud.component';
+import { EdgeComponent } from './views/edge/edge.component';
+import { MapComponent } from './views/map/map.component';
+import { FogComponent } from './views/fog/fog.component';
+import { RouterModule, Routes } from '@angular/router';
 import { NgModule } from '@angular/core';
 
 const routes: Routes = [
   {
-    path: 'map',
+    path: 'pmap',
     component: MapComponent,
   },
   {
-    path: 'cloud',
+    path: 'pcloud',
     component: CloudComponent,
   },
   {
-    path: 'fog',
+    path: 'pfog',
     component: FogComponent,
   },
   {
-    path: 'edge',
+    path: 'pedge',
     component: EdgeComponent,
   },
   {
-    path: 'devices',
+    path: 'pdevices',
     component: DevicesComponent,
   },
 ];

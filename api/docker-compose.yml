@@ -18,6 +18,7 @@ services:
       retries: 3
     networks:
       - grin-data-network
+      - proxy
     volumes:
       - grin-db-volume:/var/lib/postgresql/data
     ports:

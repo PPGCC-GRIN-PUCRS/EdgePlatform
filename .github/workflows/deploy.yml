@@ -110,7 +110,6 @@ jobs:
             if [[ -z "${{ secrets.ENV_FILE }}" ]]; then
               echo "Not injecting env variables"
             else
-              echo "Inject env file"
               echo "${{ secrets.ENV_FILE }}" > ./.env
               chmod 600 ./.env && set -a
               source ./.env

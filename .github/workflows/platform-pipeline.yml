@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - release
-    paths: 
+    paths:
       - "!.github/workflows/api-pipeline.yml"
       - "!api/**"
       - "src/**"
@@ -16,18 +16,6 @@ env:
   IMAGE_ARTIFACT: ${{ vars.PLATFORM_IMAGE_NAME }}.${{ github.sha }}
 
 jobs:
-  # ONGOING #TODO
-  # test:
-  #   strategy:
-  #     matrix:
-  #       node-version: [ 20.x ]
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     coverage: ""
-  #   steps:
-  #     - name: validation
-  #       users: actions/checkout@v4
-
   build:
     permissions:
       packages: write

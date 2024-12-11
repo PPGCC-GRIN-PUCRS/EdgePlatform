@@ -31,7 +31,7 @@ services:
       - "traefik.http.services.grin-db.loadbalancer.server.scheme=http"
       - "traefik.http.services.grin-db.loadbalancer.server.port=80"
 
-      - "traefik.http.routers.grin-db-secured.rule=Host(`grin.logiclabsoftwares.com`) && PathPrefix(`/database`)"
+      - "traefik.http.routers.grin-db-secured.rule=Host(`data.logiclabsoftwares.com`)"
       - "traefik.http.routers.grin-db-secured.tls.certresolver=cloudflare"
       - "traefik.http.routers.grin-db-secured.entrypoints=https"
 

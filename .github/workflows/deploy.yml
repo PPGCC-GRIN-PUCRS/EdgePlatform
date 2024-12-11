@@ -29,7 +29,7 @@ on:
         description: "Key file name (including path, such as './') and file extension (file.key / file.pem)"
 
     secrets:
-      ENV_FILE:
+      ENVS_FILE:
         required: false
         description: "Secured application environment variables file"
       CLOUD_RSA_KEY:
@@ -107,10 +107,10 @@ jobs:
           ssh -t -o StrictHostKeyChecking=no -i "${{ inputs.key_file }}" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
             sudo -i
 
-            if [[ -z "${{ secrets.ENV_FILE }}" ]]; then
+            if [[ -z "${{ secrets.ENVS_FILE }}" ]]; then
               echo "Not injecting env variables"
             else
-              echo "${{ secrets.ENV_FILE }}" > ./.env
+              echo "${{ secrets.ENVS_FILE }}" > ./.env
               chmod 600 ./.env && set -a
               source ./.env
             fi

@@ -25,5 +25,6 @@ runs:
       run: |
         ssh -t -o StrictHostKeyChecking=no -i "${{ inputs.key_file }}" ${{ inputs.CLOUD_USER }}@${{ inputs.CLOUD_ADDRESS }} << EOF
           sudo -i
+          echo "Removing ${{ inputs.CONTAINER_NAME }}"
           docker stop ${{ inputs.CONTAINER_NAME }} || true && docker rm ${{ inputs.CONTAINER_NAME }} || true
         EOF

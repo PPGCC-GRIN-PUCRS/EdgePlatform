@@ -37,8 +37,9 @@ services:
       - "traefik.http.routers.grin-db-secured.entrypoints=https"
 
   api:
-    container_name: ${CONTAINER_NAME:-grin-api}
+    pull_policy: always
     image: hcley/grin-api:latest
+    container_name: ${CONTAINER_NAME:-grin-api}
     networks:
       - grin-data-network
       - proxy

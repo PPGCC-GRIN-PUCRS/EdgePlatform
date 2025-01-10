@@ -96,13 +96,15 @@ jobs:
           docker push ${{ env.REGISTRY_IMAGE }}:latest
 
   deploy:
+    permissions:
+      contents: read
     needs: publish
     uses: ./.github/workflows/deploy.yml
     with:
       COMPOSE_PATH: ./docker-compose.yml
       SERVICE_NAME: ${{ vars.PLATFORM_IMAGE_NAME }}
       CONTAINER_NAME: ${{ vars.PLATFORM_CONTAINER_NAME }}
-      REGISTRY_IMAGE: ${{ env.REGISTRY_IMAGE }}
+      REGISTRY_IMAGE: ${{ vars.REGISTRY }}/${{ vars.PLATFORM_IMAGE_NAME }}
     secrets:
       CLOUD_USER: ${{ secrets.CLOUD_USER }}
       CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}

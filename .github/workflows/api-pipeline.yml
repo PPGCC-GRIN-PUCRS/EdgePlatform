@@ -9,11 +9,6 @@ on:
       - ".github/workflows/api-pipeline.yml"
       - "api/**"
 
-env:
-key_file: ./cloud.key
-REGISTRY_IMAGE: ${{ vars.REGISTRY }}/${{ vars.PLATFORM_IMAGE_NAME }}
-IMAGE_ARTIFACT: ${{ vars.PLATFORM_IMAGE_NAME }}.${{ github.sha }}
-
 jobs:
   build:
     uses: ./.github/workflows/build.yml
@@ -23,8 +18,8 @@ jobs:
       id-token: write
       contents: read
     with:
-      REGISTRY_IMAGE: ${{ env.REGISTRY_IMAGE }}
-      IMAGE_ARTIFACT: ${{ env.IMAGE_ARTIFACT }}
+      REGISTRY_IMAGE: ${{ vars.REGISTRY }}/${{ vars.API_IMAGE_NAME }}
+      IMAGE_ARTIFACT: ${{ vars.API_IMAGE_NAME }}.${{ github.sha }}
 
   publish:
     needs: build
@@ -34,8 +29,8 @@ jobs:
       id-token: write
     with:
       TAG: ${{ github.sha }}
-      REGISTRY_IMAGE: ${{ env.REGISTRY_IMAGE }}
-      IMAGE_ARTIFACT: ${{ env.IMAGE_ARTIFACT }}
+      REGISTRY_IMAGE: ${{ vars.REGISTRY }}/${{ vars.API_IMAGE_NAME }}
+      IMAGE_ARTIFACT: ${{ vars.API_IMAGE_NAME }}.${{ github.sha }}
     secrets:
       DOCKER_REGISTRY_USERNAME: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
       DOCKER_REGISTRY_PASSWORD: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
@@ -60,6 +55,7 @@ jobs:
       COMPOSE_PATH: ./api/docker-compose.yml
       SERVICE_NAME: ${{ vars.DB_SERVICE_NAME }}
       CONTAINER_NAME: ${{ vars.DB_CONTAINER_NAME }}
+      REGISTRY_IMAGE: ${{ vars.DB_REGISTRY }}
     secrets:
       ENV_FILE: ${{ secrets.API_ENV_FILE }}
       CLOUD_USER: ${{ secrets.CLOUD_USER }}
@@ -67,7 +63,6 @@ jobs:
       CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
       MANUAL_APPROVE_REQUESTOR_ID: ${{ secrets.MANUAL_APPROVE_REQUESTOR_ID }}
       MANUAL_APPROVE_REQUESTOR_SECRET: ${{ secrets.MANUAL_APPROVE_REQUESTOR_SECRET }}
-      IMAGE_REGISTRY: "${{ vars.DATABASE_REGISTRY }}"
 
   database-backup:
     if: needs.database.result == 'success'
@@ -92,12 +87,12 @@ jobs:
       COMPOSE_PATH: ./api/docker-compose.yml
       SERVICE_NAME: ${{ vars.API_SERVICE_NAME }}
       CONTAINER_NAME: ${{ vars.API_CONTAINER_NAME }}
+      REGISTRY_IMAGE: ${{ vars.REGISTRY }}/${{ vars.API_IMAGE_NAME }}
     secrets:
       ENV_FILE: ${{ secrets.API_ENV_FILE }}
       CLOUD_USER: ${{ secrets.CLOUD_USER }}
       CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
       CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
-      IMAGE_REGISTRY: ${{ env.REGISTRY_IMAGE }}
 
   cleanup:
     needs: [database-backup, backend]

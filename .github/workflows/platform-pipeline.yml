@@ -102,6 +102,7 @@ jobs:
       COMPOSE_PATH: ./docker-compose.yml
       SERVICE_NAME: ${{ vars.PLATFORM_IMAGE_NAME }}
       CONTAINER_NAME: ${{ vars.PLATFORM_CONTAINER_NAME }}
+      REGISTRY_IMAGE: ${{ env.REGISTRY_IMAGE }}
     secrets:
       CLOUD_USER: ${{ secrets.CLOUD_USER }}
       CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}

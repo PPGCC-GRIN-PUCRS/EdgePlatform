@@ -11,6 +11,8 @@ on:
 
 env:
   key_file: ./cloud.key
+  REGISTRY_IMAGE: ${{ vars.REGISTRY }}/${{ vars.API_IMAGE_NAME }}
+  IMAGE_ARTIFACT: ${{ vars.API_IMAGE_NAME }}.${{ github.sha }}
 
 jobs:
   build:
@@ -21,8 +23,8 @@ jobs:
       id-token: write
       contents: read
     with:
-      REGISTRY_IMAGE: ${{ vars.REGISTRY }}/${{ vars.API_IMAGE_NAME }}
-      IMAGE_ARTIFACT: ${{ vars.API_IMAGE_NAME }}.${{ github.sha }}
+      REGISTRY_IMAGE: ${{ env.REGISTRY_IMAGE }}
+      IMAGE_ARTIFACT: ${{ env.IMAGE_ARTIFACT }}
 
   publish:
     needs: build
@@ -32,8 +34,8 @@ jobs:
       id-token: write
     with:
       TAG: ${{ github.sha }}
-      IMAGE_ARTIFACT: ${{ vars.API_IMAGE_NAME }}.${{ github.sha }}
-      REGISTRY_IMAGE: ${{ vars.REGISTRY }}/${{ vars.API_IMAGE_NAME }}
+      REGISTRY_IMAGE: ${{ env.REGISTRY_IMAGE }}
+      IMAGE_ARTIFACT: ${{ env.IMAGE_ARTIFACT }}
     secrets:
       DOCKER_REGISTRY_USERNAME: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
       DOCKER_REGISTRY_PASSWORD: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
@@ -65,6 +67,7 @@ jobs:
       CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
       MANUAL_APPROVE_REQUESTOR_ID: ${{ secrets.MANUAL_APPROVE_REQUESTOR_ID }}
       MANUAL_APPROVE_REQUESTOR_SECRET: ${{ secrets.MANUAL_APPROVE_REQUESTOR_SECRET }}
+      IMAGE_REGISTRY: "${{ vars.DATABASE_REGISTRY }}"
 
   database-backup:
     if: needs.database.result == 'success'
@@ -94,6 +97,7 @@ jobs:
       CLOUD_USER: ${{ secrets.CLOUD_USER }}
       CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
       CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
+      IMAGE_REGISTRY: ${{ env.REGISTRY_IMAGE }}
 
   cleanup:
     needs: [database-backup, backend]

@@ -15,10 +15,6 @@ on:
         type: string
         required: true
         description: "Docker service to be stoped and removed previous new container deployment"
-      REGISTRY_IMAGE:
-        type: string
-        required: true
-        description: "Image registry to be versioned cleaned"
 
       # <optional>
       manual:
@@ -104,14 +100,6 @@ jobs:
           CLOUD_USER: ${{ secrets.CLOUD_USER }}
           CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
           CONTAINER_NAME: ${{ inputs.CONTAINER_NAME }}
-
-      # - name: Remove older images
-      #   if: ${{ inputs.manual == false || (inputs.manual && steps.request-approval.outcome != 'failure') }}
-      #   uses: ./.github/actions/docker-image-rm
-      #   with:
-      #     CLOUD_USER: ${{ secrets.CLOUD_USER }}
-      #     CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
-      #     REGISTRY_IMAGE: ${{ inputs.REGISTRY_IMAGE }}
 
       - name: Deploy
         if: ${{ inputs.manual == false || (inputs.manual && steps.request-approval.outcome != 'failure') }}

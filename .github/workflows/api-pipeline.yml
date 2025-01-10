@@ -53,7 +53,6 @@ jobs:
       COMPOSE_PATH: ./api/docker-compose.yml
       SERVICE_NAME: ${{ vars.DB_SERVICE_NAME }}
       CONTAINER_NAME: ${{ vars.DB_CONTAINER_NAME }}
-      REGISTRY_IMAGE: ${{ vars.DB_REGISTRY }}
     secrets:
       ENV_FILE: ${{ secrets.API_ENV_FILE }}
       CLOUD_USER: ${{ secrets.CLOUD_USER }}
@@ -85,7 +84,6 @@ jobs:
       COMPOSE_PATH: ./api/docker-compose.yml
       SERVICE_NAME: ${{ vars.API_SERVICE_NAME }}
       CONTAINER_NAME: ${{ vars.API_CONTAINER_NAME }}
-      REGISTRY_IMAGE: ${{ vars.REGISTRY }}/${{ vars.API_IMAGE_NAME }}
     secrets:
       ENV_FILE: ${{ secrets.API_ENV_FILE }}
       CLOUD_USER: ${{ secrets.CLOUD_USER }}

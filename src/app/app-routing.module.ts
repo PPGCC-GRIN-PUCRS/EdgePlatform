@@ -1,5 +1,6 @@
 import { DevicesComponent } from './views/devices/devices.component';
 import { CloudComponent } from './views/cloud/cloud.component';
+import { HomeComponent } from './views/home/home.component';
 import { EdgeComponent } from './views/edge/edge.component';
 import { MapComponent } from './views/map/map.component';
 import { FogComponent } from './views/fog/fog.component';
@@ -8,23 +9,27 @@ import { NgModule } from '@angular/core';
 
 const routes: Routes = [
   {
-    path: 'pmap',
+    path: 'home',
+    component: HomeComponent,
+  },
+  {
+    path: 'map',
     component: MapComponent,
   },
   {
-    path: 'pcloud',
+    path: 'cloud',
     component: CloudComponent,
   },
   {
-    path: 'pfog',
+    path: 'fog',
     component: FogComponent,
   },
   {
-    path: 'pedge',
+    path: 'edge',
     component: EdgeComponent,
   },
   {
-    path: 'pdevices',
+    path: 'devices',
     component: DevicesComponent,
   },
 ];

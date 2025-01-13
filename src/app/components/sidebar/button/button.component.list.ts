@@ -5,7 +5,7 @@ export const buttonList: any[] = [
     title: 'Map',
     icon: 'fa-map-marker-alt',
     action: (router: Router) => {
-      router.navigate([`Map`]);
+      router.navigate([`map`]);
     },
     disabled: false,
     selected: true,
@@ -14,7 +14,7 @@ export const buttonList: any[] = [
     title: 'Cloud',
     icon: 'fa-globe',
     action: (router: Router) => {
-      router.navigate([`Cloud`]);
+      router.navigate([`cloud`]);
     },
     disabled: false,
     selected: false,
@@ -23,7 +23,7 @@ export const buttonList: any[] = [
     title: 'Fog',
     icon: 'fa-water',
     action: (router: Router) => {
-      router.navigate([`Fog`]);
+      router.navigate([`fog`]);
     },
     disabled: false,
     selected: false,
@@ -32,7 +32,7 @@ export const buttonList: any[] = [
     title: 'Edge',
     icon: 'fa-server',
     action: (router: Router) => {
-      router.navigate([`Edge`]);
+      router.navigate([`edge`]);
     },
     disabled: false,
     selected: false,
@@ -41,7 +41,7 @@ export const buttonList: any[] = [
     title: 'Devices',
     icon: 'fa-tools',
     action: (router: Router) => {
-      router.navigate([`Devices`]);
+      router.navigate([`devices`]);
     },
     disabled: false,
     selected: false,

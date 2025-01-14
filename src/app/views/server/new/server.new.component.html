@@ -1,0 +1,215 @@
+<div class="form-container">
+  <form [formGroup]="serverForm" (ngSubmit)="onSubmit()">
+    <h2>Server Configuration Form</h2>
+
+    <div class="form-grid">
+      <!-- Left Column -->
+      <div class="left-column">
+        <h3>Server Information</h3>
+        <label for="hostname">Server Hostname:</label>
+        <input
+          id="hostname"
+          formControlName="hostname"
+          type="text"
+          placeholder="Enter server hostname"
+        />
+        <div
+          *ngIf="
+            serverForm.get('hostname')?.invalid &&
+            serverForm.get('hostname')?.touched
+          "
+          class="error-message"
+        >
+          <p *ngIf="serverForm.get('hostname')?.errors?.['required']">
+            Hostname is required.
+          </p>
+          <p *ngIf="serverForm.get('hostname')?.errors?.['pattern']">
+            Hostname must be alphanumeric and may include dashes.
+          </p>
+        </div>
+
+        <label for="staticIp">Server Static IP:</label>
+        <input
+          id="staticIp"
+          formControlName="staticIp"
+          type="text"
+          placeholder="Enter static IP"
+        />
+        <div
+          *ngIf="
+            serverForm.get('staticIp')?.invalid &&
+            serverForm.get('staticIp')?.touched
+          "
+          class="error-message"
+        >
+          <p *ngIf="serverForm.get('staticIp')?.errors?.['required']">
+            Static IP is required.
+          </p>
+          <p *ngIf="serverForm.get('staticIp')?.errors?.['pattern']">
+            Enter a valid IPv4 address (e.g., 192.168.1.1).
+          </p>
+        </div>
+
+        <label for="platformIp">Server Platform IP or DNS:</label>
+        <input
+          id="platformIp"
+          formControlName="platformIp"
+          type="text"
+          placeholder="Enter platform IP or DNS"
+        />
+        <div
+          *ngIf="
+            serverForm.get('platformIp')?.invalid &&
+            serverForm.get('platformIp')?.touched
+          "
+          class="error-message"
+        >
+          <p *ngIf="serverForm.get('platformIp')?.errors?.['required']">
+            Platform IP/DNS is required.
+          </p>
+          <p *ngIf="serverForm.get('platformIp')?.errors?.['pattern']">
+            Enter a valid IPv4 address (e.g., 192.168.1.2) or a valid DNS
+            hostname (e.g., www.example.com).
+          </p>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div class="right-column">
+        <h3>Server Authentication</h3>
+        <label>Authentication Method:</label>
+        <div class="auth-options">
+          <div>
+            <input
+              type="radio"
+              id="authPassword"
+              name="authMethod"
+              value="password"
+              (change)="onAuthenticationMethodChange('password')"
+              [checked]="authenticationMethod === 'password'"
+            />
+            <label for="authPassword">Password</label>
+          </div>
+          <div>
+            <input
+              type="radio"
+              id="authPublicKey"
+              name="authMethod"
+              value="publicKey"
+              (change)="onAuthenticationMethodChange('publicKey')"
+              [checked]="authenticationMethod === 'publicKey'"
+            />
+            <label for="authPublicKey">Public Key</label>
+          </div>
+        </div>
+
+        <label for="username">Username:</label>
+        <input
+          id="username"
+          formControlName="username"
+          type="text"
+          placeholder="Enter username"
+        />
+        <div
+          *ngIf="
+            serverForm.get('username')?.invalid &&
+            serverForm.get('username')?.touched
+          "
+          class="error-message"
+        >
+          <p *ngIf="serverForm.get('username')?.errors?.['required']">
+            Username is required.
+          </p>
+        </div>
+
+        <div *ngIf="authenticationMethod === 'password'">
+          <label for="password">Password:</label>
+          <input
+            id="password"
+            formControlName="password"
+            type="password"
+            placeholder="Enter password"
+          />
+          <div
+            *ngIf="
+              serverForm.get('password')?.invalid &&
+              serverForm.get('password')?.touched
+            "
+            class="error-message"
+          >
+            <p *ngIf="serverForm.get('password')?.errors?.['required']">
+              Password is required.
+            </p>
+          </div>
+        </div>
+
+        <div *ngIf="authenticationMethod === 'publicKey'">
+          <label for="publicKey">Public Key:</label>
+          <textarea
+            id="publicKey"
+            formControlName="publicKey"
+            rows="4"
+            placeholder="Enter public key"
+          ></textarea>
+          <div
+            *ngIf="
+              serverForm.get('publicKey')?.invalid &&
+              serverForm.get('publicKey')?.touched
+            "
+            class="error-message"
+          >
+            <p *ngIf="serverForm.get('publicKey')?.errors?.['required']">
+              Public Key is required.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LAN Configuration Section -->
+    <div class="full-width-section">
+      <h3>LAN Configuration</h3>
+      <label for="ssid">SSID:</label>
+      <input
+        id="ssid"
+        formControlName="ssid"
+        type="text"
+        placeholder="Enter Wi-Fi SSID"
+      />
+
+      <label for="wifiPassword">Wi-Fi Password:</label>
+      <input
+        id="wifiPassword"
+        formControlName="wifiPassword"
+        type="password"
+        placeholder="Enter Wi-Fi password"
+      />
+
+      <label for="wifiCountry">Wireless LAN Country:</label>
+      <select id="wifiCountry" formControlName="wifiCountry">
+        <option *ngFor="let country of countryCodes" [value]="country">
+          {{ country }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Location Section -->
+    <div class="full-width-section">
+      <h3>Location</h3>
+      <label for="timezone">Timezone:</label>
+      <select id="timezone" formControlName="timezone">
+        <option *ngFor="let tz of timezones" [value]="tz">{{ tz }}</option>
+      </select>
+
+      <label for="keyboardLayout">Keyboard Layout:</label>
+      <select id="keyboardLayout" formControlName="keyboardLayout">
+        <option *ngFor="let layout of keyboardLayouts" [value]="layout">
+          {{ layout }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit" [disabled]="serverForm.invalid">Submit</button>
+  </form>
+</div>

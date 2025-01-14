@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-root',
@@ -6,5 +6,18 @@ import { Component } from '@angular/core';
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
+  sidebarEnabled: boolean = true;
   title = 'EdgePlatform';
+
+  constructor() {
+    this.sidebarEnabled = true;
+  }
+
+  enableSidebar() {
+    this.sidebarEnabled = true;
+  }
+
+  disableSidebar() {
+    this.sidebarEnabled = false;
+  }
 }

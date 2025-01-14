@@ -3,6 +3,7 @@ import { ServerComponent } from 'src/app/components/marker/server/server.compone
 import { ToastrService } from 'ngx-toastr';
 import * as L from 'leaflet';
 import { MarkerComponent } from 'src/app/components/marker/marker.component';
+import { AppComponent } from 'src/app/app.component';
 
 @Component({
   selector: 'map-view',
@@ -15,7 +16,11 @@ export class MapComponent implements AfterViewInit, OnInit {
   private zoomScale: number;
   private map: any;
 
-  constructor(private toastrService: ToastrService) {
+  constructor(
+    private toastrService: ToastrService,
+    private appComponent: AppComponent
+  ) {
+    this.appComponent.enableSidebar();
     this.PUCRSLocation = { lat: -30.061108487534216, lng: -51.17391422126215 };
     this.zoomScale = 18;
     this.servers = [];

@@ -1,5 +1,8 @@
 <body class="app-container">
-  <sidebar-component class="sidebar-container"></sidebar-component>
+  <sidebar-component
+    [enabled]="true"
+    class="sidebar-container"
+  ></sidebar-component>
 
   <div class="content-container">
     <router-outlet class="view-container"></router-outlet>

@@ -1,4 +1,4 @@
-<div class="sidebar">
+<div class="sidebar" *ngIf="enabled">
   <div class="menu">
     <ng-template ngFor let-item="$implicit" [ngForOf]="menuItens" let-i="index">
       <button-component

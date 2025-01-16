@@ -17,6 +17,6 @@ export class AddComponent {
   constructor(private router: Router) {}
 
   redirect() {
-    this.router.navigate([`server/new`]);
+    this.router.navigate([`server/deploy`]);
   }
 }

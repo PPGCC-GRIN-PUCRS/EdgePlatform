@@ -6,7 +6,7 @@ import { MapComponent } from './views/topology/map/map.component';
 import { FogComponent } from './views/topology/fog/fog.component';
 import { RouterModule, Routes } from '@angular/router';
 import { NgModule } from '@angular/core';
-import { ServerNewComponent } from './views/server/new/server.new.component';
+import { ServerDeployComponent } from './views/server/deploy/server.deploy.component';
 
 const routes: Routes = [
   {
@@ -17,8 +17,8 @@ const routes: Routes = [
     path: 'server',
     children: [
       {
-        path: 'new',
-        component: ServerNewComponent,
+        path: 'deploy',
+        component: ServerDeployComponent,
       },
     ],
   },

@@ -11,8 +11,8 @@ import {
 
 @Component({
   selector: 'server-deploy-component',
-  templateUrl: './server.deploy.component.html',
   styleUrl: './server.deploy.component.scss',
+  templateUrl: './server.deploy.component.html',
 })
 export class ServerDeployComponent {
   authenticationMethod: string = 'password';

@@ -31,10 +31,12 @@
       }
 
       label {
-        display: block;
-        margin-bottom: 5px;
         font-weight: bold;
         color: #555;
+
+        input[type="radial"] {
+          vertical-align: baseline;
+        }
       }
 
       input,

@@ -80,25 +80,27 @@
           <label>Authentication Method:</label>
           <div class="auth-options">
             <div>
-              <input
-                type="radio"
-                id="authPassword"
-                name="authMethod"
-                value="password"
-                (change)="onAuthenticationMethodChange('password')"
-                [checked]="authenticationMethod === 'password'"
-              />
+              <label>
+                <input
+                  type="radio"
+                  id="authPassword"
+                  name="authMethod"
+                  value="password"
+                  (change)="onAuthenticationMethodChange('password')"
+                  [checked]="authenticationMethod === 'password'"
+              /></label>
               <label for="authPassword">Password</label>
             </div>
             <div>
-              <input
-                type="radio"
-                id="authPublicKey"
-                name="authMethod"
-                value="publicKey"
-                (change)="onAuthenticationMethodChange('publicKey')"
-                [checked]="authenticationMethod === 'publicKey'"
-              />
+              <label
+                ><input
+                  type="radio"
+                  id="authPublicKey"
+                  name="authMethod"
+                  value="publicKey"
+                  (change)="onAuthenticationMethodChange('publicKey')"
+                  [checked]="authenticationMethod === 'publicKey'"
+              /></label>
               <label for="authPublicKey">Public Key</label>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import { Router } from '@angular/router';
 
+
 export const buttonList: any[] = [
   {
     title: 'Map',
@@ -8,7 +9,7 @@ export const buttonList: any[] = [
       router.navigate([`topology/map`]);
     },
     disabled: false,
-    selected: true,
+    selected: false,
   },
   {
     title: 'Cloud',
@@ -34,7 +35,7 @@ export const buttonList: any[] = [
     action: (router: Router) => {
       router.navigate([`topology/edge`]);
     },
-    disabled: false,
+    disabled: true,
     selected: false,
   },
   {
@@ -43,7 +44,7 @@ export const buttonList: any[] = [
     action: (router: Router) => {
       router.navigate([`topology/devices`]);
     },
-    disabled: false,
+    disabled: true,
     selected: false,
   },
 ];

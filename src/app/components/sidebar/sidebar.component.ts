@@ -24,21 +24,32 @@ import { Router } from '@angular/router';
 })
 export class SidebarComponent {
   menuItens: ButtonComponent[] = buttonList;
+  currentMenu: ButtonComponent | null;
   disabledMenus: string[];
 
   @Input() enabled: boolean = true;
 
-  constructor(private router: Router) {
-    this.disabledMenus = ['Devices', 'Edge'];
+  constructor() {
+    this.currentMenu = null;
     const selectedMenu = this.menuItens.find((m) => m.title == 'Map');
-    if (selectedMenu) selectedMenu.selected = true;
+    if (selectedMenu) {
+      selectedMenu.selected = true;
+      this.currentMenu = selectedMenu;
+    }
+    
+    this.disabledMenus = ['Devices', 'Edge'];
     this.disabledMenus.forEach((menu) => {
       const disableMenu = this.menuItens.find((m) => m.title == menu);
       if (disableMenu) disableMenu.disabled = true;
     });
   }
 
-  test() {
-    console.log('hup');
+  change(item: ButtonComponent) {
+    if(this.currentMenu)
+      this.currentMenu.selected = false
+
+    this.currentMenu = item
+    this.currentMenu.selected = true
+      console.log('ITEM: ', item);
   }
 }

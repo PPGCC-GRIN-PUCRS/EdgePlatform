@@ -19,6 +19,7 @@ const routes: Routes = [
       {
         path: 'deploy',
         component: ServerDeployComponent,
+        data: { animation: 'openClosePage' }
       },
     ],
   },

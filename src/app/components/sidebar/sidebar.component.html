@@ -1,8 +1,9 @@
 <div class="sidebar" *ngIf="enabled">
   <div class="menu">
     <ng-template ngFor let-item="$implicit" [ngForOf]="menuItens" let-i="index">
-      <button-component
+      <button-component (click)="this.change(item)" 
         [disabled]="item.disabled"
+        [selected]="item.selected"
         [action]="item.action"
         [title]="item.title"
         [icon]="item.icon"

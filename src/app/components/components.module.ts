@@ -23,7 +23,6 @@ const moduleComponents: Array<Type<any> | ModuleWithProviders<{}> | any[]> = [
     BrowserAnimationsModule,
     MatFormFieldModule,
     moduleComponents,
-    MatIconModule,
     MatDialogModule,
     MatButtonModule,
     MatSelectModule,

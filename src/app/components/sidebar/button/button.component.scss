@@ -14,10 +14,6 @@
   box-sizing: border-box; // Include padding and border in element's total width and height
   transition: background-color 0.3s ease, color 0.3s ease; // Smooth transition
 
-  &:selected {
-    border-color: 2px solid red;
-  }
-
   &:disabled i,
   span {
     // background-color: $disabled-color;
@@ -45,6 +41,17 @@
 
     span {
       color: #fff; // Change text color on hover
+    }
+  }
+
+    &.selected {
+    background-color: #77bac6; // Background color for selected state
+    border-radius: 8px; // Keep the border-radius the same
+    i {
+      color: white; // Icon color when selected
+    }
+    span {
+      color: white; // Text color when selected
     }
   }
 }

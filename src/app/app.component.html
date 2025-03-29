@@ -4,7 +4,7 @@
     class="sidebar-container"
   ></sidebar-component>
 
-  <div class="content-container">
+  <div class="content-container" [@routeAnimations]="getRouteAnimationData()" >
     <router-outlet class="view-container"></router-outlet>
   </div>
 </body>

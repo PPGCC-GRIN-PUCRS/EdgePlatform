@@ -28,24 +28,24 @@
           </p>
         </div>
 
-        <label for="staticIp">Server Static IP:</label>
+        <label for="serverIp">Server IP:</label>
         <input
-          id="staticIp"
-          formControlName="staticIp"
+          id="serverIp"
+          formControlName="serverIp"
           type="text"
-          placeholder="Enter static IP"
+          placeholder="Enter serverIp IP"
         />
         <div
           *ngIf="
-            serverForm.get('staticIp')?.invalid &&
-            serverForm.get('staticIp')?.touched
+            serverForm.get('serverIp')?.invalid &&
+            serverForm.get('serverIp')?.touched
           "
           class="error-message"
         >
-          <p *ngIf="serverForm.get('staticIp')?.errors?.['required']">
-            Static IP is required.
+          <p *ngIf="serverForm.get('serverIp')?.errors?.['required']">
+            Server IP is required.
           </p>
-          <p *ngIf="serverForm.get('staticIp')?.errors?.['pattern']">
+          <p *ngIf="serverForm.get('serverIp')?.errors?.['pattern']">
             Enter a valid IPv4 address (e.g., 192.168.1.1).
           </p>
         </div>
@@ -216,14 +216,14 @@
       </div>
 
       <ng-container *ngIf="!useCableNetwork">
-        <label for="ssid">SSID:</label>
+        <label for="ssid">Wireless SSID:</label>
         <input
           id="ssid"
           formControlName="ssid"
           type="text"
           placeholder="Enter Wi-Fi SSID"
         />
-        <label for="wifiPassword">Wi-Fi Password:</label>
+        <label for="wifiPassword">Wireless Password:</label>
         <input
           id="wifiPassword"
           formControlName="wifiPassword"
@@ -269,7 +269,7 @@
     </div>
     <div *ngIf="serverForm.invalid && (serverForm.dirty || serverForm.touched)" class="error">
       <div *ngFor="let field of findInvalidFields()">
-        <p>{{field}}</p>
+        <p>* {{errorsMessage.get(field)}}</p>
       </div>
     </div>
   </form>

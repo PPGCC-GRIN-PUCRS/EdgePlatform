@@ -3,11 +3,12 @@ import { Location } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { ServerValidationService } from '@services/server-validation.service';
 import {
+  serverFunctionsList,
   countryCodeISOList,
   keyboardLayoutList,
-  serverFunctionsList,
+  errorsMessageList,
   timezoneList,
-} from './server.deploy.step.sbc.config.lists';
+} from '../server.deploy.step.lists';
 
 @Component({
   selector: 'server-deploy-step-sbc-config',
@@ -15,6 +16,7 @@ import {
   templateUrl: './server.deploy.step.sbc.config.html',
 })
 export class ServerDeployStepSBCConfig {
+  
   authenticationMethod: string = 'password';
   useCableNetwork: boolean = false;
   publicKey: string | null = null;
@@ -22,13 +24,14 @@ export class ServerDeployStepSBCConfig {
   showPassword = false;
   isGenerated = false;
   isEditing = false;
-
+  
   serverFunctions = serverFunctionsList.sort((x, y) => {
     return x === y ? 0 : x ? -1 : 1;
   });
-
+  
   keyboardLayouts = keyboardLayoutList;
   countryCodes = countryCodeISOList;
+  errorsMessage: Map<string,string> = errorsMessageList;
   timezones = timezoneList;
 
   constructor(private fb: FormBuilder, private location: Location) {
@@ -38,7 +41,7 @@ export class ServerDeployStepSBCConfig {
         'Grin-Cluster#2',
         [Validators.required]
       ],
-      staticIp: [
+      serverIp: [
         '192.168.0.1',
         [Validators.required, ServerValidationService.ipValidatorPattern()],
       ],

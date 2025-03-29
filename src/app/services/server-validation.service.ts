@@ -18,7 +18,7 @@ export class ServerValidationService {
   constructor() {}
   
   static ipValidatorPattern(): ValidatorFn {
-    return Validators.pattern(`/^${this.ipRegex}$/`);
+    return Validators.pattern(`^${this.ipRegex}$`)
   }
   
   static ipOrDNSValidatorPattern(): ValidatorFn {

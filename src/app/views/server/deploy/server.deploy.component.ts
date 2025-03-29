@@ -33,29 +33,40 @@ export class ServerDeployComponent {
 
   constructor(private fb: FormBuilder, private location: Location) {
     this.serverForm = this.fb.group({
-      hostname: ['', [Validators.required]],
+      // SERVER INFORMATION
+      hostname: [
+        'Grin-Cluster#2',
+        [Validators.required]
+      ],
       staticIp: [
-        '',
+        '192.168.0.1',
         [Validators.required, ServerValidationService.ipValidatorPattern()],
       ],
       platformIp: [
-        '',
+        'www.grin.logiclabsoftwares.com/ingress',
         [
           Validators.required,
           ServerValidationService.ipOrDNSValidatorPattern(),
         ],
       ],
+
+      // SERVER AUTHENTICATION
       serverFunction: [{ value: '', disabled: false }, [Validators.required]],
       authenticationMethod: ['password'],
       username: ['', [Validators.required]],
       password: ['', [Validators.required]],
       publicKey: [''],
+      
+      // LAN CONFIGURATION
       ssid: ['', [Validators.required]],
       wifiPassword: ['', [Validators.required]],
       wifiCountry: ['GB', [Validators.required]], // Default value: GB
+      
+      // LOCATION
       timezone: ['America/Sao_Paulo', [Validators.required]], // Default value: America/Sao_Paulo
       keyboardLayout: ['pt', [Validators.required]], // Default value: pt
     });
+    this.toggleCableNetwork()
   }
 
   ngOnInit(): void {}

@@ -3,10 +3,10 @@ import { Location } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { ServerValidationService } from '@services/server-validation.service';
 import {
+  configurationErrorsMessageList,
   serverFunctionsList,
   countryCodeISOList,
   keyboardLayoutList,
-  errorsMessageList,
   timezoneList,
 } from '../server.deploy.step.lists';
 
@@ -16,14 +16,14 @@ import {
   templateUrl: './server.deploy.step.sbc.config.html',
 })
 export class ServerDeployStepSBCConfig {
-  
   authenticationMethod: string = 'password';
   useCableNetwork: boolean = false;
   publicKey: string | null = null;
-  @Input() serverForm: FormGroup;
   showPassword = false;
   isGenerated = false;
   isEditing = false;
+  
+  @Input() serverForm: FormGroup;
   
   serverFunctions = serverFunctionsList.sort((x, y) => {
     return x === y ? 0 : x ? -1 : 1;
@@ -31,7 +31,7 @@ export class ServerDeployStepSBCConfig {
   
   keyboardLayouts = keyboardLayoutList;
   countryCodes = countryCodeISOList;
-  errorsMessage: Map<string,string> = errorsMessageList;
+  errorsMessage: Map<string,string> = configurationErrorsMessageList;
   timezones = timezoneList;
 
   constructor(private fb: FormBuilder, private location: Location) {
@@ -69,17 +69,6 @@ export class ServerDeployStepSBCConfig {
       timezone: ['America/Sao_Paulo', [Validators.required]], // Default value: America/Sao_Paulo
       keyboardLayout: ['pt', [Validators.required]], // Default value: pt
     });
-  }
-
-  findInvalidFields() {
-    const invalidFields = [];
-    const controls = this.serverForm.controls;
-    for (const name in controls) {
-        if (controls[name].invalid) {
-          invalidFields.push(name);
-        }
-    }
-    return invalidFields;
   }
 
   onAuthenticationMethodChange(method: string): void {
@@ -145,5 +134,17 @@ export class ServerDeployStepSBCConfig {
 
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
+  }
+
+  
+  findInvalidFields() {
+    const invalidFields = [];
+    const controls = this.serverForm.controls;
+    for (const name in controls) {
+        if (controls[name].invalid) {
+          invalidFields.push(name);
+        }
+    }
+    return invalidFields;
   }
 }

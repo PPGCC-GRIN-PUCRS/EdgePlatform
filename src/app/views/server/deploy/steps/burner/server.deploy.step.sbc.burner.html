@@ -1,0 +1,15 @@
+<div class="form-container">
+    <form [formGroup]="burnerForm">
+        <h2>Server Configuration Form</h2>
+        <div class="action-buttons">
+            <button mat-button matStepperPrevious>Back</button>
+            <button mat-button matStepperNext [disabled]="burnerForm.invalid">Next</button>
+        </div>
+        <div *ngIf="burnerForm.invalid && (burnerForm.dirty || burnerForm.touched)" class="form-error-list">
+            <p class="form-error-line">Fields not compliant:</p>
+            <div *ngFor="let field of findInvalidFields()">
+                <p class="form-error-line">* {{errorsMessage.get(field)}}</p>
+            </div>
+        </div>
+    </form>
+</div>

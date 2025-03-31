@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { AppComponent } from 'src/app/app.component';
 
 @Component({
@@ -6,4 +7,14 @@ import { AppComponent } from 'src/app/app.component';
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
-export class HomeComponent {}
+export class HomeComponent {
+
+  constructor(private app: AppComponent, private router: Router) {
+    this.app.disableSidebar()
+  }
+
+  redirect() {
+    this.router.navigate([`topology/map`]);
+  }
+
+}

@@ -1,11 +1,4 @@
-.center {
-  margin: auto;
-  width: 50%;
-  border: 3px solid green;
-  padding: 10px;
-}
-
-.home-container {
+.form-container {
   max-width: 900px;
   margin: 20px auto;
   padding: 20px;
@@ -181,6 +174,28 @@
       align-items: center;
       text-wrap: nowrap;
       gap: 5px;
+    }
+  }
+}
+
+.action-buttons {
+  justify-content: space-between;
+  margin-top: 20px;
+  display: flex;
+  gap: 20px;
+
+  .return-button,
+  button[type="submit"] {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+
+    &:hover {
+      background-color: #77bac6;
+      color: #fff;
     }
   }
 }

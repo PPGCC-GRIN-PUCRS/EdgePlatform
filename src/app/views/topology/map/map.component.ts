@@ -18,10 +18,10 @@ export class MapComponent implements AfterViewInit, OnInit {
 
   constructor(
     private toastrService: ToastrService,
-    private appComponent: AppComponent
+    private app: AppComponent
   ) {
-    this.appComponent.enableSidebar();
     this.PUCRSLocation = { lat: -30.061108487534216, lng: -51.17391422126215 };
+    this.app.enableSidebar();
     this.zoomScale = 18;
     this.servers = [];
   }

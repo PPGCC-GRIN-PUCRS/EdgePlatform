@@ -1,6 +1,5 @@
-import { Component, inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ServerDeployStepSBCConfig } from './steps/sbc-configuration/server.deploy.step.sbc.config';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'server-deploy-component',
@@ -9,11 +8,11 @@ import { ServerDeployStepSBCConfig } from './steps/sbc-configuration/server.depl
 })
 export class ServerDeployComponent {
   sbcConfigGroup: FormGroup;
-  secondFormGroup: FormGroup;
+  sbcBurnerGroup: FormGroup;
 
   constructor(_formBuilder: FormBuilder) {
-    this.sbcConfigGroup = _formBuilder.group({secondCtrl: ['']});
-    this.secondFormGroup = _formBuilder.group({secondCtrl: ['']});
+    this.sbcConfigGroup = _formBuilder.group({ctrl: ['']});
+    this.sbcBurnerGroup = _formBuilder.group({ctrl: ['']});
   }
 
 }

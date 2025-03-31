@@ -141,9 +141,9 @@
                 'glyphicon-eye-close': showPassword
               }"
               (click)="togglePasswordVisibility()"
-              ><mat-icon>{{
-                showPassword ? "visibility_off" : "visibility"
-              }}</mat-icon>
+              ><mat-icon
+                >{{ showPassword ? "visibility_off" : "visibility" }}</mat-icon
+              >
             </span>
           </div>
           <div
@@ -262,14 +262,18 @@
     </div>
 
     <div class="action-buttons">
-      <button mat-button matStepperPrevious (click)="goBack()" >Back</button>
+      <button mat-button matStepperPrevious (click)="goBack()">Back</button>
       <button mat-button matStepperNext [disabled]="serverForm.invalid">
         Next
       </button>
     </div>
-    <div *ngIf="serverForm.invalid && (serverForm.dirty || serverForm.touched)" class="error">
+    <div
+      *ngIf="serverForm.invalid && (serverForm.dirty || serverForm.touched)"
+      class="form-error-list"
+    >
+      <p class="form-error-line">Fields not compliant:</p>
       <div *ngFor="let field of findInvalidFields()">
-        <p>* {{errorsMessage.get(field)}}</p>
+        <p class="form-error-line">* {{errorsMessage.get(field)}}</p>
       </div>
     </div>
   </form>

@@ -1,4 +1,9 @@
-export const errorsMessageList: Map<string, string> = new Map([
+
+export const burnerErrorsMessageList: Map<string, string> = new Map([
+  ["hostname", "Server Information > Hostname must be set."],
+])
+
+export const configurationErrorsMessageList: Map<string, string> = new Map([
   ["hostname", "Server Information > Hostname must be set."],
   ["staticIp", "Server Information > Server IP must be set. (DNS isn't supported)"],
   ["platformIp", "Server Information > The centrilized platform IP or DNS must be set as given regex"],

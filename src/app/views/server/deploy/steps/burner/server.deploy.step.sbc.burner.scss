@@ -42,10 +42,6 @@
       label {
         font-weight: bold;
         color: #555;
-
-        input[type="radial"] {
-          vertical-align: baseline;
-        }
       }
 
       input,
@@ -182,6 +178,30 @@
   }
 }
 
+.password-input-wrapper {
+  position: relative;
+}
+
+.password-input-wrapper .glyphicon {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  cursor: pointer;
+  font-size: 24px;
+}
+
+.error-message {
+  color: #d9534f;
+  font-size: 0.9rem;
+  margin-top: -10px;
+  margin-bottom: 10px;
+}
+
+.auth-method-switch {
+  margin-top: 6%;
+  margin-bottom: 4%;
+}
+
 .action-buttons {
   justify-content: space-between;
   margin-top: 20px;
@@ -200,6 +220,61 @@
     &:hover {
       background-color: #77bac6;
       color: #fff;
+    }
+  }
+
+  .return-button {
+    background-color: #77bac6;
+    color: #fff;
+
+    &:hover {
+      background-color: #bbb;
+    }
+  }
+
+  button[type="submit"] {
+    background-color: #4caf50;
+    color: #fff;
+
+    &:hover {
+      background-color: #45a049;
+    }
+
+    &:disabled {
+      background-color: #ddd;
+      color: #aaa;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.info-message {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #555;
+  font-style: italic;
+}
+
+.cable-network-toggle {
+  text-align: right;
+  margin-bottom: 10px;
+
+  button {
+    padding: 4px 8px;
+    font-size: 0.9rem;
+    border: none;
+    background: none;
+    color: #007bff;
+    text-decoration: underline;
+    cursor: pointer;
+
+    &:hover {
+      color: #0056b3;
+      text-decoration: none;
+    }
+
+    &.active {
+      color: #28a745;
     }
   }
 }

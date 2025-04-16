@@ -1,6 +1,7 @@
 # agent/entrypoints/cli.py
 
-from agent.actions.run_command import install_k3s, run_command, uninstall_k3s
+from agent.actions.packages import install_packages, uninstall_k3s, uninstall_tailscale
+from agent.actions.run_command import run_command
 from agent.actions.ingress import ingress
 from agent.actions.status import status
 import argparse
@@ -9,6 +10,7 @@ def run_cli():
     parser = argparse.ArgumentParser(description="Agent CLI")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
+
     # Ingress command
     ingress_parser = subparsers.add_parser("ingress", help="Send ingress data")
     ingress_parser.add_argument("--hostname", help="Override hostname")
@@ -16,18 +18,23 @@ def run_cli():
     ingress_parser.add_argument("--vpnIpv4", help="Override VPN IPv4")
     ingress_parser.add_argument("--vpnIpv6", help="Override VPN IPv6")
 
+
     # Status command
     subparsers.add_parser("status", help="Show agent status and config info")
+
 
     # Status command
     subparsers.add_parser("reload", help="Update configuration files")
 
-    # K3S command
-    install_parser = subparsers.add_parser("install", help="Install system requirements (K3s; ...)")
-    install_parser.add_argument("--k3s-version", help="Change K3S version")
-    subparsers.add_parser("uninstall", help="Uninstall system requirements (K3s; ...)")
 
-    # cluster_parser.add_argument("execute", help="Command to be executed", nargs=argparse.REMAINDER)
+    # K3S command
+    install_parser = subparsers.add_parser("install", help="Install system requirements (K3s; tailscale;)")
+    install_parser.add_argument("--k3s-version", help="Change K3S version")
+    uninstall_parser = subparsers.add_parser("uninstall", help="Uninstall system requirements (K3s; ...)")
+    uninstall_subparsers = uninstall_parser.add_subparsers(dest="uninstall_command", required=True)
+    uninstall_subparsers.add_parser("k3s", help="Uninstall K3S")
+
+
     # Cluster
     cluster_parser = subparsers.add_parser("cluster", help="Install system requirements (K3s; ...)")
     cluster_subparsers = cluster_parser.add_subparsers(dest="cluster_command", required=True)
@@ -67,8 +74,12 @@ def handle_command(parser):
         
         case "status": return status()
         case "run": return run_command(args.execute, args.shell)
-        case "install": return install_k3s(args.k3s_version)
-        case "uninstall": return uninstall_k3s()
+        case "install": return install_packages(args.k3s_version)
+        case "uninstall":
+            match args.uninstall_command:
+                case "k3s": return uninstall_k3s()
+                case "tailscale": return uninstall_tailscale()
+        
         case "cluster":
             match args.cluster_command:
                 case "token": return run_command('sudo cat /var/lib/rancher/k3s/server/node-token', True)

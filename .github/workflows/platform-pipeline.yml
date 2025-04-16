@@ -3,7 +3,7 @@ name: Platform CI-CD
 on:
   push:
     branches:
-      - release
+      - main
     paths:
       - "!.github/workflows/api-pipeline.yml"
       - "!api/**"

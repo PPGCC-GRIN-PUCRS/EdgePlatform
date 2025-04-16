@@ -2,7 +2,7 @@ name: API CI-CD
 # Trigger
 on:
   push:
-    branches: ["release"]
+    branches: ["main"]
     paths:
       - ".github/workflows/api-pipeline.yml"
       - "api/**"

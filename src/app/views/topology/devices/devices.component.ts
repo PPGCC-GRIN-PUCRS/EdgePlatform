@@ -9,7 +9,7 @@ import { AppComponent } from '@app/app.component';
 export class DevicesComponent {
 
   constructor(private app: AppComponent) {
-    this.app.disableSidebar()
+    this.app.enableSidebar()
   }
   
 }

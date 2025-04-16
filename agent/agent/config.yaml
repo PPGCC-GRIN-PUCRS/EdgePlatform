@@ -1,0 +1,34 @@
+DEBUG: True
+
+server:
+  host: "0.0.0.0"
+  port: 8000
+
+platform:
+  host: "http://100.64.0.4:8080"
+  timeout: "10"
+  # host: "https://grin.logiclabsoftwares.com"
+  endpoint:
+    ingress: "/ingress"
+
+ingress:
+  save_path: "/var/lib/agent/ingress_data.yml"
+
+logging:
+  level:
+    "INFO"
+    # Options: 'critical', 'error', 'warning', 'info', 'debug', 'trace'
+  log_file: "/var/log/agent.log"
+  error_log_file: "/var/log/agent.error.log"
+  colors:
+    red: '\033[91m'
+    green: '\033[92m'
+    yellow: '\033[93m'
+    blue: '\033[94m'
+    magenta: '\033[95m'
+    cyan: \033[96m
+    clear: '\033[0m'
+
+metadata:
+  environment: "production"
+  owner: "grin"

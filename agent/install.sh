@@ -16,7 +16,7 @@ fi
 
 ## PREPARING
 echo "📲 Downloading agent content"
-REPO_URL="https://github.com/seuusuario/seurepositorio.git"
+REPO_URL="https://github.com/PPGCC-GRIN-PUCRS/EdgePlatform.git"
 if [ -d "/tmp/agent" ] || [ -d "$HOME/agent" ]; then
   echo "Agent on disk, using local content"
 else

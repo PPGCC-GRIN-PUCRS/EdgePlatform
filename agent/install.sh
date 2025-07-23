@@ -29,9 +29,9 @@ else
     echo "Error during content download."
     exit 1
   fi
-  sudo cp -r /tmp/grin/agent /tmp/agent
+  cp -r /tmp/grin/agent /tmp/agent
   sudo rm -rf /tmp/grin
-  sudo cd /tmp/agent
+  cd /tmp/agent
 fi
 
 # Check for --debug flag
@@ -233,5 +233,5 @@ fi
 if [ "$GIT_CLONED" = true ]; then
   echo "Removing cloned content at /tmp/agent"
   cd ..
-  rm -rf "/tmp/agent"
+  sudo rm -rf "/tmp/agent"
 fi

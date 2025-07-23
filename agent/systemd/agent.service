@@ -1,0 +1,16 @@
+[Unit]
+Description=Agent REST API service
+After=network.target
+
+[Service]
+StandardError=file:__ERROR-FILE__
+StandardOutput=file:__LOG-FILE__
+ExecStart=/usr/local/bin/agent
+Environment=PYTHONUNBUFFERED=1
+WorkingDirectory=__WORKING-DIR__
+Restart=always
+RestartSec=5
+User=__USER__
+
+[Install]
+WantedBy=multi-user.target

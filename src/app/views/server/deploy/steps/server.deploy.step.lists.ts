@@ -1,18 +1,38 @@
-
 export const burnerErrorsMessageList: Map<string, string> = new Map([
-  ["hostname", "Server Information > Hostname must be set."],
-])
+  ['hostname', 'Server Information > Hostname must be set.'],
+]);
 
 export const configurationErrorsMessageList: Map<string, string> = new Map([
-  ["hostname", "Server Information > Hostname must be set."],
-  ["staticIp", "Server Information > Server IP must be set. (DNS isn't supported)"],
-  ["platformIp", "Server Information > The centrilized platform IP or DNS must be set as given regex"],
-  ["username", "Server Authentication > Username must be given regardless the authentication method"],
-  ["password", "Server Authentication > Since the authentication is set as password, a password must be given"],
-  ["publicKey", "Server Authentication > Since the authentication is set as public key, a username must be given"],
-  ["ssid", "LAN Configuration > Wi-Fi SSID is required to connect if not on cable network"],
-  ["wifiPassword", "LAN Configuration > Wi-Fi Password is required to connect if not on cable network"],
-])
+  ['hostname', 'Server Information > Hostname must be set.'],
+  [
+    'staticIp',
+    "Server Information > Server IP must be set. (DNS isn't supported)",
+  ],
+  [
+    'platformHost',
+    'Server Information > The centrilized platform IP or DNS must be set as given regex',
+  ],
+  [
+    'username',
+    'Server Authentication > Username must be given regardless the authentication method',
+  ],
+  [
+    'password',
+    'Server Authentication > Since the authentication is set as password, a password must be given',
+  ],
+  [
+    'publicKey',
+    'Server Authentication > Since the authentication is set as public key, a username must be given',
+  ],
+  [
+    'ssid',
+    'LAN Configuration > Wi-Fi SSID is required to connect if not on cable network',
+  ],
+  [
+    'wifiPassword',
+    'LAN Configuration > Wi-Fi Password is required to connect if not on cable network',
+  ],
+]);
 
 export const serverFunctionsList = [
   { label: 'NAS', value: 'nas', disabled: true },

@@ -1,41 +1,31 @@
 package com.grin.edgeplatform.controllers;
 
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import com.grin.edgeplatform.controllers.interfaces.AgentControllerInterface;
+import com.grin.edgeplatform.entities.dtos.NodeDetailsDTO;
+import com.grin.edgeplatform.entities.dtos.NodeIngressDTO;
+import com.grin.edgeplatform.entities.dtos.TemperatureBody;
+import com.grin.edgeplatform.services.NodeService;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
-import io.swagger.v3.oas.annotations.Operation;
 
-import lombok.Data;
+import java.security.NoSuchAlgorithmException;
 
 
 @RestController
-public class AgentController {
+@AllArgsConstructor
+public class AgentController implements AgentControllerInterface {
 
-  @Operation(summary = "Get a product by id", description = "Returns a product as per the id")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", content = {}),
-    @ApiResponse(responseCode = "404", content = {})
-  })
-  @PostMapping(value = "/notify")
-  public ResponseEntity<String> heatBeat(@RequestBody TemperatureBody body) {
-    System.out.println(body.temp);
+  NodeService nodeService;
+
+  public ResponseEntity<String> heartBeat(@RequestBody NodeIngressDTO body) {
     return ResponseEntity.ok("reached");
   }
 
-  @Operation(summary = "Signup new master cluster server", description = "Returns a product as per the id")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", content = {}),
-    @ApiResponse(responseCode = "404", content = {})
-  })
-  @PostMapping("/signup")
-  public ResponseEntity<String> signup() {
-    return ResponseEntity.ok("reached");
+
+  public ResponseEntity<NodeIngressDTO> ingressNode(@RequestBody NodeIngressDTO body) throws Exception {
+    return new ResponseEntity<>(nodeService.ingress(body), HttpStatus.CREATED);
   }
 
-}
-
-@Data
-class TemperatureBody {
-  String temp;
 }

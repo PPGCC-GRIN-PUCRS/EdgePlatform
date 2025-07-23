@@ -10,6 +10,7 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { CommonModule } from '@angular/common';
+import { BrowserModule } from '@angular/platform-browser';
 
 const views: Array<Type<any> | ModuleWithProviders<{}> | any[]> = [
   ServerDeployComponent, ServerDeployStepSBCConfig, ServerDeployStepSBCBurner
@@ -20,6 +21,7 @@ const views: Array<Type<any> | ModuleWithProviders<{}> | any[]> = [
   imports: [
     ReactiveFormsModule,
     ComponentsModule,
+    BrowserModule,
     CommonModule,
 
     MatFormFieldModule,

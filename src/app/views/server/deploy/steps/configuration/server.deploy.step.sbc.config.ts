@@ -22,30 +22,31 @@ export class ServerDeployStepSBCConfig {
   showPassword = false;
   isGenerated = false;
   isEditing = false;
-  
+
+  configurations: SBCConfiguration[];
+
   @Input() serverForm: FormGroup;
-  
+
   serverFunctions = serverFunctionsList.sort((x, y) => {
     return x === y ? 0 : x ? -1 : 1;
   });
-  
+
   keyboardLayouts = keyboardLayoutList;
   countryCodes = countryCodeISOList;
-  errorsMessage: Map<string,string> = configurationErrorsMessageList;
+  errorsMessage: Map<string, string> = configurationErrorsMessageList;
   timezones = timezoneList;
 
   constructor(private fb: FormBuilder, private location: Location) {
+    this.configurations = [];
+
     this.serverForm = this.fb.group({
       // SERVER INFORMATION
-      hostname: [
-        'Grin-Cluster#2',
-        [Validators.required]
-      ],
+      hostname: ['Grin-Cluster#2', [Validators.required]],
       serverIp: [
         '192.168.0.1',
         [Validators.required, ServerValidationService.ipValidatorPattern()],
       ],
-      platformIp: [
+      platformHost: [
         'www.grin.logiclabsoftwares.com/ingress',
         [
           Validators.required,
@@ -59,12 +60,12 @@ export class ServerDeployStepSBCConfig {
       username: ['', [Validators.required]],
       password: ['', [Validators.required]],
       publicKey: [''],
-      
+
       // LAN CONFIGURATION
       ssid: ['', [Validators.required]],
       wifiPassword: ['', [Validators.required]],
       wifiCountry: ['GB', [Validators.required]], // Default value: GB
-      
+
       // LOCATION
       timezone: ['America/Sao_Paulo', [Validators.required]], // Default value: America/Sao_Paulo
       keyboardLayout: ['pt', [Validators.required]], // Default value: pt
@@ -136,14 +137,13 @@ export class ServerDeployStepSBCConfig {
     this.showPassword = !this.showPassword;
   }
 
-  
   findInvalidFields() {
     const invalidFields = [];
     const controls = this.serverForm.controls;
     for (const name in controls) {
-        if (controls[name].invalid) {
-          invalidFields.push(name);
-        }
+      if (controls[name].invalid) {
+        invalidFields.push(name);
+      }
     }
     return invalidFields;
   }

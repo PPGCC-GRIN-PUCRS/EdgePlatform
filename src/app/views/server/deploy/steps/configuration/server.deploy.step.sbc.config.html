@@ -2,8 +2,29 @@
   <form [formGroup]="serverForm">
     <h2>Server Configuration Form</h2>
 
+    <div>
+      <div *ngIf="configurations.length > 0; else FirstConfiguration">
+        <h2>Connected USB Devices</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let configuration of configurations">
+              <td>{{ configuration }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ng-template #FirstConfiguration>
+        <!-- <p>No USB devices found.</p> -->
+      </ng-template>
+    </div>
+
     <div class="form-grid">
-      <!-- Left Column -->
+      <!-- Server Information -->
       <div class="left-column">
         <h3>Server Information</h3>
         <label for="hostname">Server Hostname:</label>
@@ -50,30 +71,30 @@
           </p>
         </div>
 
-        <label for="platformIp">Server Platform IP or DNS:</label>
+        <label for="platformHost">Server Platform IP or DNS:</label>
         <input
-          id="platformIp"
-          formControlName="platformIp"
+          id="platformHost"
+          formControlName="platformHost"
           type="text"
           placeholder="Enter platform IP or DNS"
         />
         <div
           *ngIf="
-            serverForm.get('platformIp')?.invalid &&
-            serverForm.get('platformIp')?.touched
+            serverForm.get('platformHost')?.invalid &&
+            serverForm.get('platformHost')?.touched
           "
           class="error-message"
         >
-          <p *ngIf="serverForm.get('platformIp')?.errors?.['required']">
+          <p *ngIf="serverForm.get('platformHost')?.errors?.['required']">
             Platform IP/DNS is required.
           </p>
-          <p *ngIf="serverForm.get('platformIp')?.errors?.['pattern']">
+          <p *ngIf="serverForm.get('platformHost')?.errors?.['pattern']">
             Enter a valid IPv4 address (e.g., 192.168.1.2) or a valid DNS
             hostname (e.g., www.example.com).
           </p>
         </div>
       </div>
-      <!-- Right Column -->
+      <!-- Server Authentication -->
       <div class="right-column">
         <h3>Server Authentication</h3>
         <div class="auth-method-switch">

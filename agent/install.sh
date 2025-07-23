@@ -73,7 +73,7 @@ if ! command -v "pip" &> /dev/null; then
         * ) echo "$installpip is a invalid input, exiting script."; exit 1;;
     esac
   
-  install_package install python3-pip
+  install_package python3-pip
   sudo ln -s /usr/bin/pip3 /usr/bin/pip
 fi
 

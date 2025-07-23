@@ -107,16 +107,17 @@ if ! command -v "pip" &> /dev/null; then
 fi
 
 # Content gathering
-echo "📲 Gathering agent content"
+echo "📲 Syncing agent content"
 REPO_URL="https://github.com/PPGCC-GRIN-PUCRS/EdgePlatform.git"
 if [ -d "$HOME/agent" ]; then
   echo "👌 Agent on disk, using local content"
   cd "$HOME/agent"
 else
-  if [ -d "/tmp/agent" ] then
+  if [ -d "/tmp/agent" ]; then
     echo "✂️ Removing old cloned agent"
     sudo rm -rf /tmp/agent
   fi
+
   echo "🔻 Gethering agent content..."
   git clone "$REPO_URL" "/tmp/grin" & spinner "🌏 Cloning global agent repository content" "[🧳] Clonned successfully"
   if [ $? -eq 0 ]; then

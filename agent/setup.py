@@ -1,8 +1,11 @@
 from setuptools import setup, find_packages
+from agent.utils import load_config
+
+config = load_config()
 
 setup(
     name='agent',
-    version='0.1.0',
+    version='v1.0.1',
     include_package_data=True,
     packages=find_packages(),
     install_requires=[

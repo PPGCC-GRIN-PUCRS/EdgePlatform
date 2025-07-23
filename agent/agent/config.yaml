@@ -30,5 +30,6 @@ logging:
     clear: '\033[0m'
 
 metadata:
+  version: "v1.0.1"
   environment: "production"
-  owner: "grin"
+  description: ""

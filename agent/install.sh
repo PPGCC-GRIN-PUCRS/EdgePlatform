@@ -29,17 +29,19 @@ install_package() {
 }
 
 spinner() {
+    MESSAGE="$1"
+    DONE_MESSAGE="$2"
     local pid=$!
     local delay=0.1
     local spinstr='|/-\'
     local i=0
     
     while ps -p $pid > /dev/null 2>&1; do
-        printf "\r📦 Installing Python package [%c]" "${spinstr:i++%${#spinstr}:1}"
+        printf "\r$MESSAGE [%c]" "${spinstr:i++%${#spinstr}:1}"
         sleep $delay
     done
     
-    printf "\r📦 Installing Python package [✅] Installed\n"
+    printf "\r$MESSAGE $DONE_MESSAGE\n"
 }
 
 
@@ -53,8 +55,12 @@ spinner() {
 if [ "$(id -u)" -eq 0 ]; then
     echo "⚠️ Warning: You are running this script as root!"
     echo "It's recommended to run this script as a non-root user to avoid potential security issues."
-    read -p "Do you want to continue? [Y/n]: " asrootchoice
-    rootchoice="${asrootchoice:-N}"
+    if [ -t 0 ]; then
+      read -p "Do you want to continue? [Y/n]: " rootchoice
+    else
+      rootchoice="N"
+    fi
+
     case "$rootchoice" in
         [Yy]* ) echo "Continuing...";;
         [Nn]* ) echo "Exiting script."; exit 1;;
@@ -79,30 +85,51 @@ if ! command -v "pip" &> /dev/null; then
   
   install_package python3-pip
   
+  echo "📦 Checking for pip update..."
+  python3 -m pip install --upgrade --user pip
+
+  # Detect if the updated pip is in ~/.local/bin and not in PATH
+  LOCAL_BIN="$HOME/.local/bin"
+  if [ ! "$(echo $PATH | grep "$LOCAL_BIN")" ]; then
+    echo "🔧 Adding $LOCAL_BIN to PATH for this session."
+    export PATH="$LOCAL_BIN:$PATH"
+  fi
+
+  # Persist the change for future sessions
+  if ! grep -q "$LOCAL_BIN" ~/.bashrc; then
+    echo "📌 Persisting PATH update to ~/.bashrc"
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+  fi
+
   if ! command -v pip &> /dev/null && command -v pip3 &> /dev/null; then
     sudo ln -s /usr/bin/pip3 /usr/bin/pip
   fi
 fi
 
 # Content gathering
-echo "📲 Downloading agent content"
+echo "📲 Gathering agent content"
 REPO_URL="https://github.com/PPGCC-GRIN-PUCRS/EdgePlatform.git"
-if [ -d "/tmp/agent" ] || [ -d "$HOME/agent" ]; then
-    echo "Agent on disk, using local content"
+if [ -d "$HOME/agent" ]; then
+  echo "👌 Agent on disk, using local content"
+  cd "$HOME/agent"
 else
-    echo "Agent not found locally. Downloading agent content..."
-    git clone "$REPO_URL" "/tmp/grin"
-    if [ $? -eq 0 ]; then
-        GIT_CLONED=true
-        echo "Repository downloaded successfully."
-    else
-        echo "Error during content download."
-        exit 1
-    fi
-    sleep 5 #gARANTEE THAT
-    cp -r /tmp/grin/agent /tmp/agent
-    sudo rm -rf /tmp/grin
-    cd /tmp/agent
+  elif [ -d "/tmp/agent" ] then
+    echo "✂️ Removing old cloned agent"
+    sudo rm -rf /tmp/agent
+  fi
+  echo "🔻 Gethering agent content..."
+  git clone "$REPO_URL" "/tmp/grin" & spinner "🌏 Cloning global agent repository content" "[🧳] Clonned successfully"
+  if [ $? -eq 0 ]; then
+    GIT_CLONED=true
+    echo "✅ Repository downloaded successfully."
+  else
+    echo "⚠️ Error during content download."
+    exit 1
+  fi
+  sleep 5 #gARANTEE THAT
+  cp -r /tmp/grin/agent /tmp/agent
+  sudo rm -rf /tmp/grin
+  cd /tmp/agent
 fi
 
 
@@ -259,7 +286,7 @@ if [ "$DEBUG" = true ]; then
     echo "📦 Installing Python package (with logs)"
     pip install . $INSTALL_FLAGS
 else
-    (pip install . $INSTALL_FLAGS) & spinner
+    (pip install . $INSTALL_FLAGS) & spinner "📦 Installing Python package" "[✅] Installed"
 fi
 
 if [ -f "/usr/local/bin/agent" ]; then

@@ -19,12 +19,12 @@ fi
 
 # Guarantee that pre-requirements are available
 if ! command -v "pip" &> /dev/null; then
-  echo "🪤 ERR: the required command 'pip' is not installeg."
+  echo "🪤 ERR: the required command 'pip' is not installed."
     read -p "Do you want that this script auto download it? [Y/n]: " choice
     case "$choice" in
         [Yy]* ) echo "Continuing...";;
         [Nn]* ) echo "Exiting script."; exit 1;;
-        * ) echo "Invalid input, exiting script."; exit 1;;
+        * ) echo "$choice is a invalid input, exiting script."; exit 1;;
     esac
   
   sudo install_package install python3-pip

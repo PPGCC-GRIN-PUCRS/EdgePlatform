@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+# 
+# REQUIREMENT SET
+# 
+
 # Check if the script is being run as root
 if [ "$(id -u)" -eq 0 ]; then
     echo "⚠️ Warning: You are running this script as root!"
@@ -13,8 +17,21 @@ if [ "$(id -u)" -eq 0 ]; then
     esac
 fi
 
+# Guarantee that pre-requirements are available
+if ! command -v "pip" &> /dev/null; then
+  echo "🪤 ERR: the required command 'pip' is not installeg."
+    read -p "Do you want that this script auto download it? [Y/n]: " choice
+    case "$choice" in
+        [Yy]* ) echo "Continuing...";;
+        [Nn]* ) echo "Exiting script."; exit 1;;
+        * ) echo "Invalid input, exiting script."; exit 1;;
+    esac
+  
+  sudo install_package install python3-pip
+  sudo ln -s /usr/bin/pip3 /usr/bin/pip
+fi
 
-## PREPARING
+# Content gathering
 echo "📲 Downloading agent content"
 REPO_URL="https://github.com/PPGCC-GRIN-PUCRS/EdgePlatform.git"
 if [ -d "/tmp/agent" ] || [ -d "$HOME/agent" ]; then
@@ -29,10 +46,17 @@ else
     echo "Error during content download."
     exit 1
   fi
+  sleep 5 #gARANTEE THAT 
   cp -r /tmp/grin/agent /tmp/agent
   sudo rm -rf /tmp/grin
   cd /tmp/agent
 fi
+
+
+
+# 
+# INSTALL OPTIONS
+# 
 
 # Check for --debug flag
 DEBUG=false
@@ -55,6 +79,33 @@ for arg in "$@"; do
   fi
 done
 
+
+# 
+# FUNCTIONS
+# 
+
+install_package() {
+  PACKAGE_NAME="$1"
+
+  if command -v apt-get &> /dev/null; then
+    sudo apt-get update
+    sudo apt-get install -y "$PACKAGE_NAME"
+  elif command -v dnf &> /dev/null; then
+    sudo dnf install -y "$PACKAGE_NAME"
+  elif command -v yum &> /dev/null; then
+    sudo yum install -y "$PACKAGE_NAME"
+  elif command -v pacman &> /dev/null; then
+    sudo pacman -Sy --noconfirm "$PACKAGE_NAME"
+  elif command -v apk &> /dev/null; then
+    sudo apk add "$PACKAGE_NAME"
+  elif command -v zypper &> /dev/null; then
+    sudo zypper install -y "$PACKAGE_NAME"
+  else
+    echo "❌ Package manager not supported or not detected."
+    exit 1
+  fi
+}
+
 spinner() {
     local pid=$!
     local delay=0.1
@@ -70,6 +121,10 @@ spinner() {
 }
 
 
+
+# 
+# INSTALL SCRIPT
+# 
 
 ## BEGIN
 echo "🚀 Starting agent installation"

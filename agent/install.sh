@@ -86,7 +86,7 @@ if ! command -v "pip" &> /dev/null; then
   install_package python3-pip
   
   echo "📦 Checking for pip update..."
-  python3 -m pip install --upgrade --user pip
+  python3 -m pip install --upgrade --user pip --no-warn-script-location
 
   # Detect if the updated pip is in ~/.local/bin and not in PATH
   LOCAL_BIN="$HOME/.local/bin"
@@ -113,7 +113,7 @@ if [ -d "$HOME/agent" ]; then
   echo "👌 Agent on disk, using local content"
   cd "$HOME/agent"
 else
-  elif [ -d "/tmp/agent" ] then
+  if [ -d "/tmp/agent" ] then
     echo "✂️ Removing old cloned agent"
     sudo rm -rf /tmp/agent
   fi

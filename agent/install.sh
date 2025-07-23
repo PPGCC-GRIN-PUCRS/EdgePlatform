@@ -2,30 +2,30 @@
 # Exit the script immediately if any command returns a non-zero (error) exit code.
 set -e
 
-# 
+#
 # FUNCTIONS
-# 
+#
 
 install_package() {
-  PACKAGE_NAME="$1"
-
-  if command -v apt-get &> /dev/null; then
-    sudo apt-get update
-    sudo apt-get install -y "$PACKAGE_NAME"
-  elif command -v dnf &> /dev/null; then
-    sudo dnf install -y "$PACKAGE_NAME"
-  elif command -v yum &> /dev/null; then
-    sudo yum install -y "$PACKAGE_NAME"
-  elif command -v pacman &> /dev/null; then
-    sudo pacman -Sy --noconfirm "$PACKAGE_NAME"
-  elif command -v apk &> /dev/null; then
-    sudo apk add "$PACKAGE_NAME"
-  elif command -v zypper &> /dev/null; then
-    sudo zypper install -y "$PACKAGE_NAME"
-  else
-    echo "❌ Package manager not supported or not detected."
-    exit 1
-  fi
+    PACKAGE_NAME="$1"
+    
+    if command -v apt-get &> /dev/null; then
+        sudo apt-get update
+        sudo apt-get install -y "$PACKAGE_NAME"
+        elif command -v dnf &> /dev/null; then
+        sudo dnf install -y "$PACKAGE_NAME"
+        elif command -v yum &> /dev/null; then
+        sudo yum install -y "$PACKAGE_NAME"
+        elif command -v pacman &> /dev/null; then
+        sudo pacman -Sy --noconfirm "$PACKAGE_NAME"
+        elif command -v apk &> /dev/null; then
+        sudo apk add "$PACKAGE_NAME"
+        elif command -v zypper &> /dev/null; then
+        sudo zypper install -y "$PACKAGE_NAME"
+    else
+        echo "❌ Package manager not supported or not detected."
+        exit 1
+    fi
 }
 
 spinner() {
@@ -33,21 +33,21 @@ spinner() {
     local delay=0.1
     local spinstr='|/-\'
     local i=0
-
+    
     while ps -p $pid > /dev/null 2>&1; do
         printf "\r📦 Installing Python package [%c]" "${spinstr:i++%${#spinstr}:1}"
         sleep $delay
     done
-
+    
     printf "\r📦 Installing Python package [✅] Installed\n"
 }
 
 
 
 
-# 
+#
 # REQUIREMENT SET
-# 
+#
 
 # Check if the script is being run as root
 if [ "$(id -u)" -eq 0 ]; then
@@ -64,45 +64,52 @@ fi
 
 # Guarantee that pre-requirements are available
 if ! command -v "pip" &> /dev/null; then
-  echo "🪤 ERR: the required command 'pip' is not installed."
-    read -p "Do you want that this script auto download it? [Y/n]: " installpipchoice
-    installpip="${installpipchoice:-Y}"
-    case "$installpip" in
-        [Yy]* ) echo "Continuing...";;
-        [Nn]* ) echo "Exiting script."; exit 1;;
-        * ) echo "$installpip is a invalid input, exiting script."; exit 1;;
-    esac
+  echo "🪤 WARN: the required command 'pip' is not installed."
+  if [ -t 0 ]; then
+    read -p "Do you want this script to auto-install it? [Y/n]: " installpip
+  else
+    installpip="Y"
+  fi
+  
+  case "$installpip" in
+    [Yy]* ) echo "📦 Installing pip...";;
+    [Nn]* ) echo "🚪 Exiting script."; exit 1;;
+    * ) echo "❌ Invalid input: $installpip"; exit 1;;
+  esac
   
   install_package python3-pip
-  sudo ln -s /usr/bin/pip3 /usr/bin/pip
+  
+  if ! command -v pip &> /dev/null && command -v pip3 &> /dev/null; then
+    sudo ln -s /usr/bin/pip3 /usr/bin/pip
+  fi
 fi
 
 # Content gathering
 echo "📲 Downloading agent content"
 REPO_URL="https://github.com/PPGCC-GRIN-PUCRS/EdgePlatform.git"
 if [ -d "/tmp/agent" ] || [ -d "$HOME/agent" ]; then
-  echo "Agent on disk, using local content"
+    echo "Agent on disk, using local content"
 else
-  echo "Agent not found locally. Downloading agent content..."
-  git clone "$REPO_URL" "/tmp/grin"
-  if [ $? -eq 0 ]; then
-    GIT_CLONED=true
-    echo "Repository downloaded successfully."
-  else
-    echo "Error during content download."
-    exit 1
-  fi
-  sleep 5 #gARANTEE THAT 
-  cp -r /tmp/grin/agent /tmp/agent
-  sudo rm -rf /tmp/grin
-  cd /tmp/agent
+    echo "Agent not found locally. Downloading agent content..."
+    git clone "$REPO_URL" "/tmp/grin"
+    if [ $? -eq 0 ]; then
+        GIT_CLONED=true
+        echo "Repository downloaded successfully."
+    else
+        echo "Error during content download."
+        exit 1
+    fi
+    sleep 5 #gARANTEE THAT
+    cp -r /tmp/grin/agent /tmp/agent
+    sudo rm -rf /tmp/grin
+    cd /tmp/agent
 fi
 
 
 
-# 
+#
 # INSTALL OPTIONS
-# 
+#
 
 # Check for --debug flag
 DEBUG=false
@@ -110,25 +117,25 @@ CLEAN=false
 CLEAN_LOGS=false
 CLEAN_CACHE=false
 for arg in "$@"; do
-  if [ "$arg" == "--debug" ]; then
-    DEBUG=true
-    echo "🐞 Debug mode enabled: Spinner disabled, logs will be shown"
-  elif [ "$arg" == "--clean" ]; then
-    CLEAN=true
-    echo "🧹 Clean mode enabled: Old logs will be removed and cache ignored"
-  elif [ "$arg" == "--clean-cache" ]; then
-    CLEAN_CACHE=true
-    echo "🧹 Clean cache mode enabled: Cache will be ignored"
-  elif [ "$arg" == "--clean-logs" ]; then
-    CLEAN_LOGS=true
-    echo "🧹 Clean logs mode enabled: Old logs will be removed"
-  fi
+    if [ "$arg" == "--debug" ]; then
+        DEBUG=true
+        echo "🐞 Debug mode enabled: Spinner disabled, logs will be shown"
+        elif [ "$arg" == "--clean" ]; then
+        CLEAN=true
+        echo "🧹 Clean mode enabled: Old logs will be removed and cache ignored"
+        elif [ "$arg" == "--clean-cache" ]; then
+        CLEAN_CACHE=true
+        echo "🧹 Clean cache mode enabled: Cache will be ignored"
+        elif [ "$arg" == "--clean-logs" ]; then
+        CLEAN_LOGS=true
+        echo "🧹 Clean logs mode enabled: Old logs will be removed"
+    fi
 done
 
 
-# 
+#
 # INSTALL SCRIPT
-# 
+#
 
 ## BEGIN
 echo "🚀 Starting agent installation"
@@ -160,10 +167,10 @@ else
 fi
 # Create the group "agent" if it does not exist
 if ! getent group agent > /dev/null 2>&1; then
-  echo "🧑‍🤝‍🧑 Creating group 'agent'"
-  sudo groupadd agent
+    echo "🧑‍🤝‍🧑 Creating group 'agent'"
+    sudo groupadd agent
 else
-  echo "🧑‍🤝‍🧑 Group 'agent' already exists - skipped"
+    echo "🧑‍🤝‍🧑 Group 'agent' already exists - skipped"
 fi
 # Add the "agent" user to the "agent" group
 echo "👥 Adding 'agent' user to the 'agent' group"
@@ -177,8 +184,8 @@ sudo usermod -aG adm "agent"
 
 # Remove existing config directory (optional, if you want fresh install)
 if [ -d "$CONFIG_DIR" ]; then
-  echo "🧹 Removing existing config directory: $CONFIG_DIR"
-  sudo rm -rf "$CONFIG_DIR"
+    echo "🧹 Removing existing config directory: $CONFIG_DIR"
+    sudo rm -rf "$CONFIG_DIR"
 fi
 
 # Recreate config directory
@@ -221,20 +228,20 @@ sudo chown :agent "$ERR_FILE"
 
 # Remove old systemd files if needed
 if [ -f "$SYSTEMD_SERVICE" ]; then
-  echo "🧹 Removing old systemd service"
-  sudo systemctl stop agent.service || true
-  sudo systemctl disable agent.service || true
-  sudo rm -f "$SYSTEMD_SERVICE"
+    echo "🧹 Removing old systemd service"
+    sudo systemctl stop agent.service || true
+    sudo systemctl disable agent.service || true
+    sudo rm -f "$SYSTEMD_SERVICE"
 fi
 
 
 # Copy fresh systemd service file
 echo "📦 Installing systemd service"
 sed -e "s|__USER__|$AGENT_USER|g" \
-    -e "s|__LOG-FILE__|$LOG_FILE|g" \
-    -e "s|__ERROR-FILE__|$ERR_FILE|g" \
-    -e "s|__WORKING-DIR__|$CURRENT_USER_DIR|g" \
-    systemd/agent.service > /tmp/agent.service
+-e "s|__LOG-FILE__|$LOG_FILE|g" \
+-e "s|__ERROR-FILE__|$ERR_FILE|g" \
+-e "s|__WORKING-DIR__|$CURRENT_USER_DIR|g" \
+systemd/agent.service > /tmp/agent.service
 sudo mv /tmp/agent.service "$SYSTEMD_SERVICE"
 sudo chmod 644 "$SYSTEMD_SERVICE"
 
@@ -249,23 +256,23 @@ INSTALL_FLAGS="--break-system-packages --force-reinstall"
 [ "$DEBUG" = true ] || INSTALL_FLAGS="$INSTALL_FLAGS --quiet"
 # Install the package with or without debug
 if [ "$DEBUG" = true ]; then
-  echo "📦 Installing Python package (with logs)"
-  pip install . $INSTALL_FLAGS
+    echo "📦 Installing Python package (with logs)"
+    pip install . $INSTALL_FLAGS
 else
-  (pip install . $INSTALL_FLAGS) & spinner
+    (pip install . $INSTALL_FLAGS) & spinner
 fi
 
 if [ -f "/usr/local/bin/agent" ]; then
-  echo "🧹 Removing existing agent at /usr/local/bin/agent"
-  sudo rm -f /usr/local/bin/agent
+    echo "🧹 Removing existing agent at /usr/local/bin/agent"
+    sudo rm -f /usr/local/bin/agent
 fi
 
 # Move CLI tool to global bin path
 AGENT_BIN="$(python3 -m site --user-base)/bin/agent"
 if [ -f "$AGENT_BIN" ]; then
-  echo "🔀 Moving agent CLI to /usr/local/bin"
-  sudo cp "$AGENT_BIN" /usr/local/bin/agent
-  sudo chmod +x /usr/local/bin/agent
+    echo "🔀 Moving agent CLI to /usr/local/bin"
+    sudo cp "$AGENT_BIN" /usr/local/bin/agent
+    sudo chmod +x /usr/local/bin/agent
 else
     echo "❌ Could not find agent binary at $AGENT_BIN"
     exit 1
@@ -284,13 +291,13 @@ echo "✅ Agent installed and running!"
 
 
 if ! command -v k3s >/dev/null 2>&1; then
-  echo ""
-  echo "👉 Next steps: agent install to add missing packages"
+    echo ""
+    echo "👉 Next steps: agent install to add missing packages"
 fi
 
 # If git cloned, remove temp files
 if [ "$GIT_CLONED" = true ]; then
-  echo "Removing cloned content at /tmp/agent"
-  cd ..
-  sudo rm -rf "/tmp/agent"
+    echo "Removing cloned content at /tmp/agent"
+    cd ..
+    sudo rm -rf "/tmp/agent"
 fi

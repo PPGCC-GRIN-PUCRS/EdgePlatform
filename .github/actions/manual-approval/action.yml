@@ -1,0 +1,31 @@
+# .github/actions/manual-approval/action.yml
+name: "Manual approval"
+description: "Rise issue requesting manual approval to continue"
+
+inputs:
+  APPROVERS:
+    required: false
+    default: grinedgeplatform
+    description: "Team eligible to approve the request"
+  APP_ID:
+    required: true
+    description: "App eligible to create token to rise manual request issue"
+  APP_PRIVATE_KEY:
+    required: true
+    description: "App secret eligible to create token to rise manual request issue"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Generate token
+      id: generate_token
+      uses: tibdex/github-app-token@v1
+      with:
+        app_id: ${{ inputs.APP_ID }}
+        private_key: ${{ inputs.APP_PRIVATE_KEY }}
+    - name: Wait for approval
+      uses: trstringer/manual-approval@v1
+      with:
+        secret: ${{ steps.generate_token.outputs.token }}
+        approvers: ${{ inputs.APPROVERS }}
+        minimum-approvals: 1

@@ -1,0 +1,17 @@
+spring:
+
+  application:
+    name: modulartestbed
+
+  datasource:
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5434/platform}
+    username: ${DATASOURCE_USERNAME:postgres}
+    password: ${DATASOURCE_PASSWORD:password}
+    driverClassName: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect

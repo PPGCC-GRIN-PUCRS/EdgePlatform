@@ -1,0 +1,30 @@
+# .github/actions/docker-stop-rm/action.yml
+name: "Stop and remove docker container"
+description: "Reusable step to stop and remove a docker container"
+
+inputs:
+  key_file:
+    required: false
+    default: "./cloud.key"
+    description: "Key file name (including path, such as './') and file extension (file.key / file.pem)"
+  CLOUD_USER:
+    required: true
+    description: "Cloud user with access granted to the RSA key file"
+  CLOUD_ADDRESS:
+    required: true
+    description: "Cloud address host (able to accept ssh) being IPv4 or DNS."
+  CONTAINER_NAME:
+    required: true
+    description: "Name of the container to be dropped. (Doesn't accept container ID)"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Remove previous service version
+      shell: bash
+      run: |
+        ssh -t -o StrictHostKeyChecking=no -i "${{ inputs.key_file }}" ${{ inputs.CLOUD_USER }}@${{ inputs.CLOUD_ADDRESS }} << EOF
+          sudo -i
+          echo "Removing ${{ inputs.CONTAINER_NAME }}"
+          docker stop ${{ inputs.CONTAINER_NAME }} || true && docker rm ${{ inputs.CONTAINER_NAME }} || true
+        EOF

@@ -1,7 +1,10 @@
 <body class="app-container">
-  <sidebar-component class="sidebar-container"></sidebar-component>
+  <sidebar-component
+    [enabled]="sidebarEnabled"
+    class="sidebar-container"
+  ></sidebar-component>
 
-  <div class="content-container">
+  <div class="content-container" [@routeAnimations]="getRouteAnimationData()" >
     <router-outlet class="view-container"></router-outlet>
   </div>
 </body>

@@ -1,0 +1,49 @@
+<div class="form-container">
+  <!-- <form [formGroup]="burnerForm"> -->
+  <h2>Burn Configuration Images</h2>
+
+  <div class="full-width-section">
+    <button class="center" (click)="testUsb()" mat-stroked-button>List</button>
+
+    <div *ngIf="devices.length > 0; else noDevices">
+      <h2>Connected USB Devices</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Space</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let device of devices">
+            <td>{{ device.name }}</td>
+            <td>{{ device.type }}</td>
+            <td>{{ device.space }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #noDevices>
+      <p>No USB devices found.</p>
+    </ng-template>
+  </div>
+
+  <div class="action-buttons">
+    <button mat-button matStepperPrevious>Back</button>
+    <button mat-button matStepperNext [disabled]="burnerForm.invalid">
+      Next
+    </button>
+  </div>
+  <div
+    *ngIf="burnerForm.invalid && (burnerForm.dirty || burnerForm.touched)"
+    class="form-error-list"
+  >
+    <p class="form-error-line">Fields not compliant:</p>
+    <div *ngFor="let field of findInvalidFields()">
+      <p class="form-error-line">* {{errorsMessage.get(field)}}</p>
+    </div>
+  </div>
+  <!-- </form> -->
+</div>

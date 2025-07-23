@@ -1,0 +1,121 @@
+name: Deploy docker workflow
+
+on:
+  workflow_call:
+    inputs:
+      COMPOSE_PATH:
+        type: string
+        required: true
+        description: "Path to docker-compose.yml file"
+      CONTAINER_NAME:
+        type: string
+        required: true
+        description: "Desired name to be set at containar that is being deployed"
+      SERVICE_NAME:
+        type: string
+        required: true
+        description: "Docker service to be stoped and removed previous new container deployment"
+
+      # <optional>
+      manual:
+        type: boolean
+        default: false
+        required: false
+        description: "If manual input is set to true, this workflow will only continue when te owner approves the opened issue"
+      key_file:
+        type: string
+        required: false
+        default: "./cloud.key"
+        description: "Key file name (including path, such as './') and file extension (file.key / file.pem)"
+
+    secrets:
+      ENV_FILE:
+        required: false
+        description: "Secured application environment variables file"
+      CLOUD_RSA_KEY:
+        required: true
+        description: "Username able to login into image registry account"
+      CLOUD_USER:
+        required: true
+        description: "Password able to login into image registry account"
+      CLOUD_ADDRESS:
+        required: true
+        description: "Cloud address host (able to accept ssh) being IPv4 or DNS."
+
+      # <optional>
+      MANUAL_APPROVE_REQUESTOR_ID:
+        required: false
+        description: "App eligible to create token to rise manual request issue"
+      MANUAL_APPROVE_REQUESTOR_SECRET:
+        required: false
+        description: "App secret eligible to create token to trigger dispatches"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Request manual approval
+        if: ${{ inputs.manual }}
+        id: request-approval
+        uses: ./.github/actions/manual-approval
+        continue-on-error: true
+        timeout-minutes: 5
+        with:
+          APP_ID: ${{ secrets.MANUAL_APPROVE_REQUESTOR_ID }}
+          APP_PRIVATE_KEY: ${{ secrets.MANUAL_APPROVE_REQUESTOR_SECRET }}
+
+      - name: Allow workflow to finish with manual deploy deny
+        if: ${{ inputs.manual && steps.request-approval.outcome == 'failure' }}
+        id: bypass
+        run: |
+          echo ""
+          echo -e "\033[33m--------\033[0m"
+          echo -e "\033[33m${{ inputs.CONTAINER_NAME }} not deployed.\033[0m"
+          echo -e "\033[33m--------\033[0m"
+          exit 0
+
+      - name: Add server public key
+        if: ${{ inputs.manual == false || (inputs.manual && steps.request-approval.outcome != 'failure') }}
+        id: add_keys
+        uses: ./.github/actions/cloud-keys
+        with:
+          CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
+
+      - name: Inject compose file to server
+        if: ${{ inputs.manual == false || (inputs.manual && steps.request-approval.outcome != 'failure') }}
+        uses: ./.github/actions/cloud-scp
+        with:
+          local_path: ${{ inputs.COMPOSE_PATH }}
+          target_path: /home/${{ secrets.CLOUD_USER }}
+          CLOUD_USER: ${{ secrets.CLOUD_USER }}
+          CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
+
+      - name: Remove previous service version
+        if: ${{ inputs.manual == false || (inputs.manual && steps.request-approval.outcome != 'failure') }}
+        uses: ./.github/actions/docker-stop-rm
+        with:
+          CLOUD_USER: ${{ secrets.CLOUD_USER }}
+          CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
+          CONTAINER_NAME: ${{ inputs.CONTAINER_NAME }}
+
+      - name: Deploy
+        if: ${{ inputs.manual == false || (inputs.manual && steps.request-approval.outcome != 'failure') }}
+        run: |
+          ssh -t -o StrictHostKeyChecking=no -i "${{ inputs.key_file }}" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
+            sudo -i
+
+            if [[ -z "${{ secrets.ENV_FILE }}" ]]; then
+              echo "Not injecting env variables"
+            else
+              echo "${{ secrets.ENV_FILE }}" > ./.env
+              chmod 600 ./.env && set -a
+              source ./.env
+            fi
+
+            cd /home/${{ secrets.CLOUD_USER }}
+            export CONTAINER_NAME=${{ inputs.CONTAINER_NAME}}
+            docker-compose up -d ${{ inputs.SERVICE_NAME }} --force-recreate --pull always
+          EOF

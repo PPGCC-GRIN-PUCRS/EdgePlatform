@@ -1,22 +1,24 @@
 import { ModuleWithProviders, NgModule, Type } from '@angular/core';
-import { DevicesComponent } from './devices/devices.component';
-import { CloudComponent } from './cloud/cloud.component';
-import { EdgeComponent } from './edge/edge.component';
-import { MapComponent } from './map/map.component';
 import { CommonModule } from '@angular/common';
 
 import { ComponentsModule } from '../components/components.module';
+import { TopologyModule } from './topology/topology.module';
+import { HomeComponent } from './home/home.component';
+import { ReactiveFormsModule } from '@angular/forms';
+import { ServerModule } from './server/server.module';
 
-const moduleViews: Array<Type<any> | ModuleWithProviders<{}> | any[]> = [
-  MapComponent,
-  CloudComponent,
-  EdgeComponent,
-  DevicesComponent,
+const views: Array<Type<any> | ModuleWithProviders<{}> | any[]> = [
+  HomeComponent,
+];
+
+const modules: Array<Type<any> | ModuleWithProviders<{}> | any[]> = [
+  TopologyModule,
+  ServerModule,
 ];
 
 @NgModule({
-  declarations: [moduleViews],
+  declarations: [views],
   imports: [CommonModule, ComponentsModule],
-  exports: [moduleViews],
+  exports: [views, modules],
 })
 export class ViewsModule {}

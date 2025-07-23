@@ -1,0 +1,35 @@
+# .github/actions/docker-image-rm/action.yml
+name: "Remove older docker images"
+description: "Reusable step to remove a docker image"
+
+inputs:
+  key_file:
+    required: false
+    default: "./cloud.key"
+    description: "Key file name (including path, such as './') and file extension (file.key / file.pem)"
+  CLOUD_USER:
+    required: true
+    description: "Cloud user with access granted to the RSA key file"
+  CLOUD_ADDRESS:
+    required: true
+    description: "Cloud address host (able to accept ssh) being IPv4 or DNS."
+  REGISTRY_IMAGE:
+    required: true
+    description: "Image registry to be locally cleaned"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Remove previous image version
+      shell: bash
+      run: |
+        ssh -t -o StrictHostKeyChecking=no -i "${{ inputs.key_file }}" ${{ inputs.CLOUD_USER }}@${{ inputs.CLOUD_ADDRESS }} << EOF
+
+          echo "Removing image ${{ inputs.REGISTRY_IMAGE }}"
+          docker images --format "{{.Repository}}:{{.Tag}} {{.ID}}" | grep "${{ inputs.REGISTRY_IMAGE }}" | while read -r line; do
+            IMAGE_ID=$(echo "$line" | awk '{print $2}')
+            echo "Removing version: $line.$IMAGE_ID"
+            docker rmi -f "$IMAGE_ID"
+          done
+
+        EOF

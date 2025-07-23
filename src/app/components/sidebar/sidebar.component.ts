@@ -1,11 +1,10 @@
 import { ConfigurationComponent } from './configuration/configuration.component';
+import { buttonList } from './button/button.component.list';
 import { ButtonComponent } from './button/button.component';
 import { MatIconModule } from '@angular/material/icon';
-import { buttonList } from './button/button.component.list';
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { NgFor } from '@angular/common';
 import { AddComponent } from './add/add.component';
+import { Component, Input } from '@angular/core';
+import { NgFor, NgIf } from '@angular/common';
 
 @Component({
   selector: 'sidebar-component',
@@ -15,28 +14,45 @@ import { AddComponent } from './add/add.component';
   imports: [
     ConfigurationComponent,
     ButtonComponent,
-    AddComponent,
     MatIconModule,
+    MatIconModule,
+    AddComponent,
     NgFor,
+    NgIf,
   ],
 })
 export class SidebarComponent {
-  disabledMenus: string[] = ['Devices', 'Edge'];
-
   menuItens: ButtonComponent[] = buttonList;
+  currentMenu: ButtonComponent | null;
+  disabledMenus: string[];
 
-  constructor(private router: Router) {
+  @Input() enabled: boolean = true;
+
+  constructor() {
+    this.currentMenu = null;
     const selectedMenu = this.menuItens.find((m) => m.title == 'Map');
-    if (selectedMenu) selectedMenu.selected = true;
+    if (selectedMenu) {
+      selectedMenu.selected = true;
+      this.currentMenu = selectedMenu;
+    }
+    
+    this.refreshDisabledMenuList()
+    this.disabledMenus = ['Devices', 'Edge'];
     this.disabledMenus.forEach((menu) => {
       const disableMenu = this.menuItens.find((m) => m.title == menu);
       if (disableMenu) disableMenu.disabled = true;
     });
-
-    if (selectedMenu?.action) selectedMenu.action(this.router);
   }
 
-  test() {
-    console.log('hup');
+  refreshDisabledMenuList() {
+    this.disabledMenus = this.menuItens.filter((m) => m.disabled == true).map((m) => m.title) 
+  }
+
+  change(item: ButtonComponent) {
+    if(this.currentMenu)
+      this.currentMenu.selected = false
+
+    this.currentMenu = item
+    this.currentMenu.selected = true
   }
 }

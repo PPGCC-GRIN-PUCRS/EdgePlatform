@@ -1,0 +1,27 @@
+services:
+  grin-platform:
+    pull_policy: always
+    image: hcley/grin-platform:latest
+    container_name: "${GRIN_PLATFORM:-grin-platform}"
+    networks:
+      - proxy
+    environment:
+      - NGINX_HOST=grin.logiclabsoftwares.com
+      - NGINX_PORT=80
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+
+      - "traefik.http.middlewares.grin-platform-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.grin-platform.middlewares=grin-platform-https-redirect"
+      - "traefik.http.services.grin-platform.loadbalancer.server.scheme=http"
+      - "traefik.http.services.grin-platform.loadbalancer.server.port=80"
+
+      - "traefik.http.routers.grin-platform-secured.rule=Host(`grin.logiclabsoftwares.com`)"
+      - "traefik.http.routers.grin-platform-secured.tls.certresolver=cloudflare"
+      - "traefik.http.routers.grin-platform-secured.middlewares=traefik-auth"
+      - "traefik.http.routers.grin-platform-secured.entrypoints=https"
+
+networks:
+  proxy:
+    external: true

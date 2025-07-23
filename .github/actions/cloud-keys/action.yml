@@ -1,0 +1,21 @@
+# .github/actions/cloud-keys/action.yml
+name: "Add Server Public Key"
+description: "Reusable step to add server public key"
+
+inputs:
+  key_export_name:
+    required: false
+    default: "./cloud.key"
+    description: "Key file name (including path, such as './') and file extension (file.key / file.pem)"
+  CLOUD_RSA_KEY:
+    required: true
+    description: "Cloud RSA key file"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Add server public key
+      shell: bash
+      run: |
+        echo "${{ inputs.CLOUD_RSA_KEY }}" > ${{ inputs.key_export_name }}
+        chmod 600 ${{ inputs.key_export_name }}

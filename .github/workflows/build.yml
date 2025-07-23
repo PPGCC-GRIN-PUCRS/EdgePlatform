@@ -1,0 +1,64 @@
+name: Build docker workflow
+
+on:
+  workflow_call:
+    inputs:
+      REGISTRY_IMAGE:
+        type: string
+        required: true
+        description: "Image Registry with repository without tag (e.g. hcley/grin)"
+      IMAGE_ARTIFACT:
+        type: string
+        required: true
+        description: "Will be the name of the file that will be generated for the buildx (as $IMAGE_ARTIFACT.tar)"
+
+jobs:
+  image:
+    permissions:
+      packages: write
+      contents: read
+      attestations: write
+      id-token: write
+    runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5.6.0
+        with:
+          images: |
+            ${{ inputs.IMAGE_ARTIFACT }}
+            ${{ inputs.REGISTRY_IMAGE }}
+            ${{ inputs.REGISTRY_IMAGE }}:${{ github.sha }}
+
+      - name: Set Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: build image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          no-cache: true
+          push: false
+          load: true
+          file: api/Dockerfile
+          tags: |
+            ${{ inputs.REGISTRY_IMAGE }}:latest
+            ${{ inputs.REGISTRY_IMAGE }}:${{ github.sha }}
+          outputs: |
+            type=docker,dest=/tmp/${{ inputs.IMAGE_ARTIFACT }}.tar
+
+      - name: Image digest
+        run: |
+          echo "${{ steps.build.outputs.digest }}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          name: ${{ inputs.IMAGE_ARTIFACT }}
+          path: /tmp/${{ inputs.IMAGE_ARTIFACT }}.tar

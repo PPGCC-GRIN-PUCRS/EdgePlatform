@@ -1,9 +1,30 @@
 /* You can add global styles to this file, and also import other style files */
 // https://erikasarti.com/html/tabela-cores/
+//round icons
+
+/* symbols rounded */
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded");
+@import url("https://fonts.googleapis.com/css?family=Material+Icons+Round");
+@import url("https://fonts.googleapis.com/icon?family=Material+Icons");
+
 $disabled-color: #cccccc;
 $hover-color: #cccccc;
 $white: #ffff;
 $primary-color: #00d5c9;
+
+:root {
+  --grin-blue: #007bff;
+  --disabled-color: #cccccc;
+  --hover-color: #cccccc;
+  --white: #ffff;
+  --primary-color: #00d5c9;
+  --grin-completed-blue: #77bac6;
+
+  --mat-stepper-header-edit-state-icon-background-color: var(
+    --grin-completed-blue
+  );
+  --mat-stepper-header-selected-state-icon-background-color: var(--grin-blue);
+}
 
 html,
 body {

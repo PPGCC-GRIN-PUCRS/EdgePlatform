@@ -1,0 +1,16 @@
+::ng-deep .mat-horizontal-stepper-header-container {
+  align-self: center;
+  max-width: 900px;
+  width: 100%;
+}
+
+::ng-deep div {
+  .mat-stepper-horizontal-line {
+    border-top-width: 1.5px;
+    border-top-color: var(--white); //var(--grin-completed-blue);
+  }
+}
+
+.mat-stepper-vertical {
+  min-height: 100%;
+}

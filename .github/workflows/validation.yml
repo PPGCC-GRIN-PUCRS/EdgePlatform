@@ -1,0 +1,110 @@
+name: Build docker image as artifact
+
+on:
+  workflow_call:
+    inputs:
+      key_file:
+        type: string
+        required: false
+        default: "./cloud.key"
+        description: "Key file name (including path, such as './') and file extension (file.key / file.pem)"
+      CONTAINER_NAME:
+        type: string
+        required: true
+        description: "Desired name to be set at containar that is being deployed"
+
+    secrets:
+      APP_ID:
+        required: true
+        description: "App eligible to create token to trigger dispatches"
+      APP_PRIVATE_KEY:
+        required: true
+        description: "App secret eligible to create token to trigger dispatches"
+      CLOUD_RSA_KEY:
+        required: true
+        description: "Username able to login into image registry account"
+      CLOUD_USER:
+        required: true
+        description: "Password able to login into image registry account"
+      CLOUD_ADDRESS:
+        required: true
+        description: "Cloud address host (able to accept ssh) being IPv4 or DNS."
+
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Add server public key
+        uses: ./.github/actions/cloud-keys
+        with:
+          CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
+
+      - name: Inject compose file to server
+        uses: ./.github/actions/cloud-scp
+        with:
+          local_path: ./api/docker-compose.yml
+          target_path: /home/${{ secrets.CLOUD_USER }}
+          CLOUD_USER: ${{ secrets.CLOUD_USER }}
+          CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
+
+      - name: Validate container existance
+        continue-on-error: true
+        id: healthcheck
+        run: |
+          ssh -t -o StrictHostKeyChecking=no -i "${{ inputs.key_file }}" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} << EOF
+            sudo -i
+
+            if docker ps --filter "name=${{ inputs.CONTAINER_NAME }}" --format "{{.Names}}" | grep -w "${{ inputs.CONTAINER_NAME }}"; then
+              echo -e "\033[32m${{ inputs.CONTAINER_NAME }} is currently running.\033[0m"
+              exit 0;
+            else
+              echo -e "\033[31m${{ inputs.CONTAINER_NAME }} is not running or not healthy.\033[0m"
+              exit 1;
+            fi
+          EOF
+
+      - name: Wait for potential database deploy
+        id: double-check
+        if: always() && ${{ github.event.inputs.status != 'deployed' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TIMEOUT: 360 # 6 MINUTES
+        run: |
+          echo "Waiting for database deploy job to complete..."
+          start_time=$(date +%s)
+          while true; do
+            current_time=$(date +%s)
+            elapsed=$(( current_time - start_time ))
+            if [[ $elapsed -ge ${{ env.TIMEOUT }} ]]; then
+                echo -e "\033[31mTimeout waiting for database deploy job to complete.\033[0m"
+                exit 1
+            fi
+
+            job=$(gh run view ${{ github.run_id }} --json jobs | jq '.jobs[] | select(.name=="database / deploy")')
+            job_status=$(echo "$job" | jq -r '.conclusion')
+            deploy_job=$(echo "$job" | jq '.steps[] | select(.name=="Deploy")')
+            deploy_job_status=$(echo "$deploy_job" | jq -r '.conclusion')
+
+            if [[ "$deploy_job_status" == "success" ]]; then
+              echo -e "\033[32mThe deploy job finished successfully.\033[0m"
+              exit 0
+            fi
+
+            if [[ "$job_status" != "" ]]; then
+              if [[ "$deploy_job_status" == "skipped" && "${{steps.healthcheck.outcome}}" == "success" ]]; then
+                echo -e "\033[33m${{ inputs.CONTAINER_NAME }} status on previous step: \033[32m${{ steps.healthcheck.outcome }}\033[0m"
+                echo -e "\033[33mDeploy status: \033[32m$deploy_job_status\033[0m"
+                exit 0
+              fi
+              echo -e "\033[33m${{ inputs.CONTAINER_NAME }} status on previous step: \033[31m${{ steps.healthcheck.outcome }}\033[0m"
+              echo -e "\033[33mDeploy status: \033[31m$deploy_job_status\033[0m"
+              exit 1
+            fi
+
+            sleep 10
+          done

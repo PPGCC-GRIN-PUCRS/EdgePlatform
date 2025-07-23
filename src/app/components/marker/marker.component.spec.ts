@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
-import MarkerComponent from './marker.component';
+import { MarkerComponent } from './marker.component';
 
 describe('MarkerComponent', () => {
   let component: MarkerComponent;

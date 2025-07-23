@@ -1,0 +1,120 @@
+name: API CI-CD
+# Trigger
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/api-pipeline.yml"
+      - "api/**"
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+    permissions:
+      attestations: write
+      packages: write
+      id-token: write
+      contents: read
+    with:
+      REGISTRY_IMAGE: ${{ vars.REGISTRY }}/${{ vars.API_IMAGE_NAME }}
+      IMAGE_ARTIFACT: ${{ vars.API_IMAGE_NAME }}.${{ github.sha }}
+
+  publish:
+    needs: build
+    uses: ./.github/workflows/publish.yml
+    permissions:
+      attestations: write
+      id-token: write
+    with:
+      TAG: ${{ github.sha }}
+      REGISTRY_IMAGE: ${{ vars.REGISTRY }}/${{ vars.API_IMAGE_NAME }}
+      IMAGE_ARTIFACT: ${{ vars.API_IMAGE_NAME }}.${{ github.sha }}
+    secrets:
+      DOCKER_REGISTRY_USERNAME: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+      DOCKER_REGISTRY_PASSWORD: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+
+  database-health:
+    needs: publish
+    uses: ./.github/workflows/validation.yml
+    with:
+      CONTAINER_NAME: ${{ vars.DB_CONTAINER_NAME }}
+    secrets:
+      APP_ID: ${{ secrets.MANUAL_APPROVE_REQUESTOR_ID }}
+      APP_PRIVATE_KEY: ${{ secrets.MANUAL_APPROVE_REQUESTOR_SECRET }}
+      CLOUD_USER: ${{ secrets.CLOUD_USER }}
+      CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
+      CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
+
+  database:
+    needs: publish
+    uses: ./.github/workflows/deploy.yml
+    with:
+      manual: true
+      COMPOSE_PATH: ./api/docker-compose.yml
+      SERVICE_NAME: ${{ vars.DB_SERVICE_NAME }}
+      CONTAINER_NAME: ${{ vars.DB_CONTAINER_NAME }}
+    secrets:
+      ENV_FILE: ${{ secrets.API_ENV_FILE }}
+      CLOUD_USER: ${{ secrets.CLOUD_USER }}
+      CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
+      CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
+      MANUAL_APPROVE_REQUESTOR_ID: ${{ secrets.MANUAL_APPROVE_REQUESTOR_ID }}
+      MANUAL_APPROVE_REQUESTOR_SECRET: ${{ secrets.MANUAL_APPROVE_REQUESTOR_SECRET }}
+
+  database-backup:
+    if: needs.database.result == 'success'
+    needs: [database]
+    uses: ./.github/workflows/backup.yml
+    with:
+      backup: restore
+      SERVICE_NAME: ${{ vars.API_SERVICE_NAME }}
+      CONTAINER_NAME: ${{ vars.API_CONTAINER_NAME }}
+    secrets:
+      ENV_FILE: ${{ secrets.DB_ENV_FILE }}
+      BUCKET_TOKEN: ${{ secrets.BUCKET_TOKEN }}
+      CLOUD_USER: ${{ secrets.CLOUD_USER }}
+      CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
+      CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
+
+  backend:
+    if: success() || needs.database-health.result == 'success' || needs.database.result == 'success'
+    needs: [database-health, database]
+    uses: ./.github/workflows/deploy.yml
+    with:
+      COMPOSE_PATH: ./api/docker-compose.yml
+      SERVICE_NAME: ${{ vars.API_SERVICE_NAME }}
+      CONTAINER_NAME: ${{ vars.API_CONTAINER_NAME }}
+    secrets:
+      ENV_FILE: ${{ secrets.API_ENV_FILE }}
+      CLOUD_USER: ${{ secrets.CLOUD_USER }}
+      CLOUD_ADDRESS: ${{ secrets.CLOUD_ADDRESS }}
+      CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
+
+  cleanup:
+    needs: [database-backup, backend]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Add server public key
+        uses: ./.github/actions/cloud-keys
+        with:
+          CLOUD_RSA_KEY: ${{ secrets.CLOUD_RSA_KEY }}
+
+      - name: Move file to project folder to keep history
+        run: |
+          ssh -o StrictHostKeyChecking=no -i "${{ env.key_file }}" ${{ secrets.CLOUD_USER }}@${{ secrets.CLOUD_ADDRESS }} sudo mv /home/${{ secrets.CLOUD_USER }}/docker-compose.yml ${{ vars.PROJECT_FOLDER }}/docker-compose-api.yml || true
+
+      - name: Remove sensitive files
+        run: |
+          # while IFS='' read -r line || [ -n "$line" ]
+          # do
+          #   key="${line%%=*}"
+          #   printf '%s\n' "$key"
+          # done < .env
+          rm -rf ${{ env.key_file }}
+          rm -rf ./*.pem
+          rm -rf ./*.key
+          rm -rf ./.*env

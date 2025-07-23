@@ -10,6 +10,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 const moduleComponents: Array<Type<any> | ModuleWithProviders<{}> | any[]> = [
   SidebarComponent,
@@ -20,15 +21,16 @@ const moduleComponents: Array<Type<any> | ModuleWithProviders<{}> | any[]> = [
   declarations: [],
   imports: [
     BrowserAnimationsModule,
-    moduleComponents,
-    CommonModule,
-    BrowserModule,
-    FormsModule,
     MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
+    moduleComponents,
     MatDialogModule,
+    MatButtonModule,
+    MatSelectModule,
+    MatInputModule,
+    BrowserModule,
+    MatIconModule,
+    CommonModule,
+    FormsModule,
   ],
   exports: [moduleComponents],
 })

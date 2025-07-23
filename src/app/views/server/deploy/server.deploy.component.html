@@ -1,0 +1,17 @@
+<mat-stepper [linear]="false" class="mat-stepper-vertical" #stepper>
+  <mat-step [stepControl]="sbcConfigGroup" label="Configuring">
+    <server-deploy-step-sbc-config
+      [formGroup]="sbcConfigGroup"
+    ></server-deploy-step-sbc-config>
+  </mat-step>
+  <mat-step [stepControl]="sbcConfigGroup" label="Clustering">
+    <server-deploy-step-sbc-burner
+      [formGroup]="sbcBurnerGroup"
+    ></server-deploy-step-sbc-burner>
+  </mat-step>
+  <!-- <mat-step [stepControl]="sbcBurnerGroup" label="Burning">
+    <server-deploy-step-sbc-burner
+      [formGroup]="sbcBurnerGroup"
+    ></server-deploy-step-sbc-burner>
+  </mat-step> -->
+</mat-stepper>

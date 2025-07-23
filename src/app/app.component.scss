@@ -4,11 +4,16 @@
 }
 
 .sidebar-container {
-  height: 100%;
-  width: 80px;
+  &[enabled="true"] {
+    overflow: none;
+    height: 100%;
+    width: 80px;
+    top: 0%;
+  }
 }
 
 .content-container {
+  overflow: auto;
   height: 100%;
   width: 100%;
 }

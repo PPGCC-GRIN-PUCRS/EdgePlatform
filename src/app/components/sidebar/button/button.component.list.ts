@@ -1,20 +1,21 @@
 import { Router } from '@angular/router';
 
+
 export const buttonList: any[] = [
   {
     title: 'Map',
     icon: 'fa-map-marker-alt',
     action: (router: Router) => {
-      router.navigate([`Map`]);
+      router.navigate([`topology/map`]);
     },
     disabled: false,
-    selected: true,
+    selected: false,
   },
   {
     title: 'Cloud',
     icon: 'fa-globe',
     action: (router: Router) => {
-      router.navigate([`Cloud`]);
+      router.navigate([`topology/cloud`]);
     },
     disabled: false,
     selected: false,
@@ -23,7 +24,7 @@ export const buttonList: any[] = [
     title: 'Fog',
     icon: 'fa-water',
     action: (router: Router) => {
-      router.navigate([`Fog`]);
+      router.navigate([`topology/fog`]);
     },
     disabled: false,
     selected: false,
@@ -32,18 +33,18 @@ export const buttonList: any[] = [
     title: 'Edge',
     icon: 'fa-server',
     action: (router: Router) => {
-      router.navigate([`Edge`]);
+      router.navigate([`topology/edge`]);
     },
-    disabled: false,
+    disabled: true,
     selected: false,
   },
   {
     title: 'Devices',
     icon: 'fa-tools',
     action: (router: Router) => {
-      router.navigate([`Devices`]);
+      router.navigate([`topology/devices`]);
     },
-    disabled: false,
+    disabled: true,
     selected: false,
   },
 ];

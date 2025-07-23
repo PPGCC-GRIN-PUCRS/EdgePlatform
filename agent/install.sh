@@ -14,6 +14,26 @@ if [ "$(id -u)" -eq 0 ]; then
 fi
 
 
+## PREPARING
+echo "📲 Downloading agent content"
+REPO_URL="https://github.com/seuusuario/seurepositorio.git"
+if [ -d "/tmp/agent" ] || [ -d "$HOME/agent" ]; then
+  echo "Agent on disk, using local content"
+else
+  echo "Agent not found locally. Downloading agent content..."
+  git clone "$REPO_URL" "/tmp/grin"
+  if [ $? -eq 0 ]; then
+    GIT_CLONED=true
+    echo "Repository downloaded successfully."
+  else
+    echo "Error during content download."
+    exit 1
+  fi
+  sudo cp -r /tmp/grin/agent /tmp/agent
+  sudo rm -rf /tmp/grin
+  sudo cd /tmp/agent
+fi
+
 # Check for --debug flag
 DEBUG=false
 CLEAN=false
@@ -203,7 +223,15 @@ sudo systemctl restart agent.service
 echo "✅ agent CLI is now available globally!"
 echo "✅ Agent installed and running!"
 
+
 if ! command -v k3s >/dev/null 2>&1; then
   echo ""
   echo "👉 Next steps: agent install to add missing packages"
+fi
+
+# If git cloned, remove temp files
+if [ "$GIT_CLONED" = true ]; then
+  echo "Removing cloned content at /tmp/agent"
+  cd ..
+  rm -rf "/tmp/agent"
 fi

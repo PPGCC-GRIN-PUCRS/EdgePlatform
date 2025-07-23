@@ -1,5 +1,49 @@
 #!/bin/bash
+# Exit the script immediately if any command returns a non-zero (error) exit code.
 set -e
+
+# 
+# FUNCTIONS
+# 
+
+install_package() {
+  PACKAGE_NAME="$1"
+
+  if command -v apt-get &> /dev/null; then
+    sudo apt-get update
+    sudo apt-get install -y "$PACKAGE_NAME"
+  elif command -v dnf &> /dev/null; then
+    sudo dnf install -y "$PACKAGE_NAME"
+  elif command -v yum &> /dev/null; then
+    sudo yum install -y "$PACKAGE_NAME"
+  elif command -v pacman &> /dev/null; then
+    sudo pacman -Sy --noconfirm "$PACKAGE_NAME"
+  elif command -v apk &> /dev/null; then
+    sudo apk add "$PACKAGE_NAME"
+  elif command -v zypper &> /dev/null; then
+    sudo zypper install -y "$PACKAGE_NAME"
+  else
+    echo "❌ Package manager not supported or not detected."
+    exit 1
+  fi
+}
+
+spinner() {
+    local pid=$!
+    local delay=0.1
+    local spinstr='|/-\'
+    local i=0
+
+    while ps -p $pid > /dev/null 2>&1; do
+        printf "\r📦 Installing Python package [%c]" "${spinstr:i++%${#spinstr}:1}"
+        sleep $delay
+    done
+
+    printf "\r📦 Installing Python package [✅] Installed\n"
+}
+
+
+
 
 # 
 # REQUIREMENT SET
@@ -80,48 +124,6 @@ for arg in "$@"; do
     echo "🧹 Clean logs mode enabled: Old logs will be removed"
   fi
 done
-
-
-# 
-# FUNCTIONS
-# 
-
-install_package() {
-  PACKAGE_NAME="$1"
-
-  if command -v apt-get &> /dev/null; then
-    sudo apt-get update
-    sudo apt-get install -y "$PACKAGE_NAME"
-  elif command -v dnf &> /dev/null; then
-    sudo dnf install -y "$PACKAGE_NAME"
-  elif command -v yum &> /dev/null; then
-    sudo yum install -y "$PACKAGE_NAME"
-  elif command -v pacman &> /dev/null; then
-    sudo pacman -Sy --noconfirm "$PACKAGE_NAME"
-  elif command -v apk &> /dev/null; then
-    sudo apk add "$PACKAGE_NAME"
-  elif command -v zypper &> /dev/null; then
-    sudo zypper install -y "$PACKAGE_NAME"
-  else
-    echo "❌ Package manager not supported or not detected."
-    exit 1
-  fi
-}
-
-spinner() {
-    local pid=$!
-    local delay=0.1
-    local spinstr='|/-\'
-    local i=0
-
-    while ps -p $pid > /dev/null 2>&1; do
-        printf "\r📦 Installing Python package [%c]" "${spinstr:i++%${#spinstr}:1}"
-        sleep $delay
-    done
-
-    printf "\r📦 Installing Python package [✅] Installed\n"
-}
-
 
 
 # 

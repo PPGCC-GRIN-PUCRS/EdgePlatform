@@ -119,7 +119,7 @@ else
   fi
 
   echo "🔻 Gethering agent content..."
-  git clone "$REPO_URL" "/tmp/grin" & spinner "🌏 Cloning global agent repository content" "[🧳] Clonned successfully"
+  git clone "$REPO_URL" "/tmp/grin" #& spinner "🌏 Cloning global agent repository content" "[🧳] Clonned successfully"
   if [ $? -eq 0 ]; then
     GIT_CLONED=true
     echo "✅ Repository downloaded successfully."

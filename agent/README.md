@@ -1,13 +1,11 @@
-TODO
+# Install over bash
 
-1. Template apresentação MESTRADO - Reutilizar tudo possível do PEP
-    * Template OverLeaf
-        - Reportart tudo, inclusive communicação entre devices / 
+```
+wget -O - https://grin.logiclabsoftwares.com/agent/install.sh | bash
+```
 
-2. Produção textual - Monografia
-    Estudo sobre SBC - Estado atual (Capacidade, recursos disponíveis - GPU, CPU, ...-, areas de aplicação, nível de confiabilidade, consumo energético)
+```
+wget -O - https://raw.githubusercontent.com/PPGCC-GRIN-PUCRS/EdgePlatform/refs/heads/release/agent/install.sh | bash
+```
 
-    Normativa para monografia
-    Mesmo template que o PEP
-
-
+## Target platform

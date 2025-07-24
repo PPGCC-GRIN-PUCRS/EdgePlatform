@@ -1,0 +1,54 @@
+
+services:
+  headscale:
+    image: headscale/headscale:0.22.3
+    pull_policy: always
+    container_name: headscale
+    restart: unless-stopped
+    command: headscale serve
+    networks:
+      - proxy
+    volumes:
+      - /opt/headscale/config:/etc/headscale
+      - /opt/headscale/data:/var/lib/headscale/
+    expose:
+      - 8080
+    labels:
+      - "traefik.enable=true"
+      # Configure service and router
+      - "traefik.http.services.headscale.loadbalancer.server.port=8080"
+      - "traefik.http.services.headscale.loadbalancer.server.scheme=http"
+      - "traefik.http.routers.headscale.rule=Host(`vpn.{{DOMAIN}}`)"
+      - "traefik.http.routers.headscale.entrypoints=https"
+      - "traefik.http.routers.headscale.tls.certresolver=cloudflare"
+      - "traefik.http.routers.headscale.service=headscale"
+      # Configure CORS middleware if needed
+        #- "traefik.http.middlewares.headscale-cors.headers.accesscontrolallowmethods=GET,POST,PUT,PATCH,DELETE,OPTIONS"
+        #- "traefik.http.middlewares.headscale-cors.headers.accesscontrolallowheaders=*"
+        #- "traefik.http.middlewares.headscale-cors.headers.accesscontrolalloworiginlist=https://vpn.logiclabsoftwares.com, https://"
+        #- "traefik.http.middlewares.headscale-cors.headers.accesscontrolmaxage=100"
+        #- "traefik.http.middlewares.headscale-cors.headers.addvaryheader=true"
+        #- "traefik.http.routers.headscale.middlewares=headscale-cors"
+      # UDP ports for DERP, etc
+      - "traefik.udp.services.headscale-udp-41641.loadbalancer.server.port=41641"
+      - "traefik.udp.services.headscale-udp-3478.loadbalancer.server.port=3478"
+
+  headscale-admin:
+    image: goodieshq/headscale-admin:latest
+    container_name: headscale-admin
+    restart: unless-stopped
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.services.headscale-admin.loadbalancer.server.port=80"
+      - "traefik.http.services.headscale-admin.loadbalancer.server.scheme=http"
+      - "traefik.http.routers.headscale-admin.rule=Host(`vpn.{{DOMAIN}}`) && PathPrefix(`/admin`)"
+      - "traefik.http.routers.headscale-admin.entrypoints=https"
+      - "traefik.http.routers.headscale-admin.tls.certresolver=cloudflare"
+      - "traefik.http.routers.headscale-admin.middlewares=traefik-auth"
+
+networks:
+   proxy:
+      external: true

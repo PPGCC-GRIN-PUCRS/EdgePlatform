@@ -28,8 +28,3 @@ logging:
     magenta: '\033[95m'
     cyan: \033[96m
     clear: '\033[0m'
-
-metadata:
-  version: "v1.0.1"
-  environment: "production"
-  description: ""

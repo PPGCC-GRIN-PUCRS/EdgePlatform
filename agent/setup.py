@@ -1,25 +1,30 @@
 from setuptools import setup, find_packages
-from agent.utils import load_config
+import os
+import re
 
-config = load_config()
+
+def read_metadata(data):
+    with open(os.path.join("metadata.py"), encoding="utf-8") as f:
+        content = f.read()
+        return re.search(rf"^__{data}__ = ['\"]([^'\"]+)['\"]", content, re.M).group(1)
+
+def read_requirements(filename="requirements.txt"):
+    with open(filename, encoding="utf-8") as f:
+        return [line.strip() for line in f if line.strip() and not line.startswith("#")]
 
 setup(
     name='agent',
-    version='v1.0.1',
     include_package_data=True,
+    version=read_metadata("version"),
     packages=find_packages(),
-    install_requires=[
-        'fastapi',
-        'uvicorn',
-        'pyyaml',
-    ],
+    install_requires=read_requirements(),
     entry_points={
         'console_scripts': [
             'agent = agent.agent:main',
         ],
     },
-    author='Oliveira, Cleyson',
-    description='A system agent that exposes a REST API and ingresses system data.',
+    author=read_metadata("author"),
+    description=read_metadata("description"),
     classifiers=[
         'Programming Language :: Python :: 3',
         'Operating System :: Unix',

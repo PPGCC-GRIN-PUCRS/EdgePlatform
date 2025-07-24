@@ -2,9 +2,14 @@
 # Exit the script immediately if any command returns a non-zero (error) exit code.
 set -e
 
+
 #
 # FUNCTIONS
 #
+
+version_ge() {
+  printf '%s\n%s\n' "$2" "$1" | sort -C -V
+}
 
 install_package() {
     PACKAGE_NAME="$1"
@@ -45,11 +50,13 @@ spinner() {
 }
 
 
-
-
 #
 # REQUIREMENT SET
 #
+
+MIN_PYTHON_VERSION=3.10
+PYTHON_INSTALL_VERSION=3.11.7
+INSTALL_PREFIX=/usr/local
 
 # Check if the script is being run as root
 if [ "$(id -u)" -eq 0 ]; then
@@ -67,6 +74,80 @@ if [ "$(id -u)" -eq 0 ]; then
         * ) echo "$rootchoice is a invalid input, exiting script."; exit 1;;
     esac
 fi
+
+
+# Guarantee that Python >= 3.10 is available
+MIN_PYTHON_VERSION="3.10"
+PYTHON_INSTALL_VERSION="3.11.7"
+INSTALL_PREFIX="/usr/local"
+
+version_ge() {
+  # Returns 0 if $1 >= $2, 1 else
+  # Uses sort -V to compare versions
+  printf '%s\n%s\n' "$2" "$1" | sort -C -V
+}
+
+
+# Find available python version
+# Note that the python version should be greater or equal than $MIN_PYTHON_VERSION
+found_py=""
+for ver in 3.10 3.11 3.12; do
+  if command -v "python$ver" &> /dev/null; then
+    v_full=$("python$ver" --version 2>&1 | awk '{print $2}')
+    if version_ge "$v_full" "$MIN_PYTHON_VERSION"; then
+      found_py="python$ver"
+      break
+    fi
+  fi
+done
+
+if [ -z "$found_py" ]; then
+  echo "🪤 WARN: Python >= $MIN_PYTHON_VERSION is not installed."
+  if [ -t 0 ]; then
+    read -p "Do you want this script to auto-install Python $PYTHON_INSTALL_VERSION? [Y/n]: " installpython
+  else
+    installpython="Y"
+  fi
+
+  case "$installpython" in
+    [Yy]* )
+      echo "📦 Installing Python $PYTHON_INSTALL_VERSION..."
+      cd /tmp || { echo "❌ Failed to enter /tmp"; exit 1; }
+      wget -q https://www.python.org/ftp/python/$PYTHON_INSTALL_VERSION/Python-$PYTHON_INSTALL_VERSION.tgz
+      tar -xf Python-$PYTHON_INSTALL_VERSION.tgz
+      cd Python-$PYTHON_INSTALL_VERSION || { echo "❌ Failed to enter Python source dir"; exit 1; }
+      ./configure --enable-optimizations --prefix="$INSTALL_PREFIX"
+      make -j$(nproc)
+      sudo make altinstall
+      found_py="$INSTALL_PREFIX/bin/python3.11"
+      ;;
+    [Nn]* )
+      echo "🚪 Exiting script."
+      exit 1
+      ;;
+    * )
+      echo "❌ Invalid input: $installpython"
+      exit 1
+      ;;
+  esac
+
+  # Detect if the updated pip is in ~/.local/bin and not in PATH
+  if [[ ":$PATH:" != *":$INSTALL_PREFIX/bin:"* ]]; then
+    echo "🔧 Adding $INSTALL_PREFIX/bin to PATH for this session."
+    export PATH="$INSTALL_PREFIX/bin:$PATH"
+  fi
+  # Persist the change for future sessions
+  if ! grep -q "$INSTALL_PREFIX/bin" ~/.bashrc; then
+    echo "📌 Persisting PATH update to ~/.bashrc"
+    echo "export PATH=\"$INSTALL_PREFIX/bin:\$PATH\"" >> ~/.bashrc
+  fi
+else
+  echo "🐍 Found suitable Python version: $($found_py --version)"
+fi
+
+# Agora garanta usar essa versão
+alias python3="$found_py"
+alias pip3="${found_py/python/pip}"
 
 # Guarantee that pre-requirements are available
 if ! command -v "pip" &> /dev/null; then

@@ -57,8 +57,6 @@ def run_cli():
 
 def handle_command(parser):
     args = parser.parse_args()
-    print(args)
-    print(args.command)
     match args.command:
         case "ingress":
             data = None

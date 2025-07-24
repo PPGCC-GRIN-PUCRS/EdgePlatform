@@ -54,9 +54,22 @@ spinner() {
 # REQUIREMENT SET
 #
 
-MIN_PYTHON_VERSION=3.10
+# Define paths
+SYSTEMD_SERVICE="/etc/systemd/system/agent.service"
+ERR_FILE="/var/log/agent.error.log"
+LOG_FILE="/var/log/agent.log"
+DATA_DIR="/var/lib/agent"
+CONFIG_DIR="/etc/agent"
+AGENT_USER="agent"
+
+INSTALL_PREFIX="/usr/local"
+
+CURRENT_USER=$(whoami)
+CURRENT_USER_DIR=$(eval echo ~$CURRENT_USER)
+
 PYTHON_INSTALL_VERSION=3.11.7
-INSTALL_PREFIX=/usr/local
+MIN_PYTHON_VERSION=3.10
+
 
 # Check if the script is being run as root
 if [ "$(id -u)" -eq 0 ]; then
@@ -76,14 +89,10 @@ if [ "$(id -u)" -eq 0 ]; then
 fi
 
 
-# Guarantee that Python >= 3.10 is available
-MIN_PYTHON_VERSION="3.10"
-PYTHON_INSTALL_VERSION="3.11.7"
-INSTALL_PREFIX="/usr/local"
 
+# Returns 0 if $1 >= $2, 1 else
+# Uses sort -V to compare versions
 version_ge() {
-  # Returns 0 if $1 >= $2, 1 else
-  # Uses sort -V to compare versions
   printf '%s\n%s\n' "$2" "$1" | sort -C -V
 }
 
@@ -217,7 +226,7 @@ fi
 
 
 #
-# INSTALL OPTIONS
+# AGENT INSTALL OPTIONS
 #
 
 # Check for --debug flag
@@ -248,17 +257,6 @@ done
 
 ## BEGIN
 echo "🚀 Starting agent installation"
-
-# Define paths
-SYSTEMD_SERVICE="/etc/systemd/system/agent.service"
-ERR_FILE="/var/log/agent.error.log"
-LOG_FILE="/var/log/agent.log"
-DATA_DIR="/var/lib/agent"
-CONFIG_DIR="/etc/agent"
-CURRENT_USER=$(whoami)
-AGENT_USER="agent"
-
-CURRENT_USER_DIR=$(eval echo ~$CURRENT_USER)
 
 
 # Create agent user with same groups as current user
@@ -371,17 +369,17 @@ else
     (pip install . $INSTALL_FLAGS) & spinner "📦 Installing Python package" "[✅] Installed"
 fi
 
-if [ -f "/usr/local/bin/agent" ]; then
-    echo "🧹 Removing existing agent at /usr/local/bin/agent"
-    sudo rm -f /usr/local/bin/agent
+if [ -f "$INSTALL_PREFIX/bin/agent" ]; then
+    echo "🧹 Removing existing agent at $INSTALL_PREFIX/bin/agent"
+    sudo rm -f $INSTALL_PREFIX/bin/agent
 fi
 
 # Move CLI tool to global bin path
 AGENT_BIN="$(python3 -m site --user-base)/bin/agent"
 if [ -f "$AGENT_BIN" ]; then
-    echo "🔀 Moving agent CLI to /usr/local/bin"
-    sudo cp "$AGENT_BIN" /usr/local/bin/agent
-    sudo chmod +x /usr/local/bin/agent
+    echo "🔀 Moving agent CLI to $INSTALL_PREFIX/bin"
+    sudo cp "$AGENT_BIN" $INSTALL_PREFIX/bin/agent
+    sudo chmod +x $INSTALL_PREFIX/bin/agent
 else
     echo "❌ Could not find agent binary at $AGENT_BIN"
     exit 1

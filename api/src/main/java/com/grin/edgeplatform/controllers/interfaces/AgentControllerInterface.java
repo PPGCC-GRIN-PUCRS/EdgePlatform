@@ -19,6 +19,7 @@ import com.grin.edgeplatform.entities.dtos.NodeIngressDTO;
 public interface AgentControllerInterface extends AgentInstallationControllerInterface {
 
   @Operation(summary = "Notify agent status to the platform", description = "Returns an ACK from the server and any possible task that should be taken by the agent")
+
   @ApiResponse(responseCode = "200", description = "Successfully retrieved employee", content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
   @ApiResponse(responseCode = "404", description = "Agent not registered")
   @PostMapping(value = "/notify")

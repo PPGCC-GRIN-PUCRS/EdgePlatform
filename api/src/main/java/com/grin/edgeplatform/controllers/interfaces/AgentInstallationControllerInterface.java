@@ -17,6 +17,6 @@ public interface AgentInstallationControllerInterface {
             @RequestParam(required = false, defaultValue = "false") boolean refresh);
 
     @GetMapping(value = "/content")
-    ResponseEntity<String> content();// @RequestBody NodeIngressDTO body);
+    ResponseEntity<String> content();
 
 }

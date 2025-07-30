@@ -17,7 +17,7 @@ services:
       - "traefik.http.services.grin-platform.loadbalancer.server.scheme=http"
       - "traefik.http.services.grin-platform.loadbalancer.server.port=80"
 
-      - "traefik.http.routers.grin-platform-secured.rule=Host(`grin.logiclabsoftwares.com`) && PathRegexp(`^(?!/api).*`)"
+      - "traefik.http.routers.grin-platform-secured.rule=Host(`grin.logiclabsoftwares.com`) && !PathPrefix(`/api`)"
       - "traefik.http.routers.grin-platform-secured.tls.certresolver=cloudflare"
       - "traefik.http.routers.grin-platform-secured.middlewares=traefik-auth"
       - "traefik.http.routers.grin-platform-secured.entrypoints=https"

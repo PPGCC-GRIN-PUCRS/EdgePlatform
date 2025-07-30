@@ -1,4 +1,5 @@
 services:
+
   grin-platform:
     pull_policy: always
     image: hcley/grin-platform:latest

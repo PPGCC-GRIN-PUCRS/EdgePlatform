@@ -17,8 +17,15 @@ public class AgentController implements AgentControllerInterface {
   NodeService nodeService;
   AgentService agentService;
 
-  public ResponseEntity<String> install() {
-    return ResponseEntity.ok("reached");
+  public ResponseEntity<String> install(@RequestParam(required = false, defaultValue = "false") boolean refresh) {
+    if (refresh)
+      agentService.clearInstallScriptCache();
+
+    try {
+      return ResponseEntity.ok(agentService.getInstallScript());
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+    }
   }
 
   public ResponseEntity<String> content() {

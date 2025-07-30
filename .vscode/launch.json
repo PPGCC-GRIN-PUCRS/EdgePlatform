@@ -25,6 +25,7 @@
       "projectName": "api",
       "args": "",
       "envFile": "${workspaceFolder}/.env"
+      // "preLaunchTask": "gradle-clean"
     }
   ]
 }

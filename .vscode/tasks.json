@@ -37,6 +37,17 @@
           }
         }
       }
+    },
+    {
+      "label": "gradle-clean",
+      "type": "shell",
+      "command": "./gradlew clean",
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}\\api"
+      },
+      "problemMatcher": [],
+      "isBackground": false
     }
   ]
 }

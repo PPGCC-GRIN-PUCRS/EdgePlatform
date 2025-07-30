@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.ResponseEntity;
 
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,10 +19,9 @@ import com.grin.edgeplatform.entities.dtos.NodeIngressDTO;
 public interface AgentControllerInterface extends AgentInstallationControllerInterface {
 
   @Operation(summary = "Notify agent status to the platform", description = "Returns an ACK from the server and any possible task that should be taken by the agent")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Successfully retrieved employee", content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
-      @ApiResponse(responseCode = "404", description = "Agent not registered")
-  })
+
+  @ApiResponse(responseCode = "200", description = "Successfully retrieved employee", content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
+  @ApiResponse(responseCode = "404", description = "Agent not registered")
   @PostMapping(value = "/notify")
   ResponseEntity<NodeIngressDTO> heartBeat(@RequestBody NodeIngressDTO body);
 
@@ -31,10 +29,8 @@ public interface AgentControllerInterface extends AgentInstallationControllerInt
   ResponseEntity<String> heartBeat();// @RequestBody NodeIngressDTO body);
 
   @Operation(summary = "Signup new node server", description = "Ingress new node to the server, giving server self connection informations")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", content = {}),
-      @ApiResponse(responseCode = "404", content = {})
-  })
+  @ApiResponse(responseCode = "200", content = {})
+  @ApiResponse(responseCode = "404", content = {})
   @PostMapping("/ingress")
   ResponseEntity<NodeIngressDTO> ingressNode(@RequestBody NodeIngressDTO body) throws Exception;
 

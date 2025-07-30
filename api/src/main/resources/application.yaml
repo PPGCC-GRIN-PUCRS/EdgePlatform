@@ -2,6 +2,17 @@ spring:
   application:
     name: EdgeplatformAPI
 
+  cache:
+    type: ${CACHE_ENVIRONMENT:caffeine}
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=1d
+  data:
+    redis:
+      port: 6379
+      host: ${REDIS_HOST:localhost}
+      username: ${REDIS_USERNAME:}
+      password: ${REDIS_PASSWORD:}
+
   datasource:
     url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5434/platform}
     username: ${DATASOURCE_USERNAME:postgres}
@@ -14,3 +25,11 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
+application:
+  api:
+    version: ${API_VERSION:v1.0.1}
+  agent:
+    version: ${API_VERSION:v1.0.1}
+    install:
+      script: "https://raw.githubusercontent.com/PPGCC-GRIN-PUCRS/EdgePlatform/refs/heads/release/agent/install.sh"

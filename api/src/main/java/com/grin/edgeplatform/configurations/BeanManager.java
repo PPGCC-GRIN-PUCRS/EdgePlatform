@@ -1,6 +1,8 @@
 package com.grin.edgeplatform.configurations;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.modelmapper.ModelMapper;
 
@@ -14,18 +16,23 @@ import java.security.NoSuchAlgorithmException;
 public class BeanManager {
 
   @Bean
-  public ModelMapper modelMapper() {
+  ModelMapper modelMapper() {
     return new ModelMapper();
   }
 
   @Bean
-  public KeyPairGenerator keygen() throws NoSuchAlgorithmException {
+  KeyPairGenerator keygen() throws NoSuchAlgorithmException {
     return KeyPairGenerator.getInstance("RSA");
   }
 
   @Bean
-  public KeyFactory keyFactory() throws NoSuchAlgorithmException {
+  KeyFactory keyFactory() throws NoSuchAlgorithmException {
     return KeyFactory.getInstance("RSA");
+  }
+
+  @Bean
+  RestTemplate restTemplate() {
+    return new RestTemplate();
   }
 
 }

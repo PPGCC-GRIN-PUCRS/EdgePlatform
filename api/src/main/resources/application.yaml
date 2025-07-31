@@ -20,16 +20,12 @@ spring:
     driverClassName: org.postgresql.Driver
 
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-
-management:
-  metrics:
-    enable:
-      processor: false
 
 application:
   api:

@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-@Slf4j
+//@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AgentService {
@@ -51,7 +51,8 @@ public class AgentService {
                 .replaceFirst("#!/bin/bash", "")
             );
           } catch (RestClientException e) {
-            log.debug(e.getMessage());
+//            log.debug(e.getMessage());
+            System.out.println(e.getMessage());
             Thread.sleep(600);
           }
         } while (rawScript.isEmpty());

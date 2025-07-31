@@ -4,6 +4,7 @@ services:
     pull_policy: always
     image: hcley/grin-platform:latest
     container_name: "${GRIN_PLATFORM:-grin-platform}"
+    restart: always
     networks:
       - proxy
     environment:

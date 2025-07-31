@@ -40,12 +40,15 @@ services:
     pull_policy: always
     image: hcley/grin-api:latest
     container_name: ${CONTAINER_NAME:-grin-api}
+    restart: always
+#    ports:
+#      - 8080:8080
     networks:
       - grin-data-network
       - proxy
     environment:
       SPRING_PROFILES_ACTIVE: "${SPRING_PROFILE:-development}"
-      DATASOURCE_URL: "${DATASOURCE:-jdbc:postgresql://db:5434/platform}"
+      DATASOURCE_URL: "${DATASOURCE:-jdbc:postgresql://db:5432/platform}"
       DATASOURCE_USERNAME: "${POSTGRES_USER:-postgres}"
       DATASOURCE_PASSWORD: "${POSTGRES_PASSWORD:-password}"
     labels:

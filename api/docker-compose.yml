@@ -51,7 +51,7 @@ services:
       DATASOURCE_URL: "${DATASOURCE:-jdbc:postgresql://db:5432/platform}"
       DATASOURCE_USERNAME: "${POSTGRES_USER:-postgres}"
       DATASOURCE_PASSWORD: "${POSTGRES_PASSWORD:-password}"
-      CACHE_ENVIRONMENT: "${CACHE_ENVIRONMENT:caffeine}"
+      CACHE_ENVIRONMENT: "${CACHE_ENVIRONMENT:-caffeine}"
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"

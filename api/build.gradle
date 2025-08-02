@@ -58,14 +58,15 @@ dependencies {
 
 	// Caching
   implementation 'org.springframework.boot:spring-boot-starter-cache:3.1.5'
-	switch (caching) {
-		case "redis":
-			implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-			break
-		case "caffeine":
-		default:
+//  caching = caching.toUpperCase()
+//	switch (caching) {
+//		case "redis":
+//			implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+//			break
+//		case "caffeine":
+//		default:
 			implementation 'com.github.ben-manes.caffeine:caffeine'
-	}
+//	}
 
 }
 

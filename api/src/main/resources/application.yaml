@@ -27,10 +27,15 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
+management:
+  metrics:
+    enable:
+      processor: false
+
 application:
   api:
     version: ${API_VERSION:v1.0.1}
   agent:
-    version: ${API_VERSION:v1.0.1}
+    version: ${AGENT_VERSION:v1.0.1}
     install:
       script: "https://raw.githubusercontent.com/PPGCC-GRIN-PUCRS/EdgePlatform/refs/heads/release/agent/install.sh"

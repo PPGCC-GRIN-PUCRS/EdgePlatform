@@ -1,7 +1,8 @@
 spring:
   application:
     name: EdgeplatformAPI
-
+  banner:
+    location: classpath:/EdgePlatform.banner.txt
   cache:
     type: ${CACHE_ENVIRONMENT:caffeine}
     caffeine:

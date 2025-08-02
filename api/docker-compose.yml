@@ -41,8 +41,6 @@ services:
     image: hcley/grin-api:latest
     container_name: ${CONTAINER_NAME:-grin-api}
     restart: always
-#    ports:
-#      - 8080:8080
     networks:
       - grin-data-network
       - proxy

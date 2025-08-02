@@ -17,4 +17,4 @@ COPY --from=build /home/gradle/src/build/libs/*.jar /app/api.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-XX:+IgnoreUnrecognizedVMOptions ", "-XX:-UseContainerSupport ", "-XX:+UnlockExperimentalVMOptions", "-jar", "/app/api.jar"]
+ENTRYPOINT ["java", "-XX:-UseContainerSupport ", "-XX:+UnlockExperimentalVMOptions",  "-jar",  "/app/api.jar"]

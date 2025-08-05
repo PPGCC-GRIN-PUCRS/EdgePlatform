@@ -3,13 +3,38 @@
 set -e
 
 
+
+#
+# VARIABLES SET
+#
+SYSTEMD_SERVICE="/etc/systemd/system/agent.service"
+ERR_FILE="/var/log/agent.error.log"
+LOG_FILE="/var/log/agent.log"
+DATA_DIR="/var/lib/agent"
+CONFIG_DIR="/etc/agent"
+AGENT_USER="agent"
+
+INSTALL_PREFIX="/usr/local"
+
+CURRENT_USER=$(whoami)
+CURRENT_USER_DIR=$(eval echo ~$CURRENT_USER)
+
+PYTHON_INSTALL_VERSION=3.11.7
+MIN_PYTHON_VERSION=3.10
+
+
+
 #
 # FUNCTIONS
 #
 
+# Returns 0 if $1 >= $2, 1 else
+# Uses sort -V to compare versions
+
 version_ge() {
   printf '%s\n%s\n' "$2" "$1" | sort -C -V
 }
+
 
 install_package() {
     PACKAGE_NAME="$1"
@@ -33,6 +58,7 @@ install_package() {
     fi
 }
 
+
 spinner() {
     MESSAGE="$1"
     DONE_MESSAGE="$2"
@@ -50,26 +76,26 @@ spinner() {
 }
 
 
+# Find available python version
+# Note that the python version should be greater or equal than $MIN_PYTHON_VERSION
+find_python() {
+  found_py=""
+  for ver in 3.10 3.11 3.12; do
+    if command -v "python$ver" &> /dev/null; then
+      v_full=$("python$ver" --version 2>&1 | awk '{print $2}')
+      if version_ge "$v_full" "$MIN_PYTHON_VERSION"; then
+        found_py="python$ver"
+        break
+      fi
+    fi
+  done
+}
+
+
+
 #
 # REQUIREMENT SET
 #
-
-# Define paths
-SYSTEMD_SERVICE="/etc/systemd/system/agent.service"
-ERR_FILE="/var/log/agent.error.log"
-LOG_FILE="/var/log/agent.log"
-DATA_DIR="/var/lib/agent"
-CONFIG_DIR="/etc/agent"
-AGENT_USER="agent"
-
-INSTALL_PREFIX="/usr/local"
-
-CURRENT_USER=$(whoami)
-CURRENT_USER_DIR=$(eval echo ~$CURRENT_USER)
-
-PYTHON_INSTALL_VERSION=3.11.7
-MIN_PYTHON_VERSION=3.10
-
 
 # Check if the script is being run as root
 if [ "$(id -u)" -eq 0 ]; then
@@ -89,27 +115,8 @@ if [ "$(id -u)" -eq 0 ]; then
 fi
 
 
-
-# Returns 0 if $1 >= $2, 1 else
-# Uses sort -V to compare versions
-version_ge() {
-  printf '%s\n%s\n' "$2" "$1" | sort -C -V
-}
-
-
-# Find available python version
-# Note that the python version should be greater or equal than $MIN_PYTHON_VERSION
-found_py=""
-for ver in 3.10 3.11 3.12; do
-  if command -v "python$ver" &> /dev/null; then
-    v_full=$("python$ver" --version 2>&1 | awk '{print $2}')
-    if version_ge "$v_full" "$MIN_PYTHON_VERSION"; then
-      found_py="python$ver"
-      break
-    fi
-  fi
-done
-
+find_python
+# If a suitable python is NOT found
 if [ -z "$found_py" ]; then
   echo "🪤 WARN: Python >= $MIN_PYTHON_VERSION is not installed."
   if [ -t 0 ]; then
@@ -150,8 +157,42 @@ if [ -z "$found_py" ]; then
     echo "📌 Persisting PATH update to ~/.bashrc"
     echo "export PATH=\"$INSTALL_PREFIX/bin:\$PATH\"" >> ~/.bashrc
   fi
+
 else
   echo "🐍 Found suitable Python version: $($found_py --version)"
+fi
+
+find_python
+if [ -n "$found_py" ]; then
+  current_py_path="$(command -v python || true)"
+  found_py_path="$(command -v "$found_py")"
+
+  if [ "$current_py_path" != "$found_py_path" ]; then
+    if [ -t 0 ]; then
+      echo "⚠️  WARNING: The current default 'python' is NOT '$found_py'."
+      echo "    It is recommended to change the default to avoid compatibility issues."
+      read -p "Do you want to set '$found_py' as the default 'python'? [Y/n]: " change_default
+    else
+      change_default_python="Y"
+    fi
+
+    case "$change_default_python" in
+      [Yy]* )
+        echo "🔧 Setting $found_py as default python..."
+        sudo ln -sf "$found_py_path" /usr/local/bin/python
+        echo "✅ Now 'python' points to: $(python --version 2>&1)"
+        ;;
+      [Nn]* )
+        echo "⚠️  Continuing without changing the default python. Errors may occur if 'python' points to an unsupported version."
+        ;;
+      * )
+        echo "❌ Invalid input: $change_default_python"
+        exit 1
+        ;;
+    esac
+  else
+    echo "ℹ️ 'python' already points to $found_py ($found_py_path)"
+  fi
 fi
 
 # Agora garanta usar essa versão

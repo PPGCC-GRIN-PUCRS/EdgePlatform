@@ -239,7 +239,7 @@ if ! command -v "pip" &> /dev/null; then
   install_package python3-pip
   
   echo "📦 Checking for pip update..."
-  python3 -m pip install --upgrade --user pip --no-warn-script-location
+  $found_py -m pip install --upgrade --user pip --no-warn-script-location
 
   # Detect if the updated pip is in ~/.local/bin and not in PATH
   LOCAL_BIN="$HOME/.local/bin"
@@ -280,7 +280,7 @@ else
     echo "⚠️ Error during content download."
     exit 1
   fi
-  sleep 5 #gARANTEE THAT
+  sleep 5 #GARANTEE THAT
   cp -r /tmp/grin/agent /tmp/agent
   sudo rm -rf /tmp/grin
   cd /tmp/agent
@@ -298,19 +298,19 @@ CLEAN=false
 CLEAN_LOGS=false
 CLEAN_CACHE=false
 for arg in "$@"; do
-    if [ "$arg" == "--debug" ]; then
-        DEBUG=true
-        echo "🐞 Debug mode enabled: Spinner disabled, logs will be shown"
-        elif [ "$arg" == "--clean" ]; then
-        CLEAN=true
-        echo "🧹 Clean mode enabled: Old logs will be removed and cache ignored"
-        elif [ "$arg" == "--clean-cache" ]; then
-        CLEAN_CACHE=true
-        echo "🧹 Clean cache mode enabled: Cache will be ignored"
-        elif [ "$arg" == "--clean-logs" ]; then
-        CLEAN_LOGS=true
-        echo "🧹 Clean logs mode enabled: Old logs will be removed"
-    fi
+  if [ "$arg" == "--debug" ]; then
+    DEBUG=true
+    echo "🐞 Debug mode enabled: Spinner disabled, logs will be shown"
+    elif [ "$arg" == "--clean" ]; then
+    CLEAN=true
+    echo "🧹 Clean mode enabled: Old logs will be removed and cache ignored"
+    elif [ "$arg" == "--clean-cache" ]; then
+    CLEAN_CACHE=true
+    echo "🧹 Clean cache mode enabled: Cache will be ignored"
+    elif [ "$arg" == "--clean-logs" ]; then
+    CLEAN_LOGS=true
+    echo "🧹 Clean logs mode enabled: Old logs will be removed"
+  fi
 done
 
 
@@ -320,7 +320,6 @@ done
 
 ## BEGIN
 echo "🚀 Starting agent installation"
-
 
 # Create agent user with same groups as current user
 if id "agent" &>/dev/null; then
@@ -370,9 +369,9 @@ sudo chown "$AGENT_USER" "$DATA_DIR"
 
 # Ensure log file exists, and remove any old logs
 if [ "$CLEAN" = true ] || [ "$CLEAN_LOGS" = true ]; then
-    echo "🧹 Cleaning log files: [$LOG_FILE, $ERR_FILE]"
-    sudo rm -f "$LOG_FILE"
-    sudo rm -f "$ERR_FILE"
+  echo "🧹 Cleaning log files: [$LOG_FILE, $ERR_FILE]"
+  sudo rm -f "$LOG_FILE"
+  sudo rm -f "$ERR_FILE"
 fi
 
 # Change ownership if necessary
@@ -397,10 +396,10 @@ sudo chown :agent "$ERR_FILE"
 
 # Remove old systemd files if needed
 if [ -f "$SYSTEMD_SERVICE" ]; then
-    echo "🧹 Removing old systemd service"
-    sudo systemctl stop agent.service || true
-    sudo systemctl disable agent.service || true
-    sudo rm -f "$SYSTEMD_SERVICE"
+  echo "🧹 Removing old systemd service"
+  sudo systemctl stop agent.service || true
+  sudo systemctl disable agent.service || true
+  sudo rm -f "$SYSTEMD_SERVICE"
 fi
 
 
@@ -429,10 +428,10 @@ INSTALL_FLAGS="--break-system-packages --force-reinstall"
 [ "$DEBUG" = true ] || INSTALL_FLAGS="$INSTALL_FLAGS --quiet"
 # Install the package with or without debug
 if [ "$DEBUG" = true ]; then
-    echo "📦 Installing Python package (with logs)"
-    pip install . $INSTALL_FLAGS
+  echo "📦 Installing Python package (with logs)"
+  $pip3 install . $INSTALL_FLAGS
 else
-    (pip install . $INSTALL_FLAGS) & spinner "📦 Installing Python package" "[✅] Installed"
+  ($pip3 install . $INSTALL_FLAGS) & spinner "📦 Installing Python package" "[✅] Installed"
 fi
 
 ####################################################################

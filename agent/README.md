@@ -1,7 +1,7 @@
 # Install over bash
 
 ```
-wget -O - https://grin.logiclabsoftwares.com/agent/install.sh | bash
+wget -O - https://grin.logiclabsoftwares.com/api/agent/install.sh | bash
 ```
 
 ```

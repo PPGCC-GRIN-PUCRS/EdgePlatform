@@ -7,6 +7,7 @@ set -e
 #
 # VARIABLES SET
 #
+AGENT_INSTALL_SCRIPT="https://grin.logiclabsoftwares.com/api/agent/install.sh"
 SYSTEMD_SERVICE="/etc/systemd/system/agent.service"
 ERR_FILE="/var/log/agent.error.log"
 LOG_FILE="/var/log/agent.log"
@@ -22,7 +23,7 @@ CURRENT_USER_DIR=$(eval echo ~$CURRENT_USER)
 PYTHON_INSTALL_VERSION=3.11.7
 MIN_PYTHON_VERSION=3.10
 
-
+REBOOT_RECOMMENDED="N"
 
 #
 # FUNCTIONS
@@ -136,6 +137,7 @@ if [ -z "$found_py" ]; then
       make -j$(nproc)
       sudo make altinstall
       found_py="$INSTALL_PREFIX/bin/python3.11"
+      REBOOT_RECOMMENDED="Y"
       ;;
     [Nn]* )
       echo "🚪 Exiting script."
@@ -181,6 +183,7 @@ if [ -n "$found_py" ]; then
         echo "🔧 Setting $found_py as default python..."
         sudo ln -sf "$found_py_path" /usr/local/bin/python
         echo "✅ Now 'python' points to: $(python --version 2>&1)"
+        REBOOT_RECOMMENDED="Y"
         ;;
       [Nn]* )
         echo "⚠️  Continuing without changing the default python. Errors may occur if 'python' points to an unsupported version."
@@ -194,6 +197,25 @@ if [ -n "$found_py" ]; then
     echo "ℹ️ 'python' already points to $found_py ($found_py_path)"
   fi
 fi
+
+$reboot_time=5
+case "$REBOOT_RECOMMENDED" in
+    [Yy]* )
+      echo "Since there was installations, it is recommemded a reboot before continue."
+      echo "Your system will be rebooted in $reboot_time minutes."
+      (crontab -l 2>/dev/null; echo "@reboot bash -c 'wget -O - $AGENT_INSTALL_SCRIPT | bash' # GRIN_AGENT_RUN_ONCE") | crontab -
+      sudo /sbin/shutdown -r $reboot_time
+      echo "If you want to cancel this action, execute the command \"sudo shutdown -c\""
+      echo "But remember that if the system did not get rebooted before continue, errors may occur"
+      exit 0
+      ;;
+    [Nn]* ) echo "ℹ️ No pre-installation was needed. Following with the agent install.";;
+    * ) echo "$REBOOT_RECOMMENDED is a invalid input, exiting script."; exit 1;;
+esac
+
+crontab -l | grep -v 'GRIN_AGENT_RUN_ONCE' | crontab -
+
+echo "✅ Removed @reboot crontab entry."
 
 # Agora garanta usar essa versão
 alias python3="$found_py"
@@ -370,7 +392,6 @@ sudo chown :agent "$LOG_FILE"
 echo "📝 Creating error log file: $ERR_FILE"
 sudo touch "$ERR_FILE"
 sudo chmod 664 "$ERR_FILE"
-# sudo chown :agent "$ERR_FILE"
 sudo chown :agent "$ERR_FILE"
 
 
@@ -398,6 +419,10 @@ echo "🛠  Setting owner in config.yaml to $AGENT_USER"
 sudo sed -i "s/^  owner: .*/  owner: \"$AGENT_USER\"/" "$CONFIG_DIR/config.yaml"
 
 
+######## QUARENTINE ################################################
+###   This script part should be removed and the built agent should
+### be acquired/downloaded from the artifact repository
+
 # Determine the pip install flags
 INSTALL_FLAGS="--break-system-packages --force-reinstall"
 [ "$CLEAN" = true ] || [ "$CLEAN_CACHE" = true ] && INSTALL_FLAGS="$INSTALL_FLAGS --no-cache-dir"
@@ -409,6 +434,9 @@ if [ "$DEBUG" = true ]; then
 else
     (pip install . $INSTALL_FLAGS) & spinner "📦 Installing Python package" "[✅] Installed"
 fi
+
+####################################################################
+
 
 if [ -f "$INSTALL_PREFIX/bin/agent" ]; then
     echo "🧹 Removing existing agent at $INSTALL_PREFIX/bin/agent"
@@ -449,3 +477,4 @@ if [ "$GIT_CLONED" = true ]; then
     cd ..
     sudo rm -rf "/tmp/agent"
 fi
+

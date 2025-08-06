@@ -166,8 +166,8 @@ fi
 
 find_python
 if [ -n "$found_py" ]; then
-  current_py_path="$(command -v python || true)"
-  found_py_path="$(command -v "$found_py")"
+  current_py_path="$(readlink -f "$(command -v python)" || true)"
+  found_py_path="$(readlink -f "$(command -v "$found_py")")"
 
   if [ "$current_py_path" != "$found_py_path" ]; then
     if [ -t 0 ]; then

@@ -3,10 +3,10 @@
 set -e
 
 
-
 #
 # VARIABLES SET
 #
+
 AGENT_INSTALL_SCRIPT="https://grin.logiclabsoftwares.com/api/agent/install.sh"
 SYSTEMD_SERVICE="/etc/systemd/system/agent.service"
 ERR_FILE="/var/log/agent.error.log"
@@ -198,7 +198,7 @@ if [ -n "$found_py" ]; then
   fi
 fi
 
-$reboot_time=5
+reboot_time=5
 case "$REBOOT_RECOMMENDED" in
     [Yy]* )
       echo "Since there was installations, it is recommemded a reboot before continue."

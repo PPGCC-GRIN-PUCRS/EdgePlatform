@@ -98,6 +98,13 @@ find_python() {
 # REQUIREMENT SET
 #
 
+echo "🧹 Cleaning before start"
+rm -rf ~/.local/lib/python3.7/site-packages/agent
+rm -rf ~/.local/lib/python3/site-packages/agent
+rm -rf ~/.local/lib/python/site-packages/agent
+rm -f ~/.local/bin/agent
+
+
 # Check if the script is being run as root
 if [ "$(id -u)" -eq 0 ]; then
     echo "⚠️ Warning: You are running this script as root!"

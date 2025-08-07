@@ -81,11 +81,13 @@ spinner() {
 # Note that the python version should be greater or equal than $MIN_PYTHON_VERSION
 find_python() {
   found_py=""
+  found_py_version=""
   for ver in 3.10 3.11 3.12; do
     if command -v "python$ver" &> /dev/null; then
       v_full=$("python$ver" --version 2>&1 | awk '{print $2}')
       if version_ge "$v_full" "$MIN_PYTHON_VERSION"; then
         found_py="python$ver"
+        found_py_version="$ver"
         break
       fi
     fi
@@ -243,7 +245,7 @@ if ! command -v "pip" &> /dev/null; then
     * ) echo "❌ Invalid input: $installpip"; exit 1;;
   esac
   
-  install_package python3-pip
+  install_package $found_py-pip
   
   echo "📦 Checking for pip update..."
   $found_py -m pip install --upgrade --user pip --no-warn-script-location
@@ -430,15 +432,16 @@ sudo sed -i "s/^  owner: .*/  owner: \"$AGENT_USER\"/" "$CONFIG_DIR/config.yaml"
 ### be acquired/downloaded from the artifact repository
 
 # Determine the pip install flags
+find_python
 INSTALL_FLAGS="--break-system-packages --force-reinstall"
 [ "$CLEAN" = true ] || [ "$CLEAN_CACHE" = true ] && INSTALL_FLAGS="$INSTALL_FLAGS --no-cache-dir"
 [ "$DEBUG" = true ] || INSTALL_FLAGS="$INSTALL_FLAGS --quiet"
 # Install the package with or without debug
 if [ "$DEBUG" = true ]; then
   echo "📦 Installing Python package (with logs)"
-  $pip3 install . $INSTALL_FLAGS
+  $found_py -m pip install . $INSTALL_FLAGS
 else
-  ($pip3 install . $INSTALL_FLAGS) & spinner "📦 Installing Python package" "[✅] Installed"
+  ($found_py -m pip install . $INSTALL_FLAGS) & spinner "📦 Installing Python package" "[✅] Installed"
 fi
 
 ####################################################################

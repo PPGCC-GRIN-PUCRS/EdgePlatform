@@ -4,7 +4,7 @@ import re
 
 
 def read_metadata(data):
-    with open(os.path.join("metadata.py"), encoding="utf-8") as f:
+    with open(os.path.join("agent/metadata.py"), encoding="utf-8") as f:
         content = f.read()
         return re.search(rf"^__{data}__ = ['\"]([^'\"]+)['\"]", content, re.M).group(1)
 

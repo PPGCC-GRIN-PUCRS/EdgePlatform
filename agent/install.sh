@@ -8,6 +8,7 @@ set -e
 #
 
 AGENT_INSTALL_SCRIPT="https://grin.logiclabsoftwares.com/api/agent/install.sh"
+REPOSITORY_URL="https://github.com/PPGCC-GRIN-PUCRS/EdgePlatform.git"
 SYSTEMD_SERVICE="/etc/systemd/system/agent.service"
 ERR_FILE="/var/log/agent.error.log"
 LOG_FILE="/var/log/agent.log"
@@ -270,7 +271,6 @@ fi
 
 # Content gathering
 echo "📲 Syncing agent content"
-REPO_URL="https://github.com/PPGCC-GRIN-PUCRS/EdgePlatform.git"
 if [ -d "$HOME/agent" ]; then
   echo "👌 Agent on disk, using local content"
   cd "$HOME/agent"
@@ -281,7 +281,7 @@ else
   fi
 
   echo "🔻 Gethering agent content..."
-  git clone "$REPO_URL" "/tmp/grin" #& spinner "🌏 Cloning global agent repository content" "[🧳] Clonned successfully"
+  git clone "$REPOSITORY_URL" "/tmp/grin" #& spinner "🌏 Cloning global agent repository content" "[🧳] Clonned successfully"
   if [ $? -eq 0 ]; then
     GIT_CLONED=true
     echo "✅ Repository downloaded successfully."
@@ -433,6 +433,8 @@ sudo sed -i "s/^  owner: .*/  owner: \"$AGENT_USER\"/" "$CONFIG_DIR/config.yaml"
 
 # Determine the pip install flags
 find_python
+$found_py -m ensurepip --upgrade
+$found_py -m pip install --upgrade pip
 INSTALL_FLAGS="--break-system-packages --force-reinstall"
 [ "$CLEAN" = true ] || [ "$CLEAN_CACHE" = true ] && INSTALL_FLAGS="$INSTALL_FLAGS --no-cache-dir"
 [ "$DEBUG" = true ] || INSTALL_FLAGS="$INSTALL_FLAGS --quiet"
@@ -453,7 +455,7 @@ if [ -f "$INSTALL_PREFIX/bin/agent" ]; then
 fi
 
 # Move CLI tool to global bin path
-AGENT_BIN="$(python3 -m site --user-base)/bin/agent"
+AGENT_BIN="$($found_py -m site --user-base)/bin/agent"
 if [ -f "$AGENT_BIN" ]; then
     echo "🔀 Moving agent CLI to $INSTALL_PREFIX/bin"
     sudo cp "$AGENT_BIN" $INSTALL_PREFIX/bin/agent

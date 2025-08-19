@@ -1,1 +1,2 @@
 include agent/config.yaml
+include metadata.py

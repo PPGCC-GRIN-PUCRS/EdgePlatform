@@ -138,15 +138,7 @@ if [ -z "$found_py" ]; then
 
   case "$installpython" in
     [Yy]* )
-      echo "📦 Installing Python $PYTHON_INSTALL_VERSION..."
-      cd /tmp || { echo "❌ Failed to enter /tmp"; exit 1; }
-      wget -q https://www.python.org/ftp/python/$PYTHON_INSTALL_VERSION/Python-$PYTHON_INSTALL_VERSION.tgz
-      tar -xf Python-$PYTHON_INSTALL_VERSION.tgz
-      cd Python-$PYTHON_INSTALL_VERSION || { echo "❌ Failed to enter Python source dir"; exit 1; }
-      ./configure --enable-optimizations --prefix="$INSTALL_PREFIX"
-      make -j$(nproc)
-      sudo make altinstall
-      found_py="$INSTALL_PREFIX/bin/python3.11"
+      install_package python3.11 python3.11-venv python3.11-dev
       REBOOT_RECOMMENDED="Y"
       ;;
     [Nn]* )
@@ -245,13 +237,10 @@ if ! command -v "pip" &> /dev/null; then
     [Nn]* ) echo "🚪 Exiting script."; exit 1;;
     * ) echo "❌ Invalid input: $installpip"; exit 1;;
   esac
-  
-  # install_package $found_py-venv
-  
+
   echo "📦 Checking for pip update..."
-  $found_py -m pip install --upgrade --user pip --no-warn-script-location
   $found_py -m ensurepip --upgrade
-  $found_py -m pip install --upgrade pip
+  $found_py -m pip install --upgrade pip --no-warn-script-location
   
   # Detect if the updated pip is in ~/.local/bin and not in PATH
   LOCAL_BIN="$HOME/.local/bin"

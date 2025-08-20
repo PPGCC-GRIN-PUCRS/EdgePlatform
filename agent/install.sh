@@ -250,7 +250,9 @@ if ! command -v "pip" &> /dev/null; then
   
   echo "📦 Checking for pip update..."
   $found_py -m pip install --upgrade --user pip --no-warn-script-location
-
+  $found_py -m ensurepip --upgrade
+  $found_py -m pip install --upgrade pip
+  
   # Detect if the updated pip is in ~/.local/bin and not in PATH
   LOCAL_BIN="$HOME/.local/bin"
   if [ ! "$(echo $PATH | grep "$LOCAL_BIN")" ]; then
@@ -433,8 +435,6 @@ sudo sed -i "s/^  owner: .*/  owner: \"$AGENT_USER\"/" "$CONFIG_DIR/config.yaml"
 
 # Determine the pip install flags
 find_python
-$found_py -m ensurepip --upgrade
-$found_py -m pip install --upgrade pip
 INSTALL_FLAGS="--break-system-packages --force-reinstall"
 [ "$CLEAN" = true ] || [ "$CLEAN_CACHE" = true ] && INSTALL_FLAGS="$INSTALL_FLAGS --no-cache-dir"
 [ "$DEBUG" = true ] || INSTALL_FLAGS="$INSTALL_FLAGS --quiet"

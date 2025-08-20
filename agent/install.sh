@@ -246,7 +246,7 @@ if ! command -v "pip" &> /dev/null; then
     * ) echo "❌ Invalid input: $installpip"; exit 1;;
   esac
   
-  install_package $found_py-pip
+  install_package $found_py-venv
   
   echo "📦 Checking for pip update..."
   $found_py -m pip install --upgrade --user pip --no-warn-script-location

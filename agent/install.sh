@@ -206,7 +206,7 @@ case "$REBOOT_RECOMMENDED" in
       echo "Since there was installations, it is recommemded a reboot before continue."
       echo "Your system will be rebooted in $reboot_time minutes."
       (crontab -l 2>/dev/null; echo "@reboot bash -c 'wget -O - $AGENT_INSTALL_SCRIPT | bash' # GRIN_AGENT_RUN_ONCE") | crontab -
-      sudo /sbin/shutdown -r $reboot_time
+      # sudo /sbin/shutdown -r $reboot_time
       echo "If you want to cancel this action, execute the command \"sudo shutdown -c\""
       echo "But remember that if the system did not get rebooted before continue, errors may occur"
       exit 0
@@ -215,7 +215,7 @@ case "$REBOOT_RECOMMENDED" in
     * ) echo "$REBOOT_RECOMMENDED is a invalid input, exiting script."; exit 1;;
 esac
 
-crontab -l | grep -v 'GRIN_AGENT_RUN_ONCE' | crontab -
+# crontab -l | grep -v 'GRIN_AGENT_RUN_ONCE' | crontab -
 
 echo "✅ Removed @reboot crontab entry."
 

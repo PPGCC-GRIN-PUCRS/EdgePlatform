@@ -22,7 +22,7 @@ CURRENT_USER=$(whoami)
 CURRENT_USER_DIR=$(eval echo ~$CURRENT_USER)
 
 PYTHON_INSTALL_VERSION=3.11.7
-MIN_PYTHON_VERSION=3.10
+MIN_PYTHON_VERSION=3.11
 
 REBOOT_RECOMMENDED="N"
 
@@ -83,7 +83,7 @@ spinner() {
 find_python() {
   found_py=""
   found_py_version=""
-  for ver in 3.10 3.11 3.12; do
+  for ver in 3.11 3.12; do
     if command -v "python$ver" &> /dev/null; then
       v_full=$("python$ver" --version 2>&1 | awk '{print $2}')
       if version_ge "$v_full" "$MIN_PYTHON_VERSION"; then
@@ -246,10 +246,19 @@ if ! command -v "pip" &> /dev/null; then
     echo "🗄  Backup created: /etc/apt/sources.list.backup.$(date +%Y%m%d-%H%M%S)"
   fi
 
-  # Write new sources.list
+# Remove qualquer linha duplicada de raspberrypi.org do sources.list
+sudo sed -i '/archive.raspberrypi.org\/debian/d' /etc/apt/sources.list
+
+# Garante que sources.list só tem raspbian
 sudo tee /etc/apt/sources.list > /dev/null <<'EOF'
 deb http://archive.raspbian.org/raspbian buster main contrib non-free rpi
+EOF
+
+# Garante que raspi.list tem raspberrypi.org
+sudo tee /etc/apt/sources.list.d/raspi.list > /dev/null <<'EOF'
 deb http://archive.raspberrypi.org/debian buster main
+# Uncomment line below then 'apt-get update' to enable 'apt-get source'
+#deb-src http://archive.raspberrypi.org/debian buster main
 EOF
 
   echo "✅ /etc/apt/sources.list updated with Buster archive repos."

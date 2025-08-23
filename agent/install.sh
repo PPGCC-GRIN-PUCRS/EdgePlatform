@@ -209,7 +209,7 @@ case "$REBOOT_RECOMMENDED" in
       # sudo /sbin/shutdown -r $reboot_time
       echo "If you want to cancel this action, execute the command \"sudo shutdown -c\""
       echo "But remember that if the system did not get rebooted before continue, errors may occur"
-      exit 0
+      # exit 0
       ;;
     [Nn]* ) echo "ℹ️ No pre-installation was needed. Following with the agent install.";;
     * ) echo "$REBOOT_RECOMMENDED is a invalid input, exiting script."; exit 1;;

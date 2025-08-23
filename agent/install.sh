@@ -239,6 +239,8 @@ if ! command -v "pip" &> /dev/null; then
   esac
 
   echo "📦 Checking for pip update..."
+  sudo apt-get update --fix-missing
+  deb http://archive.raspberrypi.org/debian buster main
   $found_py -m ensurepip --upgrade
   $found_py -m pip install --upgrade pip --no-warn-script-location
   

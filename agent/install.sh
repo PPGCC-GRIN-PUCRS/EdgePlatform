@@ -239,8 +239,21 @@ if ! command -v "pip" &> /dev/null; then
   esac
 
   echo "📦 Checking for pip update..."
+
+  # Backup original sources.list
+  if [ -f /etc/apt/sources.list ]; then
+    sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup.$(date +%Y%m%d-%H%M%S)
+    echo "🗄  Backup created: /etc/apt/sources.list.backup.$(date +%Y%m%d-%H%M%S)"
+  fi
+
+  # Write new sources.list
+sudo tee /etc/apt/sources.list > /dev/null <<'EOF'
+deb http://archive.raspbian.org/raspbian buster main contrib non-free rpi
+deb http://archive.raspberrypi.org/debian buster main
+EOF
+
+  echo "✅ /etc/apt/sources.list updated with Buster archive repos."
   sudo apt-get update --fix-missing
-  deb http://archive.raspberrypi.org/debian buster main
   $found_py -m ensurepip --upgrade
   $found_py -m pip install --upgrade pip --no-warn-script-location
   

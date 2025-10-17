@@ -1,0 +1,87 @@
+---
+- name: Update Tailscale env and redeploy
+  hosts: rpis
+  become: true
+  gather_facts: false
+
+  vars:
+    tailscale_compose_dir: /opt/tailscale
+    ts_service_name: tailscale
+
+    # Provide via group_vars/host_vars or CLI (-e ...)
+    ts_authkey: ""
+    ts_extra_args: ""
+
+    # Behavior
+    ts_force_redeploy: true # set true to force restart even if no env change
+    ts_pull_latest: true # pull image before up
+
+  tasks:
+    - name: Ensure compose dir exists
+      ansible.builtin.file:
+        path: "{{ tailscale_compose_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Ensure env file exists (do not overwrite)
+      ansible.builtin.copy:
+        dest: "{{ tailscale_compose_dir }}/tailscale.env"
+        content: ""
+        mode: "0600"
+        force: false
+
+    - name: Set TS_HOSTNAME
+      ansible.builtin.lineinfile:
+        path: "{{ tailscale_compose_dir }}/tailscale.env"
+        regexp: "^TS_HOSTNAME="
+        line: "TS_HOSTNAME={{ inventory_hostname }}"
+        create: true
+        mode: "0600"
+      register: lh
+
+    - name: Set or remove TS_AUTHKEY
+      ansible.builtin.lineinfile:
+        path: "{{ tailscale_compose_dir }}/tailscale.env"
+        regexp: "^TS_AUTHKEY="
+        line: "TS_AUTHKEY={{ ts_authkey }}"
+        state: "{{ 'present' if (ts_authkey | default('') | length) > 0 else 'absent' }}"
+        create: true
+        mode: "0600"
+      register: la
+
+    - name: Set or remove TS_EXTRA_ARGS
+      ansible.builtin.lineinfile:
+        path: "{{ tailscale_compose_dir }}/tailscale.env"
+        regexp: "^TS_EXTRA_ARGS="
+        line: "TS_EXTRA_ARGS={{ ts_extra_args }}"
+        state: "{{ 'present' if (ts_extra_args | default('') | length) > 0 else 'absent' }}"
+        create: true
+        mode: "0600"
+      register: le
+
+    - name: Did env change?
+      ansible.builtin.set_fact:
+        env_changed: "{{ lh.changed or la.changed or le.changed }}"
+
+    - name: Optionally pull latest image (captures stderr too)
+      ansible.builtin.shell: docker compose pull {{ ts_service_name }} 2>&1
+      args:
+        chdir: "{{ tailscale_compose_dir }}"
+      when: ts_pull_latest | bool
+      register: pull
+      changed_when: pull.stdout is search('(?i)(downloading|pulling|downloaded|newer image|digest:)')
+
+    - name: Restart stack to apply env changes (down + up -d)
+      when: env_changed or ts_force_redeploy | bool
+      block:
+        - name: Compose down (stops project)
+          ansible.builtin.shell: docker compose down
+          args: { chdir: "{{ tailscale_compose_dir }}" }
+          changed_when: true
+
+        - name: Compose up -d (bring back services)
+          ansible.builtin.shell: docker compose up -d
+          args: { chdir: "{{ tailscale_compose_dir }}" }
+          register: up_out
+          changed_when: >
+            up_out.stdout is search('(?i)(creating|recreating|starting|container)')

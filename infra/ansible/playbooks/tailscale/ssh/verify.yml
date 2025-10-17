@@ -1,0 +1,91 @@
+---
+- name: Verify Tailscale SSH status without JSON parsing
+  hosts: rpis
+  become: true
+  gather_facts: false
+
+  vars:
+    tailscale_compose_dir: /opt/tailscale
+    ts_service_name: tailscale
+
+  tasks:
+    - name: Is the tailscale container up?
+      ansible.builtin.shell: >
+        docker ps --filter "name={{ ts_service_name }}"
+        --format "{{'{{'}}.Names{{'}}'}} {{'{{'}}.Status{{'}}'}}"
+      register: ts_ps
+      changed_when: false
+      failed_when: false
+
+    - name: Flag container_running
+      ansible.builtin.set_fact:
+        container_running: "{{ (ts_ps.stdout | default('')) | regex_search('\\bUp\\b') is not none }}"
+
+    - name: Get IPv4 (logged-in check)
+      ansible.builtin.shell: docker exec {{ ts_service_name }} tailscale ip -4 2>/dev/null
+      register: ip4
+      changed_when: false
+      failed_when: false
+
+    - name: Normalize IPv4 (define ts_ip4 first)
+      ansible.builtin.set_fact:
+        ts_ip4: >-
+          {{ (ip4.stdout_lines | default([]))
+             | map('trim') | select('ne','') | list | first | default('', true) }}
+
+    - name: Derive logged_in from ts_ip4
+      ansible.builtin.set_fact:
+        logged_in: "{{ ts_ip4 | length > 0 }}"
+
+    - name: Try to read live SSH setting (older versions may not support 'get')
+      ansible.builtin.shell: docker exec {{ ts_service_name }} sh -lc 'tailscale get ssh 2>/dev/null || echo __unsupported__'
+      register: getssh
+      changed_when: false
+      failed_when: false
+
+    - name: Capture ssh_get_value
+      ansible.builtin.set_fact:
+        ssh_get_value: "{{ (getssh.stdout | default('') | trim) }}"
+
+    - name: Decide if 'get ssh' is supported
+      ansible.builtin.set_fact:
+        ssh_supported: "{{ ssh_get_value != '__unsupported__' and (ssh_get_value | length > 0) }}"
+
+    - name: Decide if SSH is enabled live
+      ansible.builtin.set_fact:
+        ssh_enabled_live: "{{ ssh_supported and (ssh_get_value | lower) in ['true','1','yes'] }}"
+
+    - name: Read env file (no-fail)
+      ansible.builtin.slurp:
+        path: "{{ tailscale_compose_dir }}/tailscale.env"
+      register: env_raw
+      failed_when: false
+
+    # - name: Extract TS_EXTRA_ARGS and check persisted --ssh
+    #   ansible.builtin.set_fact:
+    #     ts_extra_args: >-
+    #       {{
+    #         (env_raw.content | default('') | ternary(env_raw.content | b64decode, ''))
+    #         | regex_search('^TS_EXTRA_ARGS=(.*)$', multiline=True) | default('') | trim
+    #       }}
+    #     ssh_flag_persisted: >-
+    #       {{ ts_extra_args | regex_search('(^|\\s)--ssh(=true)?(\\s|$)') is not none }}
+
+    - name: Summary (never fails)
+      ansible.builtin.debug:
+        msg:
+          host: "{{ inventory_hostname }}"
+          container_running: "{{ container_running }}"
+          logged_in: "{{ logged_in }}"
+          tailscale_ip4: "{{ ts_ip4 | default('') }}"
+          ssh_supported: "{{ ssh_supported | default(false) }}"
+          ssh_enabled_live: "{{ ssh_enabled_live | default(false) }}"
+          ssh_flag_persisted: "{{ ssh_flag_persisted | default(false) }}"
+          hint: >-
+            {{
+              (not container_running) and 'Container not running'
+              or (not logged_in) and 'Not logged in (no 100.x IPv4)'
+              or (ssh_supported | default(false)) and (not (ssh_enabled_live | default(false))) and 'Live SSH disabled'
+              or (not (ssh_flag_persisted | default(false))) and 'Env missing --ssh=true (not persistent)'
+              or 'OK'
+            }}

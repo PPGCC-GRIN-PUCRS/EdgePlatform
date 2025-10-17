@@ -1,0 +1,7 @@
+# playbooks/pre-checkpoint.yml
+- hosts: rpis
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Create Timeshift snapshot before changes
+      command: timeshift --create --comments "pre-{{ inventory_hostname }} {{ ansible_date_time.iso8601 }}" --tags D

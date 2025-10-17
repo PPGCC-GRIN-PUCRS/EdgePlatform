@@ -1,0 +1,49 @@
+---
+- name: Get Tailscale VPN IPs (from container)
+  hosts: rpis
+  gather_facts: false
+  become: true
+
+  vars:
+    ts_service_name: tailscale
+    ts_save_csv: false
+    ts_csv_path: /tmp/tailscale-ips.csv
+
+  tasks:
+    - name: Get IPv4 via tailscale CLI inside container
+      ansible.builtin.shell: docker exec {{ ts_service_name }} tailscale ip -4 2>/dev/null
+      register: ts_ip4_raw
+      changed_when: false
+      failed_when: false
+
+    - name: Get IPv6 via tailscale CLI inside container
+      ansible.builtin.shell: docker exec {{ ts_service_name }} tailscale ip -6 2>/dev/null
+      register: ts_ip6_raw
+      changed_when: false
+      failed_when: false
+
+    - name: Normalize addresses (use stdout_lines; avoids splitlines filter)
+      ansible.builtin.set_fact:
+        ts_ip4: >-
+          {{ (ts_ip4_raw.stdout_lines | default([]))
+             | map('trim') | select('ne','') | list | first | default('', true) }}
+        ts_ip6: >-
+          {{ (ts_ip6_raw.stdout_lines | default([]))
+             | map('trim') | select('ne','') | list | first | default('', true) }}
+
+    - name: Show Tailscale IPs
+      ansible.builtin.debug:
+        msg: >-
+          {{ inventory_hostname }} → Tailscale:
+          {{ (ts_ip4 | length > 0) | ternary('IPv4 ' ~ ts_ip4, 'IPv4 n/a') }}
+          {{ (ts_ip6 | length > 0) | ternary(', IPv6 ' ~ ts_ip6, '') }}
+
+    - name: Optionally append to CSV on controller (host,ts_ip4,ts_ip6)
+      when: ts_save_csv | bool
+      ansible.builtin.lineinfile:
+        path: "{{ ts_csv_path }}"
+        line: "{{ inventory_hostname }},{{ ts_ip4 }},{{ ts_ip6 }}"
+        create: true
+        insertafter: EOF
+      delegate_to: localhost
+      run_once: false

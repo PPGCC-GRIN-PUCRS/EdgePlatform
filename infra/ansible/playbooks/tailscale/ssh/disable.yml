@@ -1,0 +1,81 @@
+---
+- name: Disable Tailscale SSH on all nodes
+  hosts: rpis
+  become: true
+  gather_facts: false
+
+  vars:
+    tailscale_compose_dir: /opt/tailscale
+    ts_service_name: tailscale
+
+    # Behavior toggles
+    ts_force_redeploy: false # true = recreate even if env unchanged
+    ts_set_live: true # run `tailscale set --ssh=false` inside the container
+
+  tasks:
+    - name: Ensure compose dir exists
+      ansible.builtin.file:
+        path: "{{ tailscale_compose_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Ensure tailscale.env exists (don’t overwrite)
+      ansible.builtin.copy:
+        dest: "{{ tailscale_compose_dir }}/tailscale.env"
+        content: ""
+        mode: "0600"
+        force: false
+
+    - name: Remove --ssh flag from TS_EXTRA_ARGS (and clean up)
+      ansible.builtin.shell: |
+        set -e
+        f="{{ tailscale_compose_dir }}/tailscale.env"
+        current="$(grep -E '^TS_EXTRA_ARGS=' "$f" || true)"
+
+        if [ -n "$current" ]; then
+          val="${current#TS_EXTRA_ARGS=}"
+
+          # strip any --ssh / --ssh=true / --ssh=false tokens
+          val="$(printf '%s\n' "$val" \
+            | sed -E 's/(^|[[:space:]])--ssh(=(true|false))?([[:space:]]|$)/ /g')"
+
+          # squeeze/trim spaces
+          val="$(printf '%s\n' "$val" \
+            | sed -E 's/[[:space:]]+/ /g' \
+            | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')"
+
+          if [ -z "$val" ]; then
+            # no args left → remove line entirely
+            sed -i '/^TS_EXTRA_ARGS=/d' "$f"
+            echo "changed"
+          else
+            # replace with remaining args
+            esc="$(printf '%s\n' "$val" | sed -e 's/[\/&]/\\&/g')"
+            sed -i "s/^TS_EXTRA_ARGS=.*/TS_EXTRA_ARGS=$esc/" "$f"
+            echo "changed"
+          fi
+        else
+          echo "unchanged"
+        fi
+      args:
+        executable: /bin/bash
+      register: ssh_flag_edit
+      changed_when: "'changed' in (ssh_flag_edit.stdout | default(''))"
+
+    - name: Disable Tailscale SSH live inside the container (best effort)
+      when: ts_set_live | bool
+      ansible.builtin.shell: docker exec {{ ts_service_name }} tailscale set --ssh=false
+      register: ts_set_out
+      changed_when: false
+      failed_when: false
+
+    - name: Recreate container to apply env (if env changed or forced)
+      when: (ssh_flag_edit is changed) or (ts_force_redeploy | bool)
+      block:
+        - name: Compose up with force-recreate (no deps)
+          ansible.builtin.shell: docker compose up -d --force-recreate --no-deps {{ ts_service_name }}
+          args:
+            chdir: "{{ tailscale_compose_dir }}"
+          register: up_out
+          changed_when: >
+            up_out.stdout is search('(?i)(creating|recreating|starting|container)')

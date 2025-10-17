@@ -1,0 +1,154 @@
+---
+- name: Deploy Tailscale container on Raspberry Pis
+  hosts: rpis
+  become: true
+  gather_facts: false
+
+  vars:
+    tailscale_compose_dir: /opt/tailscale
+    # Pass via -e ts_authkey=... or put in group_vars/host_vars
+    ts_authkey: ""
+    ts_extra_args: ""
+
+  pre_tasks:
+    # - name: Ensure ts_authkey provided
+    #   ansible.builtin.fail:
+    #     msg: >
+    #       You must provide -e "ts_authkey=..." (ephemeral or reusable key).
+    #   when: (ts_authkey | default('') | length) == 0
+
+  tasks:
+    # Kernel TUN device for TS_USERSPACE=false
+    - name: Create /dev/net directory if missing
+      ansible.builtin.file:
+        path: /dev/net
+        state: directory
+        mode: "0755"
+
+    - name: Load tun module now
+      ansible.builtin.modprobe:
+        name: tun
+        state: present
+
+    - name: Persist tun module across reboots
+      ansible.builtin.copy:
+        dest: /etc/modules-load.d/tun.conf
+        mode: "0644"
+        content: |
+          tun
+
+    - name: Create compose directory
+      ansible.builtin.file:
+        path: "{{ tailscale_compose_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Write docker-compose.yml for Tailscale
+      ansible.builtin.copy:
+        dest: "{{ tailscale_compose_dir }}/docker-compose.yml"
+        mode: "0644"
+        content: |
+          services:
+            tailscale:
+              container_name: tailscale
+              image: tailscale/tailscale:stable
+              network_mode: host
+              hostname: "{{ inventory_hostname }}"
+              env_file:
+                - ./tailscale.env
+              environment:
+                - TS_STATE_DIR=/var/lib/tailscale
+                - TS_USERSPACE=false
+              volumes:
+                - ts-state:/var/lib/tailscale
+                - /dev/net/tun:/dev/net/tun
+              cap_add: [ "NET_ADMIN", "NET_RAW" ]
+              restart: unless-stopped
+          volumes:
+            ts-state:
+
+    - name: Write tailscale.env (auth key & args)
+      ansible.builtin.copy:
+        dest: "{{ tailscale_compose_dir }}/tailscale.env"
+        mode: "0600"
+        content: |
+          TS_AUTHKEY={{ ts_authkey_normalized }}
+          TS_EXTRA_ARGS={{ ts_extra_args }}
+          TS_HOSTNAME={{ inventory_hostname }}
+
+    - name: Bring up Tailscale with docker compose
+      ansible.builtin.shell: docker compose up -d
+      args:
+        chdir: "{{ tailscale_compose_dir }}"
+      register: compose_up
+      changed_when: >
+        'Creating' in compose_up.stdout or
+        'Recreating' in compose_up.stdout or
+        'Pulling' in compose_up.stdout
+
+    # --- Health / connectivity validation ---
+    - name: Wait for tailscaled to report Running
+      ansible.builtin.command: docker exec tailscale tailscale status --json
+      register: ts_status_json
+      retries: 15
+      delay: 3
+      until: >
+        ts_status_json.rc == 0 and
+        (ts_status_json.stdout | from_json).BackendState is defined and
+        (ts_status_json.stdout | from_json).BackendState == "Running"
+      failed_when: false
+
+    - name: Fail early if tailscaled never reached Running
+      block:
+        - name: Grab recent Tailscale logs for diagnostics
+          ansible.builtin.shell: docker logs --since 5m --tail 400 tailscale || true
+          register: ts_logs
+          changed_when: false
+
+        - name: Extract likely error lines
+          ansible.builtin.set_fact:
+            ts_error_lines: >-
+              {{
+                (ts_logs.stdout | default('')) |
+                regex_findall('(?mi)^(?=.*(error|invalid|denied|refused|fail|login url|auth)).*$') |
+                join('\n')
+              }}
+
+        - name: Show full status (human)
+          ansible.builtin.command: docker exec tailscale tailscale status
+          register: ts_status_human
+          changed_when: false
+          failed_when: false
+
+        - name: Stop with a helpful error
+          ansible.builtin.fail:
+            msg: |
+              Tailscale did not reach "Running" state.
+              --- status (human) ---
+              {{ ts_status_human.stdout | default('n/a') }}
+              --- probable errors (last 5m) ---
+              {{ (ts_error_lines | default('')).strip() if (ts_error_lines | default('') | length > 0) else 'No obvious error lines found. See log excerpt below.' }}
+              --- log excerpt (last 5 minutes) ---
+              {{ ts_logs.stdout | default('n/a') }}
+      when: >
+        ts_status_json.rc != 0 or
+        (ts_status_json.stdout | default('') == '') or
+        ((ts_status_json.stdout | from_json).BackendState | default('') != 'Running')
+
+    - name: Report connection info (success)
+      block:
+        - name: Parse status JSON
+          ansible.builtin.set_fact:
+            ts_status_obj: "{{ ts_status_json.stdout | from_json }}"
+
+        - name: Show assigned Tailscale IPs and node info
+          ansible.builtin.debug:
+            msg:
+              - "BackendState: {{ ts_status_obj.BackendState }}"
+              - "Self.HostName: {{ ts_status_obj.Self.HostName | default(inventory_hostname) }}"
+              - "Self.TailscaleIPs: {{ ts_status_obj.Self.TailscaleIPs | default([]) }}"
+              - "MagicDNSSuffix: {{ ts_status_obj.MagicDNSSuffix | default('') }}"
+              - "User: {{ ts_status_obj.User | default('') }}"
+      when: >
+        ts_status_json.rc == 0 and
+        (ts_status_json.stdout | from_json).BackendState == "Running"

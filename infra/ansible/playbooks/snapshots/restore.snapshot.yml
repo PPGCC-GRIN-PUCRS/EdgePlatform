@@ -1,0 +1,48 @@
+- hosts: rpis
+  become: true
+  gather_facts: false
+  vars:
+    # If empty -> restore the latest snapshot automatically.
+    ts_snapshot: ""
+    # Optional: force mode if you need it: 'rsync' or 'btrfs'
+    ts_mode: ""
+
+  tasks:
+    - name: Ensure Timeshift is installed
+      package:
+        name: timeshift
+        state: present
+
+    - name: Get snapshot list when none provided
+      command: timeshift --list
+      register: ts_list
+      changed_when: false
+      when: ts_snapshot | length == 0
+
+    - name: Pick latest snapshot
+      set_fact:
+        chosen_snapshot: >-
+          {{ (ts_list.stdout
+               | regex_findall('([0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}-[0-9]{2}-[0-9]{2})')
+               | sort) | last }}
+      when: ts_snapshot | length == 0
+
+    - name: Use provided snapshot
+      set_fact:
+        chosen_snapshot: "{{ ts_snapshot }}"
+      when: ts_snapshot | length > 0
+
+    - name: Kick off non-interactive restore and reboot (SSH will drop)
+      shell: >
+        nohup /bin/bash -c
+        "timeshift --restore
+        {% if ts_mode in ['rsync', 'btrfs'] %} --{{ ts_mode }}{% endif %}
+        --snapshot '{{ chosen_snapshot }}' --yes --scripted
+        && sleep 2 && systemctl reboot" >/var/log/timeshift-restore.log 2>&1 &
+      async: 1
+      poll: 0
+
+    - name: Wait for host to come back after restore
+      wait_for_connection:
+        delay: 30
+        timeout: 3600

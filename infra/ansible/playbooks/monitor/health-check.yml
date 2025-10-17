@@ -1,0 +1,130 @@
+---
+- name: Raspberry Pi health check (Docker + Tailscale)
+  hosts: rpis
+  become: true
+  gather_facts: false
+
+  vars:
+    ts_service_name: tailscale
+    required_packages:
+      - ca-certificates
+      - lsb-release
+      - gnupg
+      - curl
+
+  tasks:
+    # --- ONLINE? --------------------------------------------------------------
+    - name: Check connectivity (no-fail)
+      ansible.builtin.ping:
+      register: pingres
+      failed_when: false
+
+    - name: Flag online status
+      ansible.builtin.set_fact:
+        is_online: "{{ (pingres.ping | default('')) == 'pong' }}"
+
+    # --- REQUIREMENTS ---------------------------------------------------------
+    - name: Gather installed packages (no-fail)
+      when: is_online
+      ansible.builtin.package_facts:
+        manager: auto
+      failed_when: false
+
+    - name: Check /dev/net/tun (no-fail)
+      when: is_online
+      ansible.builtin.stat:
+        path: /dev/net/tun
+      register: tun_stat
+      failed_when: false
+
+    # --- DOCKER ---------------------------------------------------------------
+    - name: Docker installed? (no-fail)
+      when: is_online
+      ansible.builtin.command: docker --version
+      register: docker_ver
+      changed_when: false
+      failed_when: false
+
+    - name: Docker service facts (no-fail)
+      when: is_online
+      ansible.builtin.service_facts:
+      failed_when: false
+
+    - name: Docker Compose plugin present? (no-fail)
+      when: is_online
+      ansible.builtin.command: docker compose version
+      register: compose_ver
+      changed_when: false
+      failed_when: false
+
+    # --- TAILSCALE CONTAINER --------------------------------------------------
+    - name: Tailscale container status (no-fail)
+      when: is_online
+      ansible.builtin.command: >
+        docker ps --filter "name={{ ts_service_name }}"
+        --format "{{'{{'}}.Names{{'}}'}} {{'{{'}}.Status{{'}}'}}"
+      register: ts_ps
+      changed_when: false
+      failed_when: false
+
+    - name: Get Tailscale IPv4 (no-fail)
+      when: is_online
+      ansible.builtin.command: docker exec {{ ts_service_name }} tailscale ip -4
+      register: ts_ip4_raw
+      changed_when: false
+      failed_when: false
+
+    - name: Get Tailscale IPv6 (no-fail)
+      when: is_online
+      ansible.builtin.command: docker exec {{ ts_service_name }} tailscale ip -6
+      register: ts_ip6_raw
+      changed_when: false
+      failed_when: false
+
+    - name: Check if Tailscale SSH is enabled (no-fail)
+      when: is_online
+      ansible.builtin.command: docker exec {{ ts_service_name }} sh -lc 'tailscale get ssh 2>/dev/null || echo __unsupported__'
+      register: ts_ssh_flag
+      changed_when: false
+      failed_when: false
+
+    # --- SUMMARY --------------------------------------------------------------
+    - name: Build health summary
+      ansible.builtin.set_fact:
+        health:
+          online: "{{ is_online | default(false) }}"
+          requirements:
+            packages:
+              ca-certificates: "{{ 'ca-certificates' in (ansible_facts.packages | default({})) }}"
+              curl: "{{ 'curl'            in (ansible_facts.packages | default({})) }}"
+              gnupg: "{{ 'gnupg'           in (ansible_facts.packages | default({})) }}"
+              lsb-release: "{{ 'lsb-release'     in (ansible_facts.packages | default({})) }}"
+            tun_present: "{{ tun_stat.stat.exists | default(false) }}"
+          docker:
+            installed: "{{ docker_ver.rc is defined and docker_ver.rc == 0 }}"
+            service_state: >-
+              {{
+                'docker.service' in (ansible_facts.services | default({})) and
+                (ansible_facts.services['docker.service'].state | default('unknown')) or
+                (
+                  'docker' in (ansible_facts.services | default({})) and
+                  (ansible_facts.services['docker'].state | default('unknown')) or
+                  'unknown'
+                )
+              }}
+            compose_plugin: "{{ compose_ver.rc is defined and compose_ver.rc == 0 }}"
+          tailscale:
+            container_running: "{{ (ts_ps.stdout | default('')) | regex_search('\\bUp\\b') is not none }}"
+            ip4: "{{ (ts_ip4_raw.stdout_lines | default([])) | map('trim') | select('ne','') | list | first | default('') }}"
+            ip6: "{{ (ts_ip6_raw.stdout_lines | default([])) | map('trim') | select('ne','') | list | first | default('') }}"
+            logged_in: "{{ ( (ts_ip4_raw.stdout | default('') | trim) | length ) > 0 }}"
+            ssh_supported: "{{ (ts_ssh_flag.stdout | default('') | trim) != '__unsupported__' }}"
+            ssh_enabled: >-
+              {{
+                (ts_ssh_flag.stdout | default('') | trim | lower) in ['true','1','yes']
+                if ((ts_ssh_flag.stdout | default('') | trim) != '__unsupported__') else false
+              }}
+
+    - name: Show health summary
+      ansible.builtin.debug:
+        var: health

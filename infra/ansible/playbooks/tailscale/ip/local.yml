@@ -1,0 +1,34 @@
+---
+- name: Report each node's LAN IPv4
+  hosts: rpis
+  gather_facts: true
+  become: false
+
+  vars:
+    save_csv: false # set true to also write a CSV on the controller
+    csv_path: /tmp/lan-ips.csv
+
+  tasks:
+    - name: Collect IPv4 facts
+      ansible.builtin.set_fact:
+        lan_default_ip: "{{ ansible_facts.default_ipv4.address | default('') }}"
+        lan_default_iface: "{{ ansible_facts.default_ipv4.interface | default('') }}"
+        lan_all_ips: "{{ ansible_all_ipv4_addresses | default([]) }}"
+
+    - name: Show LAN IPv4 info
+      ansible.builtin.debug:
+        msg: >-
+          {{ inventory_hostname }} →
+          default={{ lan_default_ip | default('n/a') }}
+          ({{ lan_default_iface | default('no-default-route') }}),
+          all={{ (lan_all_ips | length > 0) | ternary(lan_all_ips | join(', '), 'n/a') }}
+
+    - name: Optionally append to CSV on controller (host,default_ip,iface,all_ips)
+      when: save_csv | bool
+      delegate_to: localhost
+      run_once: false
+      ansible.builtin.lineinfile:
+        path: "{{ csv_path }}"
+        line: "{{ inventory_hostname }},{{ lan_default_ip }},{{ lan_default_iface }},{{ lan_all_ips | join(' ') }}"
+        create: true
+        insertafter: EOF

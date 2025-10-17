@@ -100,3 +100,5 @@ e2e/*.map
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/angular,visualstudiocode
+
+infra\ansible\vars

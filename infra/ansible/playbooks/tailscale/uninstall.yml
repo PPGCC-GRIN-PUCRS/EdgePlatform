@@ -1,0 +1,42 @@
+---
+- name: Uninstall Tailscale (docker compose down + remove folder)
+  hosts: rpis
+  become: true
+  gather_facts: false
+
+  vars:
+    tailscale_compose_dir: /opt/tailscale
+    remove_volumes: false # set true to also drop named volumes
+    remove_orphans: true # include --remove-orphans on compose down
+
+  tasks:
+    - name: Check Tailscale compose directory
+      ansible.builtin.stat:
+        path: "{{ tailscale_compose_dir }}"
+      register: ts_dir
+
+    - name: Check docker-compose.yml exists
+      when: ts_dir.stat.exists
+      ansible.builtin.stat:
+        path: "{{ tailscale_compose_dir }}/docker-compose.yml"
+      register: ts_compose
+
+    - name: docker compose down (best effort)
+      when: ts_compose.stat.exists
+      ansible.builtin.shell: >
+        docker compose down
+        {{ '--remove-orphans' if remove_orphans else '' }}
+        {{ '--volumes' if remove_volumes else '' }}
+      args:
+        chdir: "{{ tailscale_compose_dir }}"
+      register: compose_down
+      changed_when: >
+        compose_down.rc == 0 and
+        ((compose_down.stdout | default('') ~ (compose_down.stderr | default('')))
+         | regex_search('(?i)(stopp|remov|going to remove|network|volume)'))
+      failed_when: false
+
+    - name: Remove /opt/tailscale directory (recursive)
+      ansible.builtin.file:
+        path: "{{ tailscale_compose_dir }}"
+        state: absent

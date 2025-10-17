@@ -1,0 +1,35 @@
+---
+# Runs on the controller only; adds host keys for the selected inventory hosts.
+- name: Seed SSH known_hosts for targets (no prompts)
+  hosts: rpis
+  connection: local          # <-- run on controller, not on the Pis
+  gather_facts: false
+  become: false
+
+  vars:
+    kh_path: "{{ lookup('env','HOME') }}/.ssh/known_hosts"
+    tgt_host: "{{ hostvars[inventory_hostname].ansible_host | default(inventory_hostname) }}"
+    tgt_port: "{{ hostvars[inventory_hostname].ansible_port | default(22) }}"
+
+  pre_tasks:
+    - name: Ensure ~/.ssh exists on controller
+      ansible.builtin.file:
+        path: "{{ lookup('env','HOME') }}/.ssh"
+        state: directory
+        mode: "0700"
+      run_once: true
+
+  tasks:
+    - name: Scan host key from target (ed25519, ecdsa, rsa)
+      ansible.builtin.command:
+        cmd: "ssh-keyscan -H -T 5 -p {{ tgt_port }} -t ed25519,ecdsa,rsa {{ tgt_host }}"
+      register: scan
+      changed_when: false
+      failed_when: scan.rc != 0 or scan.stdout | length == 0
+
+    - name: Add/refresh known_hosts entry on controller
+      ansible.builtin.known_hosts:
+        path: "{{ kh_path }}"
+        name: "{{ tgt_host }}"
+        key: "{{ scan.stdout }}"
+        state: present

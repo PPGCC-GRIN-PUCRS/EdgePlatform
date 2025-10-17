@@ -1,0 +1,84 @@
+---
+- name: Enable host TailSSH and disable container TailSSH
+  hosts: all
+  become: true
+  vars:
+    ssh_port: 22
+    tailscale_iface: tailscale0
+    tailscale_container_name: tailscale
+    persist_rules: true # set to false if you don't want persistence
+
+  tasks:
+    - name: Ensure iptables rule allows SSH on the Tailscale interface (INPUT)
+      ansible.builtin.shell: |
+        iptables -C INPUT -i {{ tailscale_iface }} -p tcp --dport {{ ssh_port }} -j ACCEPT \
+        || iptables -I INPUT 1 -i {{ tailscale_iface }} -p tcp --dport {{ ssh_port }} -j ACCEPT
+      args:
+        warn: false
+
+    - name: (Optional) Preseed iptables-persistent to avoid interactive prompts (Debian/Ubuntu)
+      ansible.builtin.debconf:
+        name: iptables-persistent
+        question: "{{ item.q }}"
+        value: "{{ item.v }}"
+        vtype: boolean
+      loop:
+        - { q: "iptables-persistent/autosave_v4", v: "true" }
+        - { q: "iptables-persistent/autosave_v6", v: "true" }
+      when:
+        - persist_rules
+        - ansible_facts.os_family == "Debian"
+
+    - name: (Optional) Install iptables-persistent non-interactively (Debian/Ubuntu)
+      ansible.builtin.apt:
+        name: iptables-persistent
+        state: present
+        install_recommends: no
+        update_cache: yes
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+      when:
+        - persist_rules
+        - ansible_facts.os_family == "Debian"
+
+    - name: (Optional) Save rules to disk with netfilter-persistent
+      ansible.builtin.command: netfilter-persistent save
+      register: persist_save
+      changed_when: "'saved' in (persist_save.stdout | default('')) or persist_save.rc == 0"
+      failed_when: persist_save.rc not in [0]
+      when: persist_rules
+
+    # -------- Disable TailSSH in the container (if present) --------
+    - name: Check if Docker is available
+      ansible.builtin.command: docker ps
+      register: docker_ps
+      changed_when: false
+      failed_when: false
+
+    - name: Check if {{ tailscale_container_name }} container exists
+      ansible.builtin.shell: docker ps --format '{{"{{.Names}}"}}' | grep -x {{ tailscale_container_name }}
+      register: ts_container_exists
+      changed_when: false
+      failed_when: false
+      when: docker_ps.rc == 0
+
+    - name: Disable TailSSH inside container
+      ansible.builtin.command: >
+        docker exec {{ tailscale_container_name }} tailscale set --ssh=false
+      register: tailssh_container_off
+      changed_when: tailssh_container_off.rc == 0
+      failed_when: false
+      when:
+        - docker_ps.rc == 0
+        - ts_container_exists.rc == 0
+
+    # -------- Ensure TailSSH is enabled on the host --------
+    - name: Check for host tailscale CLI
+      ansible.builtin.command: tailscale version
+      register: ts_host_cli
+      changed_when: false
+      failed_when: false
+
+    - name: Enable TailSSH on the host (idempotent)
+      ansible.builtin.command: tailscale set --ssh=true
+      when: ts_host_cli.rc == 0

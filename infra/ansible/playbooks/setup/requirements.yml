@@ -1,0 +1,3 @@
+---
+- import_playbook: ../docker/install.yml
+- import_playbook: ../tailscale/deploy.yml

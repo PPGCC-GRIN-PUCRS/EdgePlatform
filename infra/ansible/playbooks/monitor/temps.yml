@@ -1,0 +1,43 @@
+---
+- name: Read Raspberry Pi temperatures
+  hosts: rpis
+  gather_facts: false
+  become: false
+
+  tasks:
+    # CPU temp from sysfs (millidegrees C → C)
+    - name: Read CPU temperature from sysfs
+      ansible.builtin.command: cat /sys/class/thermal/thermal_zone0/temp
+      register: cpu_temp_raw
+      changed_when: false
+      failed_when: false
+
+    - name: Convert CPU temperature to Celsius
+      ansible.builtin.set_fact:
+        cpu_temp_c: "{{ (cpu_temp_raw.stdout | trim | float) / 1000 }}"
+      when: cpu_temp_raw.rc == 0 and (cpu_temp_raw.stdout | default('') | trim) is match('^\\d+$')
+
+    # GPU temp via vcgencmd (if available)
+    - name: Read GPU temperature with vcgencmd (if available)
+      ansible.builtin.command: vcgencmd measure_temp
+      register: vcg
+      changed_when: false
+      failed_when: false
+
+    - name: Parse GPU temperature
+      ansible.builtin.set_fact:
+        gpu_temp_c: "{{ (vcg.stdout | regex_replace('^temp=([0-9.]+).*', '\\1')) | float }}"
+      when: vcg.rc == 0 and ('temp=' in (vcg.stdout | default('')))
+
+    - name: Show temperatures
+      ansible.builtin.debug:
+        msg: >-
+          {{ inventory_hostname }} → CPU:
+          {{
+            (cpu_temp_c is defined)
+            | ternary( ('%.1f' | format(cpu_temp_c | float)) ~ '°C', 'n/a')
+          }}
+          {{
+            (gpu_temp_c is defined)
+            | ternary(', GPU: ' ~ ('%.1f' | format(gpu_temp_c | float)) ~ '°C', '')
+          }}

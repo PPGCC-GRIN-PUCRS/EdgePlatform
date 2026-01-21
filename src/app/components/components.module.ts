@@ -19,19 +19,7 @@ const moduleComponents: Array<Type<any> | ModuleWithProviders<{}> | any[]> = [
 
 @NgModule({
   declarations: [],
-  imports: [
-    BrowserAnimationsModule,
-    MatFormFieldModule,
-    moduleComponents,
-    MatDialogModule,
-    MatButtonModule,
-    MatSelectModule,
-    MatInputModule,
-    BrowserModule,
-    MatIconModule,
-    CommonModule,
-    FormsModule,
-  ],
+  imports: [BrowserAnimationsModule, MatFormFieldModule, FormsModule],
   exports: [moduleComponents],
 })
 export class ComponentsModule {}

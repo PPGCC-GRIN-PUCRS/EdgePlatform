@@ -7,7 +7,7 @@ set -Eeuo pipefail
 # Configuration
 # ==============================================================================
 
-INSTALL_URL="https://raw.githubusercontent.com/PPGCC-GRIN-PUCRS/EdgePlatform/refs/heads/release/vpn/install.sh"
+INSTALL_URL="https://github.com/PPGCC-GRIN-PUCRS/EdgePlatform/blob/release/agent/vpn/install.sh"
 
 REPO_ARCHIVE_URL="https://github.com/PPGCC-GRIN-PUCRS/EdgePlatform/archive/refs/heads/release.tar.gz"
 
